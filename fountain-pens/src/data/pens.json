@@ -1,0 +1,38 @@
+[
+  {
+    "id": "pen1",
+    "brand": "Pilot",
+    "model": "Metal Falcon",
+    "color": "Burgundy",
+    "nibSize": "Extra Fine",
+    "nibType": "Gold, 14k",
+    "nibCharacteristic": "Soft, Flex"
+  },
+  {
+    "id": "pen2",
+    "brand": "Pilot",
+    "model": "Metal Falcon",
+    "color": "Sapphire",
+    "nibSize": "Fine",
+    "nibType": "Gold, 14k",
+    "nibCharacteristic": "Soft, Flex"
+  },
+  {
+    "id": "pen3",
+    "brand": "TWSBI",
+    "model": "Eco",
+    "color": "Transparent",
+    "nibSize": "Medium",
+    "nibType": "Steel",
+    "nibCharacteristic": "Firm"
+  },
+  {
+    "id": "pen4",
+    "brand": "Lamy",
+    "model": "Safari",
+    "color": "Black",
+    "nibSize": "Fine",
+    "nibType": "Steel",
+    "nibCharacteristic": "Firm"
+  }
+] 
