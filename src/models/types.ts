@@ -18,12 +18,12 @@ export interface CurrentlyInked {
     id: string;
     date: string;
     penId: string;
-    inkId: string;
+    inkIds: string[];
     notes: string;
 }
 
 // For displaying joined data in the UI
 export interface CurrentlyInkedDisplay extends CurrentlyInked {
     penDetails: Pen;
-    inkDetails: Ink;
+    inkDetails: Ink[];
 }

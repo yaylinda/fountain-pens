@@ -68,7 +68,7 @@ export const deletePen = (id: string): void => {
 export const getAllCurrentlyInked = (): CurrentlyInkedDisplay[] => {
     return currentlyInked.map((item) => {
         const penDetails = getPenById(item.penId) as Pen;
-        const inkDetails = getInkById(item.inkId) as Ink;
+        const inkDetails = item.inkIds.map((id) => getInkById(id) as Ink);
         return { ...item, penDetails, inkDetails };
     });
 };
@@ -80,7 +80,7 @@ export const getCurrentlyInkedById = (
     if (!item) return undefined;
 
     const penDetails = getPenById(item.penId) as Pen;
-    const inkDetails = getInkById(item.inkId) as Ink;
+    const inkDetails = item.inkIds.map((id) => getInkById(id) as Ink);
     return { ...item, penDetails, inkDetails };
 };
 
@@ -91,7 +91,7 @@ export const addCurrentlyInked = (
     currentlyInked = [...currentlyInked, newItem];
 
     const penDetails = getPenById(newItem.penId) as Pen;
-    const inkDetails = getInkById(newItem.inkId) as Ink;
+    const inkDetails = newItem.inkIds.map((id) => getInkById(id) as Ink);
     return { ...newItem, penDetails, inkDetails };
 };
 
@@ -103,7 +103,7 @@ export const updateCurrentlyInked = (
     );
 
     const penDetails = getPenById(updatedItem.penId) as Pen;
-    const inkDetails = getInkById(updatedItem.inkId) as Ink;
+    const inkDetails = updatedItem.inkIds.map((id) => getInkById(id) as Ink);
     return { ...updatedItem, penDetails, inkDetails };
 };
 

@@ -4,7 +4,9 @@ import {
     Edit as EditIcon,
 } from '@mui/icons-material';
 import {
+    Box,
     Button,
+    Chip,
     Dialog,
     DialogActions,
     DialogContent,
@@ -13,6 +15,7 @@ import {
     IconButton,
     InputLabel,
     MenuItem,
+    OutlinedInput,
     Paper,
     Select,
     SelectChangeEvent,
@@ -52,7 +55,7 @@ const CurrentlyInkedList: React.FC = () => {
     const [currentItem, setCurrentItem] = useState<Partial<CurrentlyInked>>({
         date: format(new Date(), 'yyyy-MM-dd'),
         penId: '',
-        inkId: '',
+        inkIds: [],
         notes: '',
     });
 
@@ -69,14 +72,14 @@ const CurrentlyInkedList: React.FC = () => {
 
     const handleOpen = (item?: CurrentlyInkedDisplay) => {
         if (item) {
-            const { id, date, penId, inkId, notes } = item;
-            setCurrentItem({ id, date, penId, inkId, notes });
+            const { id, date, penId, inkIds, notes } = item;
+            setCurrentItem({ id, date, penId, inkIds, notes });
             setIsEditing(true);
         } else {
             setCurrentItem({
                 date: format(new Date(), 'yyyy-MM-dd'),
                 penId: '',
-                inkId: '',
+                inkIds: [],
                 notes: '',
             });
             setIsEditing(false);
@@ -89,7 +92,7 @@ const CurrentlyInkedList: React.FC = () => {
         setCurrentItem({
             date: format(new Date(), 'yyyy-MM-dd'),
             penId: '',
-            inkId: '',
+            inkIds: [],
             notes: '',
         });
     };
@@ -104,9 +107,23 @@ const CurrentlyInkedList: React.FC = () => {
         setCurrentItem((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleInkSelectChange = (event: SelectChangeEvent<string[]>) => {
+        const {
+            target: { value },
+        } = event;
+        setCurrentItem((prev) => ({
+            ...prev,
+            inkIds: typeof value === 'string' ? value.split(',') : value,
+        }));
+    };
+
     const handleSave = () => {
-        if (!currentItem.penId || !currentItem.inkId || !currentItem.date) {
-            alert('Pen, ink, and date are required!');
+        if (
+            !currentItem.penId ||
+            !currentItem.inkIds?.length ||
+            !currentItem.date
+        ) {
+            alert('Pen, at least one ink, and date are required!');
             return;
         }
 
@@ -135,6 +152,22 @@ const CurrentlyInkedList: React.FC = () => {
         return `${ink.brand} ${ink.name}${
             ink.collection ? ` (${ink.collection})` : ''
         }`;
+    };
+
+    const renderInks = (inkDetails: Ink[]) => {
+        return (
+            <div>
+                {inkDetails.map((ink, index) => (
+                    <Chip
+                        key={ink.id}
+                        label={getInkDisplayText(ink)}
+                        color="primary"
+                        variant="outlined"
+                        style={{ margin: '2px' }}
+                    />
+                ))}
+            </div>
+        );
     };
 
     return (
@@ -169,7 +202,7 @@ const CurrentlyInkedList: React.FC = () => {
                                 <strong>Pen</strong>
                             </TableCell>
                             <TableCell>
-                                <strong>Ink</strong>
+                                <strong>Inks</strong>
                             </TableCell>
                             <TableCell>
                                 <strong>Notes</strong>
@@ -187,7 +220,7 @@ const CurrentlyInkedList: React.FC = () => {
                                     {getPenDisplayText(item.penDetails)}
                                 </TableCell>
                                 <TableCell>
-                                    {getInkDisplayText(item.inkDetails)}
+                                    {renderInks(item.inkDetails)}
                                 </TableCell>
                                 <TableCell>{item.notes}</TableCell>
                                 <TableCell>
@@ -263,13 +296,35 @@ const CurrentlyInkedList: React.FC = () => {
                         margin="dense"
                         required
                     >
-                        <InputLabel id="ink-select-label">Ink</InputLabel>
+                        <InputLabel id="ink-select-label">Inks</InputLabel>
                         <Select
                             labelId="ink-select-label"
-                            name="inkId"
-                            value={currentItem.inkId}
-                            onChange={handleSelectChange}
-                            label="Ink"
+                            multiple
+                            name="inkIds"
+                            value={currentItem.inkIds || []}
+                            onChange={handleInkSelectChange}
+                            input={<OutlinedInput label="Inks" />}
+                            renderValue={(selected) => (
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: 0.5,
+                                    }}
+                                >
+                                    {(selected as string[]).map((value) => {
+                                        const ink = inks.find(
+                                            (i) => i.id === value
+                                        );
+                                        return ink ? (
+                                            <Chip
+                                                key={value}
+                                                label={getInkDisplayText(ink)}
+                                            />
+                                        ) : null;
+                                    })}
+                                </Box>
+                            )}
                         >
                             {inks.map((ink) => (
                                 <MenuItem
