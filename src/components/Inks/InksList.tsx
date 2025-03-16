@@ -6,6 +6,7 @@ import {
     Edit as EditIcon,
 } from '@mui/icons-material';
 import {
+    Autocomplete,
     Box,
     Button,
     Chip,
@@ -22,6 +23,7 @@ import {
     TableHead,
     TableRow,
     TextField,
+    Typography,
 } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Ink } from '../../models/types';
@@ -210,29 +212,61 @@ const InksList: React.FC = () => {
         );
     };
 
+    // Extract unique brands and collections
+    const uniqueBrands = useMemo(() => {
+        return [...new Set(inks.map((ink) => ink.brand))].sort();
+    }, [inks]);
+
+    const uniqueCollections = useMemo(() => {
+        return [
+            ...new Set(inks.map((ink) => ink.collection).filter(Boolean)),
+        ].sort();
+    }, [inks]);
+
     return (
-        <div>
-            <div
-                style={{
+        <Box
+            sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                px: 2,
+                pb: 2,
+            }}
+        >
+            <Box
+                sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    margin: '20px 0',
+                    pt: 2,
+                    pb: 1,
                 }}
             >
-                <h2>Inks Inventory</h2>
+                <Typography variant="h6">Inks Inventory</Typography>
                 <Button
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
                     onClick={() => handleOpen()}
+                    size="small"
                 >
                     Add Ink
                 </Button>
-            </div>
+            </Box>
 
-            <TableContainer component={Paper}>
-                <Table>
+            <TableContainer
+                component={Paper}
+                sx={{
+                    flexGrow: 1,
+                    height: 'calc(100% - 56px)',
+                    overflow: 'auto',
+                }}
+            >
+                <Table
+                    stickyHeader
+                    size="small"
+                >
                     <TableHead>
                         <TableRow>
                             <TableCell
@@ -339,25 +373,45 @@ const InksList: React.FC = () => {
                     {isEditing ? 'Edit Ink' : 'Add New Ink'}
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        name="brand"
-                        label="Brand"
-                        type="text"
-                        fullWidth
-                        value={currentInk.brand}
-                        onChange={handleChange}
-                        required
+                    <Autocomplete
+                        freeSolo
+                        options={uniqueBrands}
+                        value={currentInk.brand || ''}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                autoFocus
+                                margin="dense"
+                                label="Brand"
+                                required
+                                fullWidth
+                            />
+                        )}
+                        onChange={(event, newValue) => {
+                            setCurrentInk((prev) => ({
+                                ...prev,
+                                brand: newValue || '',
+                            }));
+                        }}
                     />
-                    <TextField
-                        margin="dense"
-                        name="collection"
-                        label="Collection"
-                        type="text"
-                        fullWidth
-                        value={currentInk.collection}
-                        onChange={handleChange}
+                    <Autocomplete
+                        freeSolo
+                        options={uniqueCollections}
+                        value={currentInk.collection || ''}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                margin="dense"
+                                label="Collection"
+                                fullWidth
+                            />
+                        )}
+                        onChange={(event, newValue) => {
+                            setCurrentInk((prev) => ({
+                                ...prev,
+                                collection: newValue || '',
+                            }));
+                        }}
                     />
                     <TextField
                         margin="dense"
@@ -385,7 +439,7 @@ const InksList: React.FC = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </Box>
     );
 };
 

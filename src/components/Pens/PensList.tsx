@@ -6,6 +6,7 @@ import {
     Edit as EditIcon,
 } from '@mui/icons-material';
 import {
+    Autocomplete,
     Box,
     Button,
     Chip,
@@ -22,6 +23,7 @@ import {
     TableHead,
     TableRow,
     TextField,
+    Typography,
 } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pen } from '../../models/types';
@@ -177,6 +179,26 @@ const PensList: React.FC = () => {
         }, {} as Record<string, string>);
     }, [pens]);
 
+    // Model colors for all models
+    const modelColors = useMemo(() => {
+        const models = [...new Set(pens.map((pen) => pen.model))];
+        return models.reduce((colors, model) => {
+            colors[model] = stringToColor(model);
+            return colors;
+        }, {} as Record<string, string>);
+    }, [pens]);
+
+    // Color chips for pen colors
+    const penColorColors = useMemo(() => {
+        const colors = [
+            ...new Set(pens.map((pen) => pen.color).filter(Boolean)),
+        ];
+        return colors.reduce((colorMap, color) => {
+            colorMap[color] = stringToColor(color);
+            return colorMap;
+        }, {} as Record<string, string>);
+    }, [pens]);
+
     // Get models that are used 2+ times
     const modelCounts = useMemo(() => {
         const counts: Record<string, number> = {};
@@ -185,16 +207,6 @@ const PensList: React.FC = () => {
         });
         return counts;
     }, [pens]);
-
-    const modelColors = useMemo(() => {
-        const models = Object.keys(modelCounts).filter(
-            (model) => modelCounts[model] >= 2
-        );
-        return models.reduce((colors, model) => {
-            colors[model] = stringToColor(model);
-            return colors;
-        }, {} as Record<string, string>);
-    }, [modelCounts]);
 
     const nibSizeColors = useMemo(() => {
         const nibSizes = [
@@ -303,29 +315,71 @@ const PensList: React.FC = () => {
         );
     };
 
+    // Extract unique values for dropdowns
+    const uniqueBrands = useMemo(() => {
+        return [...new Set(pens.map((pen) => pen.brand))].sort();
+    }, [pens]);
+
+    const uniqueModels = useMemo(() => {
+        return [...new Set(pens.map((pen) => pen.model))].sort();
+    }, [pens]);
+
+    const uniqueNibSizes = useMemo(() => {
+        return [
+            ...new Set(pens.map((pen) => pen.nibSize).filter(Boolean)),
+        ].sort();
+    }, [pens]);
+
+    const uniqueNibTypes = useMemo(() => {
+        return [
+            ...new Set(pens.map((pen) => pen.nibType).filter(Boolean)),
+        ].sort();
+    }, [pens]);
+
     return (
-        <div>
-            <div
-                style={{
+        <Box
+            sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                px: 2,
+                pb: 2,
+            }}
+        >
+            <Box
+                sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    margin: '20px 0',
+                    pt: 2,
+                    pb: 1,
                 }}
             >
-                <h2>Pens Inventory</h2>
+                <Typography variant="h6">Pens Inventory</Typography>
                 <Button
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
                     onClick={() => handleOpen()}
+                    size="small"
                 >
                     Add Pen
                 </Button>
-            </div>
+            </Box>
 
-            <TableContainer component={Paper}>
-                <Table>
+            <TableContainer
+                component={Paper}
+                sx={{
+                    flexGrow: 1,
+                    height: 'calc(100% - 56px)',
+                    overflow: 'auto',
+                }}
+            >
+                <Table
+                    stickyHeader
+                    size="small"
+                >
                     <TableHead>
                         <TableRow>
                             <TableCell
@@ -417,18 +471,14 @@ const PensList: React.FC = () => {
                                     />
                                 </TableCell>
                                 <TableCell>
-                                    {modelCounts[pen.model] >= 2 ? (
-                                        <Chip
-                                            label={pen.model}
-                                            sx={{
-                                                bgcolor: modelColors[pen.model],
-                                                color: 'white',
-                                                fontWeight: 'bold',
-                                            }}
-                                        />
-                                    ) : (
-                                        pen.model
-                                    )}
+                                    <Chip
+                                        label={pen.model}
+                                        sx={{
+                                            bgcolor: modelColors[pen.model],
+                                            color: 'white',
+                                            fontWeight: 'bold',
+                                        }}
+                                    />
                                 </TableCell>
                                 <TableCell>{pen.color}</TableCell>
                                 <TableCell>
@@ -487,26 +537,46 @@ const PensList: React.FC = () => {
                     {isEditing ? 'Edit Pen' : 'Add New Pen'}
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        name="brand"
-                        label="Brand"
-                        type="text"
-                        fullWidth
-                        value={currentPen.brand}
-                        onChange={handleChange}
-                        required
+                    <Autocomplete
+                        freeSolo
+                        options={uniqueBrands}
+                        value={currentPen.brand || ''}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                autoFocus
+                                margin="dense"
+                                label="Brand"
+                                required
+                                fullWidth
+                            />
+                        )}
+                        onChange={(event, newValue) => {
+                            setCurrentPen((prev) => ({
+                                ...prev,
+                                brand: newValue || '',
+                            }));
+                        }}
                     />
-                    <TextField
-                        margin="dense"
-                        name="model"
-                        label="Model"
-                        type="text"
-                        fullWidth
-                        value={currentPen.model}
-                        onChange={handleChange}
-                        required
+                    <Autocomplete
+                        freeSolo
+                        options={uniqueModels}
+                        value={currentPen.model || ''}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                margin="dense"
+                                label="Model"
+                                required
+                                fullWidth
+                            />
+                        )}
+                        onChange={(event, newValue) => {
+                            setCurrentPen((prev) => ({
+                                ...prev,
+                                model: newValue || '',
+                            }));
+                        }}
                     />
                     <TextField
                         margin="dense"
@@ -517,23 +587,43 @@ const PensList: React.FC = () => {
                         value={currentPen.color}
                         onChange={handleChange}
                     />
-                    <TextField
-                        margin="dense"
-                        name="nibSize"
-                        label="Nib Size"
-                        type="text"
-                        fullWidth
-                        value={currentPen.nibSize}
-                        onChange={handleChange}
+                    <Autocomplete
+                        freeSolo
+                        options={uniqueNibSizes}
+                        value={currentPen.nibSize || ''}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                margin="dense"
+                                label="Nib Size"
+                                fullWidth
+                            />
+                        )}
+                        onChange={(event, newValue) => {
+                            setCurrentPen((prev) => ({
+                                ...prev,
+                                nibSize: newValue || '',
+                            }));
+                        }}
                     />
-                    <TextField
-                        margin="dense"
-                        name="nibType"
-                        label="Nib Type"
-                        type="text"
-                        fullWidth
-                        value={currentPen.nibType}
-                        onChange={handleChange}
+                    <Autocomplete
+                        freeSolo
+                        options={uniqueNibTypes}
+                        value={currentPen.nibType || ''}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                margin="dense"
+                                label="Nib Type"
+                                fullWidth
+                            />
+                        )}
+                        onChange={(event, newValue) => {
+                            setCurrentPen((prev) => ({
+                                ...prev,
+                                nibType: newValue || '',
+                            }));
+                        }}
                     />
                 </DialogContent>
                 <DialogActions>
@@ -551,7 +641,7 @@ const PensList: React.FC = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </Box>
     );
 };
 
