@@ -38,7 +38,6 @@ const PensList: React.FC = () => {
         color: '',
         nibSize: '',
         nibType: '',
-        nibCharacteristic: '',
     });
 
     useEffect(() => {
@@ -61,7 +60,6 @@ const PensList: React.FC = () => {
                 color: '',
                 nibSize: '',
                 nibType: '',
-                nibCharacteristic: '',
             });
             setIsEditing(false);
         }
@@ -76,7 +74,6 @@ const PensList: React.FC = () => {
             color: '',
             nibSize: '',
             nibType: '',
-            nibCharacteristic: '',
         });
     };
 
@@ -149,9 +146,6 @@ const PensList: React.FC = () => {
                                 <strong>Nib Type</strong>
                             </TableCell>
                             <TableCell>
-                                <strong>Nib Characteristic</strong>
-                            </TableCell>
-                            <TableCell>
                                 <strong>Actions</strong>
                             </TableCell>
                         </TableRow>
@@ -164,7 +158,6 @@ const PensList: React.FC = () => {
                                 <TableCell>{pen.color}</TableCell>
                                 <TableCell>{pen.nibSize}</TableCell>
                                 <TableCell>{pen.nibType}</TableCell>
-                                <TableCell>{pen.nibCharacteristic}</TableCell>
                                 <TableCell>
                                     <IconButton
                                         color="primary"
@@ -241,15 +234,6 @@ const PensList: React.FC = () => {
                         type="text"
                         fullWidth
                         value={currentPen.nibType}
-                        onChange={handleChange}
-                    />
-                    <TextField
-                        margin="dense"
-                        name="nibCharacteristic"
-                        label="Nib Characteristic"
-                        type="text"
-                        fullWidth
-                        value={currentPen.nibCharacteristic}
                         onChange={handleChange}
                     />
                 </DialogContent>
