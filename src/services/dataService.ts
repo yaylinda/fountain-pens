@@ -1,5 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Ink, Pen, RefillLog, RefillLogDisplay } from '../models/types';
+import {
+    saveInksToFile,
+    savePensToFile,
+    saveRefillLogsToFile,
+} from './fileService';
 
 // Import initial data
 import inksData from '../data/inks.json';
@@ -23,16 +28,28 @@ export const getInkById = (id: string): Ink | undefined => {
 export const addInk = (ink: Omit<Ink, 'id'>): Ink => {
     const newInk = { ...ink, id: uuidv4() };
     inks = [...inks, newInk];
+    // Save to file
+    saveInksToFile(inks).catch((err) =>
+        console.error('Failed to save inks to file:', err)
+    );
     return newInk;
 };
 
 export const updateInk = (updatedInk: Ink): Ink => {
     inks = inks.map((ink) => (ink.id === updatedInk.id ? updatedInk : ink));
+    // Save to file
+    saveInksToFile(inks).catch((err) =>
+        console.error('Failed to save inks to file:', err)
+    );
     return updatedInk;
 };
 
 export const deleteInk = (id: string): void => {
     inks = inks.filter((ink) => ink.id !== id);
+    // Save to file
+    saveInksToFile(inks).catch((err) =>
+        console.error('Failed to save inks to file:', err)
+    );
 };
 
 // Pen methods
@@ -47,16 +64,28 @@ export const getPenById = (id: string): Pen | undefined => {
 export const addPen = (pen: Omit<Pen, 'id'>): Pen => {
     const newPen = { ...pen, id: uuidv4() };
     pens = [...pens, newPen];
+    // Save to file
+    savePensToFile(pens).catch((err) =>
+        console.error('Failed to save pens to file:', err)
+    );
     return newPen;
 };
 
 export const updatePen = (updatedPen: Pen): Pen => {
     pens = pens.map((pen) => (pen.id === updatedPen.id ? updatedPen : pen));
+    // Save to file
+    savePensToFile(pens).catch((err) =>
+        console.error('Failed to save pens to file:', err)
+    );
     return updatedPen;
 };
 
 export const deletePen = (id: string): void => {
     pens = pens.filter((pen) => pen.id !== id);
+    // Save to file
+    savePensToFile(pens).catch((err) =>
+        console.error('Failed to save pens to file:', err)
+    );
 };
 
 // Refill Log methods
@@ -87,6 +116,11 @@ export const addRefillLog = (
     refillLogs = [...refillLogs, item];
     const index = refillLogs.length - 1;
 
+    // Save to file
+    saveRefillLogsToFile(refillLogs).catch((err) =>
+        console.error('Failed to save refill logs to file:', err)
+    );
+
     const penDetails = getPenById(item.penId) as Pen;
     const inkDetails = item.inkIds.map((id) => getInkById(id) as Ink);
     return { ...item, penDetails, inkDetails, index };
@@ -102,6 +136,11 @@ export const updateRefillLog = (
             updatedItem,
             ...refillLogs.slice(index + 1),
         ];
+
+        // Save to file
+        saveRefillLogsToFile(refillLogs).catch((err) =>
+            console.error('Failed to save refill logs to file:', err)
+        );
     }
 
     const penDetails = getPenById(updatedItem.penId) as Pen;
@@ -115,5 +154,10 @@ export const deleteRefillLog = (index: number): void => {
             ...refillLogs.slice(0, index),
             ...refillLogs.slice(index + 1),
         ];
+
+        // Save to file
+        saveRefillLogsToFile(refillLogs).catch((err) =>
+            console.error('Failed to save refill logs to file:', err)
+        );
     }
 };
