@@ -14,8 +14,7 @@ export interface Pen {
     nibType: string;
 }
 
-export interface CurrentlyInked {
-    id: string;
+export interface RefillLog {
     date: string;
     penId: string;
     inkIds: string[];
@@ -23,7 +22,7 @@ export interface CurrentlyInked {
 }
 
 // For displaying joined data in the UI
-export interface CurrentlyInkedDisplay extends CurrentlyInked {
+export interface RefillLogDisplay extends RefillLog {
     penDetails: Pen;
     inkDetails: Ink[];
 }

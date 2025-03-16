@@ -1,9 +1,9 @@
 import { AppBar, Box, Container, Tab, Tabs, Typography } from '@mui/material';
 import { useState } from 'react';
 import './App.css';
-import CurrentlyInkedList from './components/CurrentlyInked/CurrentlyInkedList';
 import InksList from './components/Inks/InksList';
 import PensList from './components/Pens/PensList';
+import RefillLogList from './components/RefillLog/RefillLogList';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -60,7 +60,7 @@ function App() {
                             onChange={handleChange}
                             aria-label="fountain pen app tabs"
                         >
-                            <Tab label="Currently Inked" />
+                            <Tab label="Refill Log" />
                             <Tab label="Inks" />
                             <Tab label="Pens" />
                         </Tabs>
@@ -69,7 +69,7 @@ function App() {
                         value={value}
                         index={0}
                     >
-                        <CurrentlyInkedList />
+                        <RefillLogList />
                     </TabPanel>
                     <TabPanel
                         value={value}

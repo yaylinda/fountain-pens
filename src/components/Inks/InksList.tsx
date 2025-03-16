@@ -1,10 +1,14 @@
 import {
     Add as AddIcon,
+    ArrowDownward as ArrowDownwardIcon,
+    ArrowUpward as ArrowUpwardIcon,
     Delete as DeleteIcon,
     Edit as EditIcon,
 } from '@mui/icons-material';
 import {
+    Box,
     Button,
+    Chip,
     Dialog,
     DialogActions,
     DialogContent,
@@ -19,7 +23,7 @@ import {
     TableRow,
     TextField,
 } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Ink } from '../../models/types';
 import {
     addInk,
@@ -27,6 +31,22 @@ import {
     getAllInks,
     updateInk,
 } from '../../services/dataService';
+
+// Utility function to generate colors based on string
+const stringToColor = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = Math.abs(hash) % 360;
+    return `hsl(${h}, 70%, 40%)`;
+};
+
+// Type for sorting
+type SortConfig = {
+    key: keyof Ink;
+    direction: 'asc' | 'desc';
+} | null;
 
 const InksList: React.FC = () => {
     const [inks, setInks] = useState<Ink[]>([]);
@@ -36,6 +56,10 @@ const InksList: React.FC = () => {
         brand: '',
         collection: '',
         name: '',
+    });
+    const [sortConfig, setSortConfig] = useState<SortConfig>({
+        key: 'brand',
+        direction: 'asc',
     });
 
     useEffect(() => {
@@ -91,6 +115,101 @@ const InksList: React.FC = () => {
         }
     };
 
+    // Create a unique set of brand and collection pairs
+    const brandColors = useMemo(() => {
+        const brands = [...new Set(inks.map((ink) => ink.brand))];
+        return brands.reduce((colors, brand) => {
+            colors[brand] = stringToColor(brand);
+            return colors;
+        }, {} as Record<string, string>);
+    }, [inks]);
+
+    const collectionColors = useMemo(() => {
+        const collections = [
+            ...new Set(inks.map((ink) => ink.collection).filter(Boolean)),
+        ];
+        return collections.reduce((colors, collection) => {
+            colors[collection] = stringToColor(collection);
+            return colors;
+        }, {} as Record<string, string>);
+    }, [inks]);
+
+    // Handle sorting
+    const requestSort = (key: keyof Ink) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (
+            sortConfig &&
+            sortConfig.key === key &&
+            sortConfig.direction === 'asc'
+        ) {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    // Sort the inks
+    const sortedInks = useMemo(() => {
+        const sortableInks = [...inks];
+        if (sortConfig !== null) {
+            sortableInks.sort((a, b) => {
+                if (a[sortConfig.key] < b[sortConfig.key]) {
+                    return sortConfig.direction === 'asc' ? -1 : 1;
+                }
+                if (a[sortConfig.key] > b[sortConfig.key]) {
+                    return sortConfig.direction === 'asc' ? 1 : -1;
+                }
+                // If primary sort key is equal, sort by brand, then collection, then name
+                if (sortConfig.key !== 'brand' && a.brand !== b.brand) {
+                    return a.brand < b.brand ? -1 : 1;
+                }
+                if (
+                    sortConfig.key !== 'collection' &&
+                    a.collection !== b.collection
+                ) {
+                    return a.collection < b.collection ? -1 : 1;
+                }
+                if (sortConfig.key !== 'name' && a.name !== b.name) {
+                    return a.name < b.name ? -1 : 1;
+                }
+                return 0;
+            });
+        }
+        return sortableInks;
+    }, [inks, sortConfig]);
+
+    // Default display sorting (brand, collection, name)
+    const displaySortedInks = useMemo(() => {
+        // Deepcopy to prevent side effects
+        const displayInks = [...sortedInks];
+
+        // If no explicit sorting, sort by brand, then collection, then name
+        if (!sortConfig) {
+            return displayInks.sort((a, b) => {
+                if (a.brand !== b.brand) {
+                    return a.brand.localeCompare(b.brand);
+                }
+                if (a.collection !== b.collection) {
+                    return a.collection.localeCompare(b.collection);
+                }
+                return a.name.localeCompare(b.name);
+            });
+        }
+
+        return displayInks;
+    }, [sortedInks, sortConfig]);
+
+    // Render the sort direction indicator
+    const getSortDirection = (key: keyof Ink) => {
+        if (!sortConfig || sortConfig.key !== key) {
+            return null;
+        }
+        return sortConfig.direction === 'asc' ? (
+            <ArrowUpwardIcon fontSize="small" />
+        ) : (
+            <ArrowDownwardIcon fontSize="small" />
+        );
+    };
+
     return (
         <div>
             <div
@@ -116,14 +235,47 @@ const InksList: React.FC = () => {
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>
-                                <strong>Brand</strong>
+                            <TableCell
+                                onClick={() => requestSort('brand')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <strong>Brand</strong>
+                                    {getSortDirection('brand')}
+                                </Box>
                             </TableCell>
-                            <TableCell>
-                                <strong>Collection</strong>
+                            <TableCell
+                                onClick={() => requestSort('collection')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <strong>Collection</strong>
+                                    {getSortDirection('collection')}
+                                </Box>
                             </TableCell>
-                            <TableCell>
-                                <strong>Name</strong>
+                            <TableCell
+                                onClick={() => requestSort('name')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <strong>Name</strong>
+                                    {getSortDirection('name')}
+                                </Box>
                             </TableCell>
                             <TableCell>
                                 <strong>Actions</strong>
@@ -131,10 +283,33 @@ const InksList: React.FC = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {inks.map((ink) => (
+                        {displaySortedInks.map((ink) => (
                             <TableRow key={ink.id}>
-                                <TableCell>{ink.brand}</TableCell>
-                                <TableCell>{ink.collection}</TableCell>
+                                <TableCell>
+                                    <Chip
+                                        label={ink.brand}
+                                        sx={{
+                                            bgcolor: brandColors[ink.brand],
+                                            color: 'white',
+                                            fontWeight: 'bold',
+                                        }}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    {ink.collection && (
+                                        <Chip
+                                            label={ink.collection}
+                                            sx={{
+                                                bgcolor:
+                                                    collectionColors[
+                                                        ink.collection
+                                                    ],
+                                                color: 'white',
+                                                fontWeight: 'bold',
+                                            }}
+                                        />
+                                    )}
+                                </TableCell>
                                 <TableCell>{ink.name}</TableCell>
                                 <TableCell>
                                     <IconButton

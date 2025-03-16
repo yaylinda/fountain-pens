@@ -1,20 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
-import {
-    CurrentlyInked,
-    CurrentlyInkedDisplay,
-    Ink,
-    Pen,
-} from '../models/types';
+import { Ink, Pen, RefillLog, RefillLogDisplay } from '../models/types';
 
 // Import initial data
-import currentlyInkedData from '../data/currentlyInked.json';
 import inksData from '../data/inks.json';
 import pensData from '../data/pens.json';
+import refillLogData from '../data/refillLog.json';
 
 // In-memory storage
 let inks: Ink[] = [...inksData];
 let pens: Pen[] = [...pensData];
-let currentlyInked: CurrentlyInked[] = [...currentlyInkedData];
+let refillLogs: RefillLog[] = [...refillLogData];
 
 // Ink methods
 export const getAllInks = (): Ink[] => {
@@ -64,19 +59,21 @@ export const deletePen = (id: string): void => {
     pens = pens.filter((pen) => pen.id !== id);
 };
 
-// Currently Inked methods
-export const getAllCurrentlyInked = (): CurrentlyInkedDisplay[] => {
-    return currentlyInked.map((item) => {
+// Refill Log methods
+export const getAllRefillLogs = (): (RefillLogDisplay & {
+    index: number;
+})[] => {
+    return refillLogs.map((item, index) => {
         const penDetails = getPenById(item.penId) as Pen;
         const inkDetails = item.inkIds.map((id) => getInkById(id) as Ink);
-        return { ...item, penDetails, inkDetails };
+        return { ...item, penDetails, inkDetails, index };
     });
 };
 
-export const getCurrentlyInkedById = (
-    id: string
-): CurrentlyInkedDisplay | undefined => {
-    const item = currentlyInked.find((ci) => ci.id === id);
+export const getRefillLogByIndex = (
+    index: number
+): RefillLogDisplay | undefined => {
+    const item = refillLogs[index];
     if (!item) return undefined;
 
     const penDetails = getPenById(item.penId) as Pen;
@@ -84,29 +81,39 @@ export const getCurrentlyInkedById = (
     return { ...item, penDetails, inkDetails };
 };
 
-export const addCurrentlyInked = (
-    item: Omit<CurrentlyInked, 'id'>
-): CurrentlyInkedDisplay => {
-    const newItem = { ...item, id: uuidv4() };
-    currentlyInked = [...currentlyInked, newItem];
+export const addRefillLog = (
+    item: RefillLog
+): RefillLogDisplay & { index: number } => {
+    refillLogs = [...refillLogs, item];
+    const index = refillLogs.length - 1;
 
-    const penDetails = getPenById(newItem.penId) as Pen;
-    const inkDetails = newItem.inkIds.map((id) => getInkById(id) as Ink);
-    return { ...newItem, penDetails, inkDetails };
+    const penDetails = getPenById(item.penId) as Pen;
+    const inkDetails = item.inkIds.map((id) => getInkById(id) as Ink);
+    return { ...item, penDetails, inkDetails, index };
 };
 
-export const updateCurrentlyInked = (
-    updatedItem: CurrentlyInked
-): CurrentlyInkedDisplay => {
-    currentlyInked = currentlyInked.map((item) =>
-        item.id === updatedItem.id ? updatedItem : item
-    );
+export const updateRefillLog = (
+    updatedItem: RefillLog,
+    index: number
+): RefillLogDisplay & { index: number } => {
+    if (index >= 0 && index < refillLogs.length) {
+        refillLogs = [
+            ...refillLogs.slice(0, index),
+            updatedItem,
+            ...refillLogs.slice(index + 1),
+        ];
+    }
 
     const penDetails = getPenById(updatedItem.penId) as Pen;
     const inkDetails = updatedItem.inkIds.map((id) => getInkById(id) as Ink);
-    return { ...updatedItem, penDetails, inkDetails };
+    return { ...updatedItem, penDetails, inkDetails, index };
 };
 
-export const deleteCurrentlyInked = (id: string): void => {
-    currentlyInked = currentlyInked.filter((item) => item.id !== id);
+export const deleteRefillLog = (index: number): void => {
+    if (index >= 0 && index < refillLogs.length) {
+        refillLogs = [
+            ...refillLogs.slice(0, index),
+            ...refillLogs.slice(index + 1),
+        ];
+    }
 };

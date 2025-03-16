@@ -29,30 +29,30 @@ import {
 } from '@mui/material';
 import { format } from 'date-fns';
 import React, { useEffect, useState } from 'react';
+import { Ink, Pen, RefillLog, RefillLogDisplay } from '../../models/types';
 import {
-    CurrentlyInked,
-    CurrentlyInkedDisplay,
-    Ink,
-    Pen,
-} from '../../models/types';
-import {
-    addCurrentlyInked,
-    deleteCurrentlyInked,
-    getAllCurrentlyInked,
+    addRefillLog,
+    deleteRefillLog,
     getAllInks,
     getAllPens,
-    updateCurrentlyInked,
+    getAllRefillLogs,
+    updateRefillLog,
 } from '../../services/dataService';
 
-const CurrentlyInkedList: React.FC = () => {
-    const [currentlyInked, setCurrentlyInked] = useState<
-        CurrentlyInkedDisplay[]
-    >([]);
+// Extended interface to include the index
+interface RefillLogWithIndex extends RefillLogDisplay {
+    index: number;
+}
+
+const RefillLogList: React.FC = () => {
+    const [refillLogs, setRefillLogs] = useState<RefillLogWithIndex[]>([]);
     const [pens, setPens] = useState<Pen[]>([]);
     const [inks, setInks] = useState<Ink[]>([]);
     const [open, setOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [currentItem, setCurrentItem] = useState<Partial<CurrentlyInked>>({
+    const [currentItem, setCurrentItem] = useState<
+        Partial<RefillLog> & { index?: number }
+    >({
         date: format(new Date(), 'yyyy-MM-dd'),
         penId: '',
         inkIds: [],
@@ -60,20 +60,20 @@ const CurrentlyInkedList: React.FC = () => {
     });
 
     useEffect(() => {
-        loadCurrentlyInked();
+        loadRefillLogs();
         setPens(getAllPens());
         setInks(getAllInks());
     }, []);
 
-    const loadCurrentlyInked = () => {
-        const allCurrentlyInked = getAllCurrentlyInked();
-        setCurrentlyInked(allCurrentlyInked);
+    const loadRefillLogs = () => {
+        const allRefillLogs = getAllRefillLogs();
+        setRefillLogs(allRefillLogs as RefillLogWithIndex[]);
     };
 
-    const handleOpen = (item?: CurrentlyInkedDisplay) => {
+    const handleOpen = (item?: RefillLogWithIndex) => {
         if (item) {
-            const { id, date, penId, inkIds, notes } = item;
-            setCurrentItem({ id, date, penId, inkIds, notes });
+            const { date, penId, inkIds, notes, index } = item;
+            setCurrentItem({ date, penId, inkIds, notes, index });
             setIsEditing(true);
         } else {
             setCurrentItem({
@@ -127,20 +127,20 @@ const CurrentlyInkedList: React.FC = () => {
             return;
         }
 
-        if (isEditing && currentItem.id) {
-            updateCurrentlyInked(currentItem as CurrentlyInked);
+        if (isEditing && currentItem.index !== undefined) {
+            updateRefillLog(currentItem as RefillLog, currentItem.index);
         } else {
-            addCurrentlyInked(currentItem as Omit<CurrentlyInked, 'id'>);
+            addRefillLog(currentItem as RefillLog);
         }
 
-        loadCurrentlyInked();
+        loadRefillLogs();
         handleClose();
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = (index: number) => {
         if (window.confirm('Are you sure you want to delete this entry?')) {
-            deleteCurrentlyInked(id);
-            loadCurrentlyInked();
+            deleteRefillLog(index);
+            loadRefillLogs();
         }
     };
 
@@ -157,9 +157,9 @@ const CurrentlyInkedList: React.FC = () => {
     const renderInks = (inkDetails: Ink[]) => {
         return (
             <div>
-                {inkDetails.map((ink, index) => (
+                {inkDetails.map((ink, i) => (
                     <Chip
-                        key={ink.id}
+                        key={ink.id + '-' + i}
                         label={getInkDisplayText(ink)}
                         color="primary"
                         variant="outlined"
@@ -180,14 +180,14 @@ const CurrentlyInkedList: React.FC = () => {
                     margin: '20px 0',
                 }}
             >
-                <h2>Currently Inked Pens</h2>
+                <h2>Refill Logs</h2>
                 <Button
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
                     onClick={() => handleOpen()}
                 >
-                    Add Inked Pen
+                    Add Pen Refill
                 </Button>
             </div>
 
@@ -213,8 +213,8 @@ const CurrentlyInkedList: React.FC = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {currentlyInked.map((item) => (
-                            <TableRow key={item.id}>
+                        {refillLogs.map((item) => (
+                            <TableRow key={`refill-${item.index}`}>
                                 <TableCell>{item.date}</TableCell>
                                 <TableCell>
                                     {getPenDisplayText(item.penDetails)}
@@ -232,7 +232,7 @@ const CurrentlyInkedList: React.FC = () => {
                                     </IconButton>
                                     <IconButton
                                         color="error"
-                                        onClick={() => handleDelete(item.id)}
+                                        onClick={() => handleDelete(item.index)}
                                     >
                                         <DeleteIcon />
                                     </IconButton>
@@ -250,7 +250,7 @@ const CurrentlyInkedList: React.FC = () => {
                 fullWidth
             >
                 <DialogTitle>
-                    {isEditing ? 'Edit Inked Pen' : 'Add New Inked Pen'}
+                    {isEditing ? 'Edit Pen Refill' : 'Add New Pen Refill'}
                 </DialogTitle>
                 <DialogContent>
                     <TextField
@@ -368,4 +368,4 @@ const CurrentlyInkedList: React.FC = () => {
     );
 };
 
-export default CurrentlyInkedList;
+export default RefillLogList;
