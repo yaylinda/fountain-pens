@@ -1188,61 +1188,61 @@
         "notes": ""
     },
     {
-        "date": "Sat, Mar 08, 2025",
+        "date": "2025-03-08",
         "penId": "pen_1",
         "inkIds": ["ink_40"],
         "notes": ""
     },
     {
-        "date": "Sat, Mar 08, 2025",
+        "date": "2025-03-08",
         "penId": "pen_6",
         "inkIds": ["ink_72"],
         "notes": ""
     },
     {
-        "date": "Sat, Mar 08, 2025",
+        "date": "2025-03-08",
         "penId": "pen_8",
         "inkIds": ["ink_10"],
         "notes": ""
     },
     {
-        "date": "Sat, Mar 08, 2025",
+        "date": "2025-03-08",
         "penId": "pen_10",
         "inkIds": ["ink_2"],
         "notes": ""
     },
     {
-        "date": "Sat, Mar 08, 2025",
+        "date": "2025-03-08",
         "penId": "pen_34",
         "inkIds": ["ink_10"],
         "notes": ""
     },
     {
-        "date": "Sat, Mar 08, 2025",
+        "date": "2025-03-08",
         "penId": "pen_12",
         "inkIds": ["ink_48"],
         "notes": ""
     },
     {
-        "date": "Sat, Mar 08, 2025",
+        "date": "2025-03-08",
         "penId": "pen_14",
         "inkIds": ["ink_58"],
         "notes": ""
     },
     {
-        "date": "Sat, Mar 08, 2025",
+        "date": "2025-03-08",
         "penId": "pen_29",
         "inkIds": ["ink_42"],
         "notes": ""
     },
     {
-        "date": "Sat, Mar 08, 2025",
+        "date": "2025-03-08",
         "penId": "pen_30",
         "inkIds": ["ink_81"],
         "notes": ""
     },
     {
-        "date": "Sat, Mar 08, 2025",
+        "date": "2025-03-08",
         "penId": "pen_31",
         "inkIds": ["ink_16"],
         "notes": ""
@@ -1274,8 +1274,9 @@
     {
         "date": "2025-03-09",
         "penId": "pen_21",
-        "inkIds": ["ink_62"],
-        "notes": ""
+        "inkIds": ["ink_58"],
+        "notes": "",
+        "index": 212
     },
     {
         "date": "2025-03-09",
