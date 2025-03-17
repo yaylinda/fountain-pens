@@ -23,14 +23,21 @@ import {
     TableHead,
     TableRow,
     TextField,
+    Tooltip,
     Typography,
 } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
-import { Pen } from '../../models/types';
+import { Ink, Pen } from '../../models/types';
+import {
+    getMostRecentInkForPen,
+    getPenRefillCount,
+} from '../../services/countService';
 import {
     addPen,
     deletePen,
     getAllPens,
+    getAllRefillLogs,
+    getInkById,
     updatePen,
 } from '../../services/dataService';
 
@@ -44,50 +51,49 @@ const stringToColor = (str: string) => {
     return `hsl(${h}, 70%, 40%)`;
 };
 
+// Utility for Nib size comparison
+const nibSizeOrder = [
+    'EF',
+    'F',
+    'M',
+    'B',
+    'BB',
+    'BBB',
+    'BBBB',
+    'Stub',
+    'Italic',
+    'Music',
+    'Fude',
+];
+
+const compareNibSizes = (a: string, b: string): number => {
+    if (a === b) return 0;
+    if (!a) return 1;
+    if (!b) return -1;
+
+    const aIdx = nibSizeOrder.findIndex((size) =>
+        a.toUpperCase().includes(size)
+    );
+    const bIdx = nibSizeOrder.findIndex((size) =>
+        b.toUpperCase().includes(size)
+    );
+
+    if (aIdx >= 0 && bIdx >= 0) {
+        return aIdx - bIdx;
+    } else if (aIdx >= 0) {
+        return -1;
+    } else if (bIdx >= 0) {
+        return 1;
+    } else {
+        return a.localeCompare(b);
+    }
+};
+
 // Type for sorting
 type SortConfig = {
-    key: keyof Pen;
+    key: keyof Pen | 'refillCount' | 'currentInk';
     direction: 'asc' | 'desc';
 } | null;
-
-// Nib size comparison function
-const compareNibSizes = (a: string, b: string): number => {
-    // Extract numeric portion if it's in the format like "F", "EF", "M", "B", "BB", etc.
-    const standardSizes = {
-        UEF: 0,
-        XXF: 1,
-        EEF: 2,
-        EF: 3,
-        F: 4,
-        M: 5,
-        B: 6,
-        BB: 7,
-        BBB: 8,
-        BBBB: 9,
-    };
-
-    const aUpper = a.toUpperCase();
-    const bUpper = b.toUpperCase();
-
-    const aSize = standardSizes[aUpper as keyof typeof standardSizes];
-    const bSize = standardSizes[bUpper as keyof typeof standardSizes];
-
-    // If both are standard sizes
-    if (aSize !== undefined && bSize !== undefined) {
-        return aSize - bSize;
-    }
-
-    // Try to extract numeric values (e.g., 0.3mm, 0.5mm)
-    const aNumMatch = a.match(/(\d+(\.\d+)?)/);
-    const bNumMatch = b.match(/(\d+(\.\d+)?)/);
-
-    if (aNumMatch && bNumMatch) {
-        return parseFloat(aNumMatch[0]) - parseFloat(bNumMatch[0]);
-    }
-
-    // Default to string comparison
-    return a.localeCompare(b);
-};
 
 const PensList: React.FC = () => {
     const [pens, setPens] = useState<Pen[]>([]);
@@ -104,15 +110,51 @@ const PensList: React.FC = () => {
         key: 'brand',
         direction: 'asc',
     });
+    const [refillLogs, setRefillLogs] = useState(
+        getAllRefillLogs().map((log) => ({
+            date: log.date,
+            penId: log.penId,
+            inkIds: log.inkIds,
+            notes: log.notes,
+        }))
+    );
 
     useEffect(() => {
         loadPens();
+        // Get refill logs for counting
+        setRefillLogs(
+            getAllRefillLogs().map((log) => ({
+                date: log.date,
+                penId: log.penId,
+                inkIds: log.inkIds,
+                notes: log.notes,
+            }))
+        );
     }, []);
 
     const loadPens = () => {
         const allPens = getAllPens();
         setPens(allPens);
     };
+
+    // Calculate pen refill counts and current ink
+    const penRefillData = useMemo(() => {
+        return pens.reduce((acc, pen) => {
+            const refillCount = getPenRefillCount(pen.id, refillLogs);
+            const currentInkId = getMostRecentInkForPen(pen.id, refillLogs);
+            const currentInk = currentInkId
+                ? getInkById(currentInkId)
+                : undefined;
+
+            acc[pen.id] = {
+                refillCount,
+                currentInkId,
+                currentInk,
+            };
+
+            return acc;
+        }, {} as Record<string, { refillCount: number; currentInkId?: string; currentInk?: Ink }>);
+    }, [pens, refillLogs]);
 
     const handleOpen = (pen?: Pen) => {
         if (pen) {
@@ -160,6 +202,15 @@ const PensList: React.FC = () => {
         }
 
         loadPens();
+        // Refresh refill logs as well
+        setRefillLogs(
+            getAllRefillLogs().map((log) => ({
+                date: log.date,
+                penId: log.penId,
+                inkIds: log.inkIds,
+                notes: log.notes,
+            }))
+        );
         handleClose();
     };
 
@@ -229,7 +280,7 @@ const PensList: React.FC = () => {
     }, [pens]);
 
     // Handle sorting
-    const requestSort = (key: keyof Pen) => {
+    const requestSort = (key: keyof Pen | 'refillCount' | 'currentInk') => {
         let direction: 'asc' | 'desc' = 'asc';
         if (
             sortConfig &&
@@ -246,6 +297,23 @@ const PensList: React.FC = () => {
         const sortablePens = [...pens];
         if (sortConfig !== null) {
             sortablePens.sort((a, b) => {
+                // Special handling for custom sort keys
+                if (sortConfig.key === 'refillCount') {
+                    const countA = penRefillData[a.id]?.refillCount || 0;
+                    const countB = penRefillData[b.id]?.refillCount || 0;
+                    return sortConfig.direction === 'asc'
+                        ? countA - countB
+                        : countB - countA;
+                }
+
+                if (sortConfig.key === 'currentInk') {
+                    const inkA = penRefillData[a.id]?.currentInk?.name || '';
+                    const inkB = penRefillData[b.id]?.currentInk?.name || '';
+                    return sortConfig.direction === 'asc'
+                        ? inkA.localeCompare(inkB)
+                        : inkB.localeCompare(inkA);
+                }
+
                 // Special handling for nibSize
                 if (sortConfig.key === 'nibSize') {
                     const comparison = compareNibSizes(a.nibSize, b.nibSize);
@@ -255,10 +323,16 @@ const PensList: React.FC = () => {
                 }
 
                 // Default string comparison for other keys
-                if (a[sortConfig.key] < b[sortConfig.key]) {
+                if (
+                    a[sortConfig.key as keyof Pen] <
+                    b[sortConfig.key as keyof Pen]
+                ) {
                     return sortConfig.direction === 'asc' ? -1 : 1;
                 }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
+                if (
+                    a[sortConfig.key as keyof Pen] >
+                    b[sortConfig.key as keyof Pen]
+                ) {
                     return sortConfig.direction === 'asc' ? 1 : -1;
                 }
 
@@ -280,7 +354,7 @@ const PensList: React.FC = () => {
             });
         }
         return sortablePens;
-    }, [pens, sortConfig]);
+    }, [pens, sortConfig, penRefillData]);
 
     // Default display sorting (brand, model, nibSize)
     const displaySortedPens = useMemo(() => {
@@ -304,7 +378,9 @@ const PensList: React.FC = () => {
     }, [sortedPens, sortConfig]);
 
     // Render the sort direction indicator
-    const getSortDirection = (key: keyof Pen) => {
+    const getSortDirection = (
+        key: keyof Pen | 'refillCount' | 'currentInk'
+    ) => {
         if (!sortConfig || sortConfig.key !== key) {
             return null;
         }
@@ -452,6 +528,34 @@ const PensList: React.FC = () => {
                                     {getSortDirection('nibType')}
                                 </Box>
                             </TableCell>
+                            <TableCell
+                                onClick={() => requestSort('refillCount')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <strong>Refill Count</strong>
+                                    {getSortDirection('refillCount')}
+                                </Box>
+                            </TableCell>
+                            <TableCell
+                                onClick={() => requestSort('currentInk')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <strong>Current Ink</strong>
+                                    {getSortDirection('currentInk')}
+                                </Box>
+                            </TableCell>
                             <TableCell>
                                 <strong>Actions</strong>
                             </TableCell>
@@ -507,6 +611,50 @@ const PensList: React.FC = () => {
                                         />
                                     )}
                                 </TableCell>
+                                <TableCell align="center">
+                                    {penRefillData[pen.id]?.refillCount || 0}
+                                </TableCell>
+                                <TableCell>
+                                    {penRefillData[pen.id]?.currentInk ? (
+                                        <Tooltip
+                                            title={`${
+                                                penRefillData[pen.id].currentInk
+                                                    ?.brand
+                                            } ${
+                                                penRefillData[pen.id].currentInk
+                                                    ?.collection
+                                                    ? penRefillData[pen.id]
+                                                          .currentInk
+                                                          ?.collection + ' '
+                                                    : ''
+                                            }${
+                                                penRefillData[pen.id].currentInk
+                                                    ?.name
+                                            }`}
+                                        >
+                                            <Chip
+                                                label={
+                                                    penRefillData[pen.id]
+                                                        .currentInk?.name
+                                                }
+                                                size="small"
+                                                sx={{
+                                                    bgcolor: stringToColor(
+                                                        penRefillData[pen.id]
+                                                            .currentInk
+                                                            ?.brand || ''
+                                                    ),
+                                                    color: 'white',
+                                                    fontWeight: 'bold',
+                                                }}
+                                            />
+                                        </Tooltip>
+                                    ) : (
+                                        <span style={{ color: '#999' }}>
+                                            None
+                                        </span>
+                                    )}
+                                </TableCell>
                                 <TableCell>
                                     <IconButton
                                         color="primary"
@@ -530,114 +678,118 @@ const PensList: React.FC = () => {
             <Dialog
                 open={open}
                 onClose={handleClose}
-                maxWidth="md"
-                fullWidth
             >
                 <DialogTitle>
                     {isEditing ? 'Edit Pen' : 'Add New Pen'}
                 </DialogTitle>
                 <DialogContent>
                     <Autocomplete
+                        id="brand"
                         freeSolo
                         options={uniqueBrands}
-                        value={currentPen.brand || ''}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                autoFocus
-                                margin="dense"
-                                label="Brand"
-                                required
-                                fullWidth
-                            />
-                        )}
-                        onChange={(event, newValue) => {
+                        value={currentPen.brand}
+                        onChange={(_, newValue) => {
                             setCurrentPen((prev) => ({
                                 ...prev,
                                 brand: newValue || '',
                             }));
                         }}
-                    />
-                    <Autocomplete
-                        freeSolo
-                        options={uniqueModels}
-                        value={currentPen.model || ''}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
-                                margin="dense"
-                                label="Model"
+                                name="brand"
+                                label="Brand"
+                                margin="normal"
                                 required
                                 fullWidth
+                                onChange={handleChange}
                             />
                         )}
-                        onChange={(event, newValue) => {
+                    />
+                    <Autocomplete
+                        id="model"
+                        freeSolo
+                        options={uniqueModels}
+                        value={currentPen.model}
+                        onChange={(_, newValue) => {
                             setCurrentPen((prev) => ({
                                 ...prev,
                                 model: newValue || '',
                             }));
                         }}
-                    />
-                    <TextField
-                        margin="dense"
-                        name="color"
-                        label="Color"
-                        type="text"
-                        fullWidth
-                        value={currentPen.color}
-                        onChange={handleChange}
-                    />
-                    <Autocomplete
-                        freeSolo
-                        options={uniqueNibSizes}
-                        value={currentPen.nibSize || ''}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
-                                margin="dense"
-                                label="Nib Size"
+                                name="model"
+                                label="Model"
+                                margin="normal"
+                                required
                                 fullWidth
+                                onChange={handleChange}
                             />
                         )}
-                        onChange={(event, newValue) => {
+                    />
+                    <TextField
+                        name="color"
+                        label="Color"
+                        value={currentPen.color || ''}
+                        onChange={handleChange}
+                        margin="normal"
+                        fullWidth
+                    />
+                    <Autocomplete
+                        id="nibSize"
+                        freeSolo
+                        options={uniqueNibSizes}
+                        value={currentPen.nibSize || ''}
+                        onChange={(_, newValue) => {
                             setCurrentPen((prev) => ({
                                 ...prev,
                                 nibSize: newValue || '',
                             }));
                         }}
-                    />
-                    <Autocomplete
-                        freeSolo
-                        options={uniqueNibTypes}
-                        value={currentPen.nibType || ''}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
-                                margin="dense"
-                                label="Nib Type"
+                                name="nibSize"
+                                label="Nib Size"
+                                margin="normal"
                                 fullWidth
+                                onChange={handleChange}
                             />
                         )}
-                        onChange={(event, newValue) => {
+                    />
+                    <Autocomplete
+                        id="nibType"
+                        freeSolo
+                        options={uniqueNibTypes}
+                        value={currentPen.nibType || ''}
+                        onChange={(_, newValue) => {
                             setCurrentPen((prev) => ({
                                 ...prev,
                                 nibType: newValue || '',
                             }));
                         }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                name="nibType"
+                                label="Nib Type"
+                                margin="normal"
+                                fullWidth
+                                onChange={handleChange}
+                            />
+                        )}
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button
-                        onClick={handleClose}
-                        color="primary"
-                    >
-                        Cancel
-                    </Button>
+                    <Button onClick={handleClose}>Cancel</Button>
                     <Button
                         onClick={handleSave}
+                        variant="contained"
                         color="primary"
                     >
-                        Save
+                        {isEditing ? 'Update' : 'Add'}
                     </Button>
                 </DialogActions>
             </Dialog>
