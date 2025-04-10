@@ -286,5 +286,13 @@
     "color": "Mondrian",
     "nibSize": "Omniflex",
     "nibType": "Steel"
+  },
+  {
+    "brand": "Pilot",
+    "model": "Custom 832",
+    "color": "Clear",
+    "nibSize": "Signature",
+    "nibType": "Gold, 14k",
+    "id": "7340b806-2bfd-4e46-82b6-923700f8266f"
   }
 ]

@@ -1,112 +1,674 @@
 [
-  { "id": "ink_1", "brand": "Diamine", "collection": "Blue Edition 2019", "name": "Happy Holidays" },
-  { "id": "ink_2", "brand": "Diamine", "collection": "Blue Edition 2019", "name": "Jack Frost" },
-  { "id": "ink_3", "brand": "Diamine", "collection": "Blue Edition 2019", "name": "Polar Glow" },
-  { "id": "ink_4", "brand": "Diamine", "collection": "Blue Edition 2019", "name": "Winter Miracle" },
-  { "id": "ink_5", "brand": "Diamine", "collection": "Blue Edition 2019", "name": "Holly" },
-  { "id": "ink_6", "brand": "Diamine", "collection": "Blue Edition 2019", "name": "Blue Peppermint" },
-  { "id": "ink_7", "brand": "Diamine", "collection": "Red Edition 2021", "name": "Garland" },
-  { "id": "ink_8", "brand": "Diamine", "collection": "Red Edition 2021", "name": "Subzero" },
-  { "id": "ink_9", "brand": "Diamine", "collection": "Red Edition 2021", "name": "Winter Spice" },
-  { "id": "ink_10", "brand": "Diamine", "collection": "Green Edition 2022", "name": "Arctic Blast" },
-  { "id": "ink_11", "brand": "Diamine", "collection": "Green Edition 2022", "name": "Serendipity" },
-  { "id": "ink_12", "brand": "Diamine", "collection": "Green Edition 2022", "name": "Spiced Apple" },
-  { "id": "ink_13", "brand": "Diamine", "collection": "Green Edition 2022", "name": "Solar Storm" },
-  { "id": "ink_14", "brand": "Diamine", "collection": "Green Edition 2022", "name": "Upon a Star" },
-  { "id": "ink_15", "brand": "Diamine", "collection": "Purple Edition 2023", "name": "Astral" },
-  { "id": "ink_16", "brand": "Diamine", "collection": "Purple Edition 2023", "name": "Glacier" },
-  { "id": "ink_17", "brand": "Diamine", "collection": "Purple Edition 2023", "name": "Raise A Glass" },
-  { "id": "ink_18", "brand": "Diamine", "collection": "Shimmer-tastic", "name": "Frosted Orchid" },
-  { "id": "ink_19", "brand": "Diamine", "collection": "Shimmer-tastic", "name": "Golden Ivy" },
-  { "id": "ink_20", "brand": "Diamine", "collection": "Shimmer-tastic", "name": "Golden Oasis" },
-  { "id": "ink_21", "brand": "Diamine", "collection": "Shimmer-tastic", "name": "Golden Sands" },
-  { "id": "ink_22", "brand": "Diamine", "collection": "Shimmer-tastic", "name": "Night Sky" },
-  { "id": "ink_23", "brand": "Diamine", "collection": "Shimmer-tastic", "name": "Pink Glitz" },
-  { "id": "ink_24", "brand": "Diamine", "collection": "Shimmer-tastic", "name": "Shimmering Seas" },
-  { "id": "ink_25", "brand": "Ferris Wheel Press", "collection": "", "name": "Stroke of Midnight" },
-  { "id": "ink_26", "brand": "Jacques Herbin", "collection": "1670", "name": "Emerald of Chivor" },
-  { "id": "ink_27", "brand": "Jacques Herbin", "collection": "1798", "name": "Kyanite du Nepal" },
-  { "id": "ink_28", "brand": "Jacques Herbin", "collection": "1670", "name": "Fuchsia de Magellan" },
-  { "id": "ink_29", "brand": "Jacques Herbin", "collection": "1670", "name": "Rouge Hematite" },
-  { "id": "ink_30", "brand": "KWZ", "collection": "", "name": "Sheen Machine 1" },
-  { "id": "ink_31", "brand": "KWZ", "collection": "", "name": "Sheen Machine 2" },
-  { "id": "ink_32", "brand": "Monteverde", "collection": "", "name": "California Teal" },
-  { "id": "ink_33", "brand": "Organics Studio", "collection": "", "name": "Nitrogen" },
-  { "id": "ink_34", "brand": "Organics Studio", "collection": "", "name": "Walden" },
-  { "id": "ink_35", "brand": "Pilot", "collection": "Iroshizuku", "name": "Kon-Peki" },
-  { "id": "ink_36", "brand": "Pilot", "collection": "Iroshizuku", "name": "Hotaru-Bi" },
-  { "id": "ink_37", "brand": "Pilot", "collection": "Iroshizuku", "name": "Momiji" },
-  { "id": "ink_38", "brand": "Robert Oster", "collection": "", "name": "Rose Gold Antiqua" },
-  { "id": "ink_39", "brand": "Robert Oster", "collection": "", "name": "Violet Clouds" },
-  { "id": "ink_40", "brand": "Sailor", "collection": "Manyo", "name": "Haha" },
-  { "id": "ink_41", "brand": "Sailor", "collection": "Manyo", "name": "Koke" },
-  { "id": "ink_42", "brand": "Sailor", "collection": "Manyo", "name": "Nekoyanagi" },
-  { "id": "ink_43", "brand": "Sailor", "collection": "Shikiori", "name": "Yuki-Akari" },
-  { "id": "ink_44", "brand": "Vinta Inks", "collection": "Holiday Collection", "name": "Vesper Blue Bisperas 1669" },
-  { "id": "ink_45", "brand": "Vinta Inks", "collection": "Holiday Collection", "name": "Jewel Green Parol 1908" },
-  { "id": "ink_46", "brand": "Vinta Inks", "collection": "", "name": "Cosmic Blue Shimmer Kosmos 1955" },
-  { "id": "ink_47", "brand": "Vinta Inks", "collection": "", "name": "Blue Blood Dugong Bughaw 1521" },
-  { "id": "ink_48", "brand": "Vinta Inks", "collection": "", "name": "Malayan Apple Makopa 1938" },
-  { "id": "ink_49", "brand": "Vinta Inks", "collection": "", "name": "Night Sky Tala 1980 [SAMPLE]" },
-  { "id": "ink_50", "brand": "Vinta Inks", "collection": "", "name": "Pastel Blue Julio 1991" },
-  { "id": "ink_51", "brand": "Vinta Inks", "collection": "Fairytale Collection", "name": "Plume Salimbay 1949" },
-  { "id": "ink_52", "brand": "Vinta Inks", "collection": "Fairytale Collection", "name": "Sea and Sky Lakbay 1861" },
-  { "id": "ink_53", "brand": "Vinta Inks", "collection": "Vanness Exclusive", "name": "Sodalite Kislap 1891" },
-  { "id": "ink_54", "brand": "Van Dieman", "collection": "Underwater Series", "name": "Parrot Fish" },
-  { "id": "ink_55", "brand": "Pelikan", "collection": "Edelstein", "name": "Golden Lapis" },
-  { "id": "ink_56", "brand": "Wearingeul", "collection": "Monthly World Literature", "name": "Bram Stoker Dracula" },
-  { "id": "ink_57", "brand": "Wearingeul", "collection": "World Myths and Legends", "name": "Enki" },
-  { "id": "ink_58", "brand": "Wearingeul", "collection": "Peter and Wendy", "name": "Wendy Darling" },
-  { "id": "ink_59", "brand": "Wearingeul", "collection": "Frances Hodgson Burnett", "name": "A Little Princess" },
-  { "id": "ink_60", "brand": "Wearingeul", "collection": "The Adventures of Pinocchio", "name": "Pinocchio" },
-  { "id": "ink_61", "brand": "Wearingeul", "collection": "Jules Verne", "name": "20000 Leagues Under the Sea" },
-  { "id": "ink_62", "brand": "Wearingeul", "collection": "World Myth Greek and Roman", "name": "Hades" },
-  { "id": "ink_63", "brand": "Wearingeul", "collection": "Hermann Hesse", "name": "The Glass Bead Game" },
-  { "id": "ink_64", "brand": "Wearingeul", "collection": "Dante Alighieri", "name": "Paradiso" },
-  { "id": "ink_65", "brand": "Wearingeul", "collection": "Alice's Adventures in Wonderland", "name": "Alice" },
-  { "id": "ink_66", "brand": "Wearingeul", "collection": "Alexandre Dumans", "name": "The Count of Monte Cristo" },
-  { "id": "ink_67", "brand": "Wearingeul", "collection": "Daniel Defoe", "name": "Robinson Crusoe" },
-  { "id": "ink_68", "brand": "Colorverse", "collection": "2024 Special Ink", "name": "[🫙] 2024 Blue Dragon (Blue, Silver, Gold Shimmers)" },
-  { "id": "ink_69", "brand": "Kiwi Inks", "collection": "", "name": "Trecolori Green Sheen (Red Color / Pink Glitter)" },
-  { "id": "ink_70", "brand": "Kiwi Inks", "collection": "", "name": "Trecolori Green Sheen (Purple Color / Blue Glitter)" },
-  { "id": "ink_71", "brand": "Kiwi Inks", "collection": "", "name": "[🫙] Trecolori Gold Sheen (Purple Color / Silver + Rainbow Glitter)" },
-  { "id": "ink_72", "brand": "Kiwi Inks", "collection": "", "name": "Trecolori Gold Sheen (Magenta Color / Pink Glitter)" },
-  { "id": "ink_73", "brand": "Kiwi Inks", "collection": "", "name": "Trecolori Red Sheen (Green Color / Rainbow Glitter)" },
-  { "id": "ink_74", "brand": "Kiwi Inks", "collection": "", "name": "Trecolori Red Sheen (Turquoise Color / Silver Glitter)" },
-  { "id": "ink_75", "brand": "Kiwi Inks", "collection": "", "name": "Trecolori Red Sheen (Teal Color / Pink Glitter)" },
-  { "id": "ink_76", "brand": "Kiwi Inks", "collection": "", "name": "[🫙] Trecolori Red Sheen (Ultramarine Color / Green + Gold + Rainbow Glitter)" },
-  { "id": "ink_77", "brand": "Kiwi Inks", "collection": "", "name": "Quetzalcoatl" },
-  { "id": "ink_78", "brand": "Kiwi Inks", "collection": "", "name": "Multishader Lavender (Blue Shimmer)" },
-  { "id": "ink_79", "brand": "Kiwi Inks", "collection": "", "name": "Multishader Rainbow in a Bottle (Gold Shimmer)" },
-  { "id": "ink_80", "brand": "Kiwi Inks", "collection": "", "name": "Fairy Dust (Silver Shimmer)" },
-  { "id": "ink_81", "brand": "Kiwi Inks", "collection": "", "name": "Cotton Candy Sky" },
-  { "id": "ink_82", "brand": "Kiwi Inks", "collection": "", "name": "[DEPRECATED] Trecolori Gold Sheen (Purple Color / Silver Glitter)" },
-  { "id": "ink_83", "brand": "Kiwi Inks", "collection": "", "name": "[DEPRECATED] Trecolori Gold Sheen (Purple Color / Rainbow Glitter)" },
-  { "id": "ink_84", "brand": "Kiwi Inks", "collection": "", "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Gold Glitter)" },
-  { "id": "ink_85", "brand": "Kiwi Inks", "collection": "", "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Rainbow Glitter)" },
-  { "id": "ink_86", "brand": "Kiwi Inks", "collection": "", "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Green Glitter)" },
-  { "id": "ink_87", "brand": "Kiwi Inks", "collection": "", "name": "[DEPRECATED] Glamorous Peacock (green glitter)" },
-  { "id": "ink_88", "brand": "Colorverse", "collection": "2024 Special Ink", "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Blue)" },
-  { "id": "ink_89", "brand": "Colorverse", "collection": "2024 Special Ink", "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Silver)" },
-  { "id": "ink_90", "brand": "Colorverse", "collection": "2024 Special Ink", "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Gold)" },
-  { "id": "ink_91", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Marley" },
-  { "id": "ink_92", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Salted Caramel" },
-  { "id": "ink_93", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Nutmeg" },
-  { "id": "ink_94", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Grotto" },
-  { "id": "ink_95", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Cosmic Glow" },
-  { "id": "ink_96", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Icy Lilac" },
-  { "id": "ink_97", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Sleigh Ride" },
-  { "id": "ink_98", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Noble Fir" },
-  { "id": "ink_99", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Chilly Nights" },
-  { "id": "ink_100", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Winterberry" },
-  { "id": "ink_101", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Wishing Tree" },
-  { "id": "ink_102", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Lemon and Lime" },
-  { "id": "ink_103", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Mint Twist" },
-  { "id": "ink_104", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Cranberry" },
-  { "id": "ink_105", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Pine Needle" },
-  { "id": "ink_106", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Snow Globe" },
-  { "id": "ink_107", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Baltic Breeze" },
-  { "id": "ink_108", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Potpourri" },
-  { "id": "ink_109", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Vibe" },
-  { "id": "ink_110", "brand": "Diamine", "collection": "Black Edition 2024", "name": "Lullaby" }
-] 
+  {
+    "id": "ink_1",
+    "brand": "Diamine",
+    "collection": "Blue Edition 2019",
+    "name": "Happy Holidays"
+  },
+  {
+    "id": "ink_2",
+    "brand": "Diamine",
+    "collection": "Blue Edition 2019",
+    "name": "Jack Frost"
+  },
+  {
+    "id": "ink_3",
+    "brand": "Diamine",
+    "collection": "Blue Edition 2019",
+    "name": "Polar Glow"
+  },
+  {
+    "id": "ink_4",
+    "brand": "Diamine",
+    "collection": "Blue Edition 2019",
+    "name": "Winter Miracle"
+  },
+  {
+    "id": "ink_5",
+    "brand": "Diamine",
+    "collection": "Blue Edition 2019",
+    "name": "Holly"
+  },
+  {
+    "id": "ink_6",
+    "brand": "Diamine",
+    "collection": "Blue Edition 2019",
+    "name": "Blue Peppermint"
+  },
+  {
+    "id": "ink_7",
+    "brand": "Diamine",
+    "collection": "Red Edition 2021",
+    "name": "Garland"
+  },
+  {
+    "id": "ink_8",
+    "brand": "Diamine",
+    "collection": "Red Edition 2021",
+    "name": "Subzero"
+  },
+  {
+    "id": "ink_9",
+    "brand": "Diamine",
+    "collection": "Red Edition 2021",
+    "name": "Winter Spice"
+  },
+  {
+    "id": "ink_10",
+    "brand": "Diamine",
+    "collection": "Green Edition 2022",
+    "name": "Arctic Blast"
+  },
+  {
+    "id": "ink_11",
+    "brand": "Diamine",
+    "collection": "Green Edition 2022",
+    "name": "Serendipity"
+  },
+  {
+    "id": "ink_12",
+    "brand": "Diamine",
+    "collection": "Green Edition 2022",
+    "name": "Spiced Apple"
+  },
+  {
+    "id": "ink_13",
+    "brand": "Diamine",
+    "collection": "Green Edition 2022",
+    "name": "Solar Storm"
+  },
+  {
+    "id": "ink_14",
+    "brand": "Diamine",
+    "collection": "Green Edition 2022",
+    "name": "Upon a Star"
+  },
+  {
+    "id": "ink_15",
+    "brand": "Diamine",
+    "collection": "Purple Edition 2023",
+    "name": "Astral"
+  },
+  {
+    "id": "ink_16",
+    "brand": "Diamine",
+    "collection": "Purple Edition 2023",
+    "name": "Glacier"
+  },
+  {
+    "id": "ink_17",
+    "brand": "Diamine",
+    "collection": "Purple Edition 2023",
+    "name": "Raise A Glass"
+  },
+  {
+    "id": "ink_18",
+    "brand": "Diamine",
+    "collection": "Shimmer-tastic",
+    "name": "Frosted Orchid"
+  },
+  {
+    "id": "ink_19",
+    "brand": "Diamine",
+    "collection": "Shimmer-tastic",
+    "name": "Golden Ivy"
+  },
+  {
+    "id": "ink_20",
+    "brand": "Diamine",
+    "collection": "Shimmer-tastic",
+    "name": "Golden Oasis"
+  },
+  {
+    "id": "ink_21",
+    "brand": "Diamine",
+    "collection": "Shimmer-tastic",
+    "name": "Golden Sands"
+  },
+  {
+    "id": "ink_22",
+    "brand": "Diamine",
+    "collection": "Shimmer-tastic",
+    "name": "Night Sky"
+  },
+  {
+    "id": "ink_23",
+    "brand": "Diamine",
+    "collection": "Shimmer-tastic",
+    "name": "Pink Glitz"
+  },
+  {
+    "id": "ink_24",
+    "brand": "Diamine",
+    "collection": "Shimmer-tastic",
+    "name": "Shimmering Seas"
+  },
+  {
+    "id": "ink_25",
+    "brand": "Ferris Wheel Press",
+    "collection": "",
+    "name": "Stroke of Midnight"
+  },
+  {
+    "id": "ink_26",
+    "brand": "Jacques Herbin",
+    "collection": "1670",
+    "name": "Emerald of Chivor"
+  },
+  {
+    "id": "ink_27",
+    "brand": "Jacques Herbin",
+    "collection": "1798",
+    "name": "Kyanite du Nepal"
+  },
+  {
+    "id": "ink_28",
+    "brand": "Jacques Herbin",
+    "collection": "1670",
+    "name": "Fuchsia de Magellan"
+  },
+  {
+    "id": "ink_29",
+    "brand": "Jacques Herbin",
+    "collection": "1670",
+    "name": "Rouge Hematite"
+  },
+  {
+    "id": "ink_30",
+    "brand": "KWZ",
+    "collection": "",
+    "name": "Sheen Machine 1"
+  },
+  {
+    "id": "ink_31",
+    "brand": "KWZ",
+    "collection": "",
+    "name": "Sheen Machine 2"
+  },
+  {
+    "id": "ink_32",
+    "brand": "Monteverde",
+    "collection": "",
+    "name": "California Teal"
+  },
+  {
+    "id": "ink_33",
+    "brand": "Organics Studio",
+    "collection": "",
+    "name": "Nitrogen"
+  },
+  {
+    "id": "ink_34",
+    "brand": "Organics Studio",
+    "collection": "",
+    "name": "Walden"
+  },
+  {
+    "id": "ink_35",
+    "brand": "Pilot",
+    "collection": "Iroshizuku",
+    "name": "Kon-Peki"
+  },
+  {
+    "id": "ink_36",
+    "brand": "Pilot",
+    "collection": "Iroshizuku",
+    "name": "Hotaru-Bi"
+  },
+  {
+    "id": "ink_37",
+    "brand": "Pilot",
+    "collection": "Iroshizuku",
+    "name": "Momiji"
+  },
+  {
+    "id": "ink_38",
+    "brand": "Robert Oster",
+    "collection": "",
+    "name": "Rose Gold Antiqua"
+  },
+  {
+    "id": "ink_39",
+    "brand": "Robert Oster",
+    "collection": "",
+    "name": "Violet Clouds"
+  },
+  {
+    "id": "ink_40",
+    "brand": "Sailor",
+    "collection": "Manyo",
+    "name": "Haha"
+  },
+  {
+    "id": "ink_41",
+    "brand": "Sailor",
+    "collection": "Manyo",
+    "name": "Koke"
+  },
+  {
+    "id": "ink_42",
+    "brand": "Sailor",
+    "collection": "Manyo",
+    "name": "Nekoyanagi"
+  },
+  {
+    "id": "ink_43",
+    "brand": "Sailor",
+    "collection": "Shikiori",
+    "name": "Yuki-Akari"
+  },
+  {
+    "id": "ink_44",
+    "brand": "Vinta Inks",
+    "collection": "Holiday Collection",
+    "name": "Vesper Blue Bisperas 1669"
+  },
+  {
+    "id": "ink_45",
+    "brand": "Vinta Inks",
+    "collection": "Holiday Collection",
+    "name": "Jewel Green Parol 1908"
+  },
+  {
+    "id": "ink_46",
+    "brand": "Vinta Inks",
+    "collection": "",
+    "name": "Cosmic Blue Shimmer Kosmos 1955"
+  },
+  {
+    "id": "ink_47",
+    "brand": "Vinta Inks",
+    "collection": "",
+    "name": "Blue Blood Dugong Bughaw 1521"
+  },
+  {
+    "id": "ink_48",
+    "brand": "Vinta Inks",
+    "collection": "",
+    "name": "Malayan Apple Makopa 1938"
+  },
+  {
+    "id": "ink_49",
+    "brand": "Vinta Inks",
+    "collection": "",
+    "name": "Night Sky Tala 1980 [SAMPLE]"
+  },
+  {
+    "id": "ink_50",
+    "brand": "Vinta Inks",
+    "collection": "",
+    "name": "Pastel Blue Julio 1991"
+  },
+  {
+    "id": "ink_51",
+    "brand": "Vinta Inks",
+    "collection": "Fairytale Collection",
+    "name": "Plume Salimbay 1949"
+  },
+  {
+    "id": "ink_52",
+    "brand": "Vinta Inks",
+    "collection": "Fairytale Collection",
+    "name": "Sea and Sky Lakbay 1861"
+  },
+  {
+    "id": "ink_53",
+    "brand": "Vinta Inks",
+    "collection": "Vanness Exclusive",
+    "name": "Sodalite Kislap 1891"
+  },
+  {
+    "id": "ink_54",
+    "brand": "Van Dieman",
+    "collection": "Underwater Series",
+    "name": "Parrot Fish"
+  },
+  {
+    "id": "ink_55",
+    "brand": "Pelikan",
+    "collection": "Edelstein",
+    "name": "Golden Lapis"
+  },
+  {
+    "id": "ink_56",
+    "brand": "Wearingeul",
+    "collection": "Monthly World Literature",
+    "name": "Bram Stoker Dracula"
+  },
+  {
+    "id": "ink_57",
+    "brand": "Wearingeul",
+    "collection": "World Myths and Legends",
+    "name": "Enki"
+  },
+  {
+    "id": "ink_58",
+    "brand": "Wearingeul",
+    "collection": "Peter and Wendy",
+    "name": "Wendy Darling"
+  },
+  {
+    "id": "ink_59",
+    "brand": "Wearingeul",
+    "collection": "Frances Hodgson Burnett",
+    "name": "A Little Princess"
+  },
+  {
+    "id": "ink_60",
+    "brand": "Wearingeul",
+    "collection": "The Adventures of Pinocchio",
+    "name": "Pinocchio"
+  },
+  {
+    "id": "ink_61",
+    "brand": "Wearingeul",
+    "collection": "Jules Verne",
+    "name": "20000 Leagues Under the Sea"
+  },
+  {
+    "id": "ink_62",
+    "brand": "Wearingeul",
+    "collection": "World Myth Greek and Roman",
+    "name": "Hades"
+  },
+  {
+    "id": "ink_63",
+    "brand": "Wearingeul",
+    "collection": "Hermann Hesse",
+    "name": "The Glass Bead Game"
+  },
+  {
+    "id": "ink_64",
+    "brand": "Wearingeul",
+    "collection": "Dante Alighieri",
+    "name": "Paradiso"
+  },
+  {
+    "id": "ink_65",
+    "brand": "Wearingeul",
+    "collection": "Alice's Adventures in Wonderland",
+    "name": "Alice"
+  },
+  {
+    "id": "ink_66",
+    "brand": "Wearingeul",
+    "collection": "Alexandre Dumans",
+    "name": "The Count of Monte Cristo"
+  },
+  {
+    "id": "ink_67",
+    "brand": "Wearingeul",
+    "collection": "Daniel Defoe",
+    "name": "Robinson Crusoe"
+  },
+  {
+    "id": "ink_68",
+    "brand": "Colorverse",
+    "collection": "2024 Special Ink",
+    "name": "[🫙] 2024 Blue Dragon (Blue, Silver, Gold Shimmers)"
+  },
+  {
+    "id": "ink_69",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Trecolori Green Sheen (Red Color / Pink Glitter)"
+  },
+  {
+    "id": "ink_70",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Trecolori Green Sheen (Purple Color / Blue Glitter)"
+  },
+  {
+    "id": "ink_71",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "[🫙] Trecolori Gold Sheen (Purple Color / Silver + Rainbow Glitter)"
+  },
+  {
+    "id": "ink_72",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Trecolori Gold Sheen (Magenta Color / Pink Glitter)"
+  },
+  {
+    "id": "ink_73",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Trecolori Red Sheen (Green Color / Rainbow Glitter)"
+  },
+  {
+    "id": "ink_74",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Trecolori Red Sheen (Turquoise Color / Silver Glitter)"
+  },
+  {
+    "id": "ink_75",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Trecolori Red Sheen (Teal Color / Pink Glitter)"
+  },
+  {
+    "id": "ink_76",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "[🫙] Trecolori Red Sheen (Ultramarine Color / Green + Gold + Rainbow Glitter)"
+  },
+  {
+    "id": "ink_77",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Quetzalcoatl"
+  },
+  {
+    "id": "ink_78",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Multishader Lavender (Blue Shimmer)"
+  },
+  {
+    "id": "ink_79",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Multishader Rainbow in a Bottle (Gold Shimmer)"
+  },
+  {
+    "id": "ink_80",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Fairy Dust (Silver Shimmer)"
+  },
+  {
+    "id": "ink_81",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "Cotton Candy Sky"
+  },
+  {
+    "id": "ink_82",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "[DEPRECATED] Trecolori Gold Sheen (Purple Color / Silver Glitter)"
+  },
+  {
+    "id": "ink_83",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "[DEPRECATED] Trecolori Gold Sheen (Purple Color / Rainbow Glitter)"
+  },
+  {
+    "id": "ink_84",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Gold Glitter)"
+  },
+  {
+    "id": "ink_85",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Rainbow Glitter)"
+  },
+  {
+    "id": "ink_86",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Green Glitter)"
+  },
+  {
+    "id": "ink_87",
+    "brand": "Kiwi Inks",
+    "collection": "",
+    "name": "[DEPRECATED] Glamorous Peacock (green glitter)"
+  },
+  {
+    "id": "ink_88",
+    "brand": "Colorverse",
+    "collection": "2024 Special Ink",
+    "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Blue)"
+  },
+  {
+    "id": "ink_89",
+    "brand": "Colorverse",
+    "collection": "2024 Special Ink",
+    "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Silver)"
+  },
+  {
+    "id": "ink_90",
+    "brand": "Colorverse",
+    "collection": "2024 Special Ink",
+    "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Gold)"
+  },
+  {
+    "id": "ink_91",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Marley"
+  },
+  {
+    "id": "ink_92",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Salted Caramel"
+  },
+  {
+    "id": "ink_93",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Nutmeg"
+  },
+  {
+    "id": "ink_94",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Grotto"
+  },
+  {
+    "id": "ink_95",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Cosmic Glow"
+  },
+  {
+    "id": "ink_96",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Icy Lilac"
+  },
+  {
+    "id": "ink_97",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Sleigh Ride"
+  },
+  {
+    "id": "ink_98",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Noble Fir"
+  },
+  {
+    "id": "ink_99",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Chilly Nights"
+  },
+  {
+    "id": "ink_100",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Winterberry"
+  },
+  {
+    "id": "ink_101",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Wishing Tree"
+  },
+  {
+    "id": "ink_102",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Lemon and Lime"
+  },
+  {
+    "id": "ink_103",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Mint Twist"
+  },
+  {
+    "id": "ink_104",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Cranberry"
+  },
+  {
+    "id": "ink_105",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Pine Needle"
+  },
+  {
+    "id": "ink_106",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Snow Globe"
+  },
+  {
+    "id": "ink_107",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Baltic Breeze"
+  },
+  {
+    "id": "ink_108",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Potpourri"
+  },
+  {
+    "id": "ink_109",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Vibe"
+  },
+  {
+    "id": "ink_110",
+    "brand": "Diamine",
+    "collection": "Black Edition 2024",
+    "name": "Lullaby"
+  },
+  {
+    "brand": "Pilot",
+    "collection": "",
+    "name": "Blue",
+    "id": "21ebe10b-60e8-4a1a-931d-a4c9beacf17b"
+  },
+  {
+    "brand": "Wearingeul",
+    "collection": "World Myth Greek and Roman",
+    "name": "Atlas",
+    "id": "439839ff-1c03-43c5-b9f0-14bc99d97b8c"
+  }
+]
