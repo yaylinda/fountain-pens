@@ -294,5 +294,13 @@
     "nibSize": "Signature",
     "nibType": "Gold, 14k",
     "id": "7340b806-2bfd-4e46-82b6-923700f8266f"
+  },
+  {
+    "brand": "Pilot",
+    "model": "Metal Falcon",
+    "color": "Sapphire (v2)",
+    "nibSize": "Fine",
+    "nibType": "Gold, 14k",
+    "id": "b98fae65-4661-4435-900c-8dffbe810c36"
   }
 ]
