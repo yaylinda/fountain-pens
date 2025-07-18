@@ -2111,9 +2111,9 @@
     "date": "2025-06-08",
     "penId": "pen_11",
     "inkIds": [
-      "ink_42"
+      "ink_77"
     ],
-    "notes": "with tiny bits of lavender, robinson crusoe, quetzalcoatl",
+    "notes": "with nekoyanagi, tiny bits of lavender, robinson crusoe",
     "index": 259
   },
   {
@@ -2123,6 +2123,39 @@
       "ink_63",
       "ink_58",
       "ink_42"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-07-04",
+    "penId": "7340b806-2bfd-4e46-82b6-923700f8266f",
+    "inkIds": [
+      "ink_2"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-07-06",
+    "penId": "pen_4",
+    "inkIds": [
+      "ink_32"
+    ],
+    "notes": "with gold glitter",
+    "index": 262
+  },
+  {
+    "date": "2025-07-17",
+    "penId": "pen_12",
+    "inkIds": [
+      "0ef1725f-3c1c-4d13-a10b-f474d63e9feb"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-07-17",
+    "penId": "pen_26",
+    "inkIds": [
+      "18b9e23b-a34e-4878-b0ee-6829253c08ed"
     ],
     "notes": ""
   }
