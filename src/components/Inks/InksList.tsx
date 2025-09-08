@@ -27,10 +27,12 @@ import {
 } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Ink } from '../../models/types';
+import { getInkUsageCount } from '../../services/countService';
 import {
     addInk,
     deleteInk,
     getAllInks,
+    getAllRefillLogs,
     updateInk,
 } from '../../services/dataService';
 
@@ -46,7 +48,7 @@ const stringToColor = (str: string) => {
 
 // Type for sorting
 type SortConfig = {
-    key: keyof Ink;
+    key: keyof Ink | 'usageCount';
     direction: 'asc' | 'desc';
 } | null;
 
@@ -63,15 +65,41 @@ const InksList: React.FC = () => {
         key: 'brand',
         direction: 'asc',
     });
+    const [refillLogs, setRefillLogs] = useState(
+        getAllRefillLogs().map((log) => ({
+            date: log.date,
+            penId: log.penId,
+            inkIds: log.inkIds,
+            notes: log.notes,
+        }))
+    );
 
     useEffect(() => {
         loadInks();
+        // Get refill logs for counting
+        setRefillLogs(
+            getAllRefillLogs().map((log) => ({
+                date: log.date,
+                penId: log.penId,
+                inkIds: log.inkIds,
+                notes: log.notes,
+            }))
+        );
     }, []);
 
     const loadInks = () => {
         const allInks = getAllInks();
         setInks(allInks);
     };
+
+    // Calculate ink usage counts
+    const inkUsageData = useMemo(() => {
+        return inks.reduce((acc, ink) => {
+            const usageCount = getInkUsageCount(ink.id, refillLogs);
+            acc[ink.id] = { usageCount };
+            return acc;
+        }, {} as Record<string, { usageCount: number }>);
+    }, [inks, refillLogs]);
 
     const handleOpen = (ink?: Ink) => {
         if (ink) {
@@ -107,6 +135,15 @@ const InksList: React.FC = () => {
         }
 
         loadInks();
+        // Refresh refill logs as well
+        setRefillLogs(
+            getAllRefillLogs().map((log) => ({
+                date: log.date,
+                penId: log.penId,
+                inkIds: log.inkIds,
+                notes: log.notes,
+            }))
+        );
         handleClose();
     };
 
@@ -137,7 +174,7 @@ const InksList: React.FC = () => {
     }, [inks]);
 
     // Handle sorting
-    const requestSort = (key: keyof Ink) => {
+    const requestSort = (key: keyof Ink | 'usageCount') => {
         let direction: 'asc' | 'desc' = 'asc';
         if (
             sortConfig &&
@@ -154,10 +191,26 @@ const InksList: React.FC = () => {
         const sortableInks = [...inks];
         if (sortConfig !== null) {
             sortableInks.sort((a, b) => {
-                if (a[sortConfig.key] < b[sortConfig.key]) {
+                // Special handling for usage count
+                if (sortConfig.key === 'usageCount') {
+                    const countA = inkUsageData[a.id]?.usageCount || 0;
+                    const countB = inkUsageData[b.id]?.usageCount || 0;
+                    return sortConfig.direction === 'asc'
+                        ? countA - countB
+                        : countB - countA;
+                }
+
+                // Default string comparison for other keys
+                if (
+                    a[sortConfig.key as keyof Ink] <
+                    b[sortConfig.key as keyof Ink]
+                ) {
                     return sortConfig.direction === 'asc' ? -1 : 1;
                 }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
+                if (
+                    a[sortConfig.key as keyof Ink] >
+                    b[sortConfig.key as keyof Ink]
+                ) {
                     return sortConfig.direction === 'asc' ? 1 : -1;
                 }
                 // If primary sort key is equal, sort by brand, then collection, then name
@@ -177,7 +230,7 @@ const InksList: React.FC = () => {
             });
         }
         return sortableInks;
-    }, [inks, sortConfig]);
+    }, [inks, sortConfig, inkUsageData]);
 
     // Default display sorting (brand, collection, name)
     const displaySortedInks = useMemo(() => {
@@ -201,7 +254,7 @@ const InksList: React.FC = () => {
     }, [sortedInks, sortConfig]);
 
     // Render the sort direction indicator
-    const getSortDirection = (key: keyof Ink) => {
+    const getSortDirection = (key: keyof Ink | 'usageCount') => {
         if (!sortConfig || sortConfig.key !== key) {
             return null;
         }
@@ -311,6 +364,20 @@ const InksList: React.FC = () => {
                                     {getSortDirection('name')}
                                 </Box>
                             </TableCell>
+                            <TableCell
+                                onClick={() => requestSort('usageCount')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <strong>Usage Count</strong>
+                                    {getSortDirection('usageCount')}
+                                </Box>
+                            </TableCell>
                             <TableCell>
                                 <strong>Actions</strong>
                             </TableCell>
@@ -345,6 +412,9 @@ const InksList: React.FC = () => {
                                     )}
                                 </TableCell>
                                 <TableCell>{ink.name}</TableCell>
+                                <TableCell align="center">
+                                    {inkUsageData[ink.id]?.usageCount || 0}
+                                </TableCell>
                                 <TableCell>
                                     <IconButton
                                         color="primary"
