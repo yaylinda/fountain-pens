@@ -1,0 +1,680 @@
+{
+  "Happy Holidays": {
+    "name": "Happy Holidays",
+    "url": "https://inkswatch.com/ink.html?inkId=1274",
+    "hex": "#404898",
+    "note": null
+  },
+  "Jack Frost": {
+    "name": "Jack Frost",
+    "url": "https://inkswatch.com/ink.html?inkId=1092",
+    "hex": "#31438c",
+    "note": null
+  },
+  "Polar Glow": {
+    "name": "Polar Glow",
+    "url": "https://inkswatch.com/ink.html?inkId=1303",
+    "hex": "#414171",
+    "note": null
+  },
+  "Winter Miracle": {
+    "name": "Winter Miracle",
+    "url": "https://inkswatch.com/ink.html?inkId=1275",
+    "hex": "#4d2965",
+    "note": null
+  },
+  "Holly": {
+    "name": "Holly",
+    "url": "https://inkswatch.com/ink.html?inkId=1664",
+    "hex": "#39586b",
+    "note": null
+  },
+  "Blue Peppermint": {
+    "name": "Blue Peppermint",
+    "url": "https://inkswatch.com/ink.html?inkId=2042",
+    "hex": "#02a09a",
+    "note": null
+  },
+  "Garland": {
+    "name": "Garland",
+    "url": "https://inkswatch.com/ink.html?inkId=1621",
+    "hex": "#202c32",
+    "note": null
+  },
+  "Subzero": {
+    "name": "Subzero",
+    "url": "https://inkswatch.com/ink.html?inkId=1637",
+    "hex": "#00748c",
+    "note": null
+  },
+  "Winter Spice": {
+    "name": "Winter Spice",
+    "url": "https://inkswatch.com/ink.html?inkId=1625",
+    "hex": "#35281d",
+    "note": null
+  },
+  "Arctic Blast": {
+    "name": "Arctic Blast",
+    "url": "https://inkswatch.com/ink.html?inkId=1871",
+    "hex": "#0c3880",
+    "note": null
+  },
+  "Serendipity": {
+    "name": "Serendipity",
+    "url": "https://inkswatch.com/ink.html?inkId=1867",
+    "hex": "#233345",
+    "note": null
+  },
+  "Spiced Apple": {
+    "name": "Spiced Apple",
+    "url": "https://inkswatch.com/ink.html?inkId=1856",
+    "hex": "#883828",
+    "note": null
+  },
+  "Solar Storm": {
+    "name": "Solar Storm",
+    "url": "https://inkswatch.com/ink.html?inkId=1552",
+    "hex": "#ff9a42",
+    "note": null
+  },
+  "Upon a Star": {
+    "name": "Upon a Star",
+    "url": "https://inkswatch.com/ink.html?inkId=1864",
+    "hex": "#2a3642",
+    "note": null
+  },
+  "Astral": {
+    "name": "Astral",
+    "url": "https://inkswatch.com/ink.html?inkId=2446",
+    "hex": "#1f1f1f",
+    "note": null
+  },
+  "Glacier": {
+    "name": "Glacier",
+    "url": "https://inkswatch.com/ink.html?inkId=2437",
+    "hex": "#446b83",
+    "note": null
+  },
+  "Raise A Glass": {
+    "name": "Raise A Glass",
+    "url": "https://inkswatch.com/ink.html?inkId=2451",
+    "hex": "#382838",
+    "note": null
+  },
+  "Frosted Orchid": {
+    "name": "Frosted Orchid",
+    "url": "https://inkswatch.com/ink.html?inkId=1326",
+    "hex": "#805870",
+    "note": null
+  },
+  "Golden Ivy": {
+    "name": "Golden Ivy",
+    "url": "https://inkswatch.com/ink.html?inkId=135",
+    "hex": "#386e3e",
+    "note": null
+  },
+  "Golden Oasis": {
+    "name": "Golden Oasis",
+    "url": "https://inkswatch.com/ink.html?inkId=1327",
+    "hex": "#6bbb4c",
+    "note": null
+  },
+  "Golden Sands": {
+    "name": "Golden Sands",
+    "url": "https://inkswatch.com/ink.html?inkId=1053",
+    "hex": "#c27a38",
+    "note": null
+  },
+  "Night Sky": {
+    "name": "Night Sky",
+    "url": "https://inkswatch.com/ink.html?inkId=456",
+    "hex": "#424242",
+    "note": null
+  },
+  "Pink Glitz": {
+    "name": "Pink Glitz",
+    "url": "https://inkswatch.com/ink.html?inkId=1332",
+    "hex": "#e3475a",
+    "note": null
+  },
+  "Shimmering Seas": {
+    "name": "Shimmering Seas",
+    "url": "https://inkswatch.com/ink.html?inkId=469",
+    "hex": "#484860",
+    "note": null
+  },
+  "Stroke of Midnight": {
+    "name": "Stroke of Midnight",
+    "url": "https://inkswatch.com/ink.html?inkId=2465",
+    "hex": "#3c3c44",
+    "note": null
+  },
+  "Emerald of Chivor": {
+    "name": "Emerald of Chivor",
+    "url": "https://inkswatch.com/ink.html?inkId=330",
+    "hex": "#325a69",
+    "note": null
+  },
+  "Kyanite du Nepal": {
+    "name": "Kyanite du Nepal",
+    "url": "https://inkswatch.com/ink.html?inkId=297",
+    "hex": "#0878c0",
+    "note": null
+  },
+  "Fuchsia de Magellan": {
+    "name": "Fuchsia de Magellan",
+    "url": "https://inkswatch.com/ink.html?inkId=2778",
+    "hex": "#e3487b",
+    "note": null
+  },
+  "Rouge Hematite": {
+    "name": "Rouge Hematite",
+    "url": "https://inkswatch.com/ink.html?inkId=268",
+    "hex": "#eb6b38",
+    "note": null
+  },
+  "Sheen Machine 1": {
+    "name": "Sheen Machine 1",
+    "url": "https://inkswatch.com/ink.html?inkId=599",
+    "hex": "#2e6a78",
+    "note": null
+  },
+  "Sheen Machine 2": {
+    "name": "Sheen Machine 2",
+    "url": "https://inkswatch.com/ink.html?inkId=599",
+    "hex": "#2e6a78",
+    "note": null
+  },
+  "California Teal": {
+    "name": "California Teal",
+    "url": "https://inkswatch.com/ink.html?inkId=141",
+    "hex": "#037050",
+    "note": null
+  },
+  "Nitrogen": {
+    "name": "Nitrogen",
+    "url": "https://inkswatch.com/ink.html?inkId=381",
+    "hex": "#3a65cc",
+    "note": null
+  },
+  "Walden": {
+    "name": "Walden",
+    "url": "https://inkswatch.com/ink.html?inkId=1244",
+    "hex": "#657db5",
+    "note": null
+  },
+  "Kon-Peki": {
+    "name": "Kon-Peki",
+    "url": "https://inkswatch.com/ink.html?inkId=776",
+    "hex": "#156ab2",
+    "note": null
+  },
+  "Hotaru-Bi": {
+    "name": "Hotaru-Bi",
+    "url": "https://inkswatch.com/ink.html?inkId=1795",
+    "hex": "#c7af1a",
+    "note": null
+  },
+  "Momiji": {
+    "name": "Momiji",
+    "url": "https://inkswatch.com/ink.html?inkId=528",
+    "hex": "#e34343",
+    "note": null
+  },
+  "Rose Gold Antiqua": {
+    "name": "Rose Gold Antiqua",
+    "url": "https://inkswatch.com/ink.html?inkId=2057",
+    "hex": "#8f494f",
+    "note": null
+  },
+  "Violet Clouds": {
+    "name": "Violet Clouds",
+    "url": "https://inkswatch.com/ink.html?inkId=2058",
+    "hex": "#7a5f77",
+    "note": null
+  },
+  "Haha": {
+    "name": "Haha",
+    "url": "https://inkswatch.com/ink.html?inkId=675",
+    "hex": "#88d0d8",
+    "note": null
+  },
+  "Koke": {
+    "name": "Koke",
+    "url": "https://inkswatch.com/ink.html?inkId=1385",
+    "hex": "#9a822b",
+    "note": null
+  },
+  "Nekoyanagi": {
+    "name": "Nekoyanagi",
+    "url": "https://inkswatch.com/ink.html?inkId=677",
+    "hex": "#b8b7f1",
+    "note": null
+  },
+  "Yuki-Akari": {
+    "name": "Yuki-Akari",
+    "url": "https://inkswatch.com/ink.html?inkId=681",
+    "hex": "#61f0f9",
+    "note": null
+  },
+  "Vesper Blue Bisperas 1669": {
+    "name": "Vesper Blue Bisperas 1669",
+    "url": "https://inkswatch.com/ink.html?inkId=935",
+    "hex": "#8cb4bc",
+    "note": null
+  },
+  "Jewel Green Parol 1908": {
+    "name": "Jewel Green Parol 1908",
+    "url": "https://inkswatch.com/ink.html?inkId=2130",
+    "hex": "#618141",
+    "note": null
+  },
+  "Cosmic Blue Shimmer Kosmos 1955": {
+    "name": "Cosmic Blue Shimmer Kosmos 1955",
+    "url": "https://inkswatch.com/ink.html?inkId=2574",
+    "hex": "#1b2670",
+    "note": null
+  },
+  "Blue Blood Dugong Bughaw 1521": {
+    "name": "Blue Blood Dugong Bughaw 1521",
+    "url": "https://inkswatch.com/ink.html?inkId=392",
+    "hex": "#2f40a3",
+    "note": null
+  },
+  "Malayan Apple Makopa 1938": {
+    "name": "Malayan Apple Makopa 1938",
+    "url": "https://inkswatch.com/ink.html?inkId=936",
+    "hex": "#e42cc2",
+    "note": null
+  },
+  "Night Sky Tala 1980 [SAMPLE]": {
+    "name": "Night Sky Tala 1980 [SAMPLE]",
+    "url": "https://inkswatch.com/ink.html?inkId=937",
+    "hex": "#30435b",
+    "note": null
+  },
+  "Pastel Blue Julio 1991": {
+    "name": "Pastel Blue Julio 1991",
+    "url": "https://inkswatch.com/ink.html?inkId=2123",
+    "hex": "#285838",
+    "note": null
+  },
+  "Plume Salimbay 1949": {
+    "name": "Plume Salimbay 1949",
+    "url": "https://inkswatch.com/ink.html?inkId=1779",
+    "hex": "#828ad3",
+    "note": null
+  },
+  "Sea and Sky Lakbay 1861": {
+    "name": "Sea and Sky Lakbay 1861",
+    "url": "https://inkswatch.com/ink.html?inkId=1780",
+    "hex": "#79a1b4",
+    "note": null
+  },
+  "Sodalite Kislap 1891": {
+    "name": "Sodalite Kislap 1891",
+    "url": "https://inkswatch.com/ink.html?inkId=1506",
+    "hex": "#7a8a92",
+    "note": null
+  },
+  "Parrot Fish": {
+    "name": "Parrot Fish",
+    "url": "https://inkswatch.com/ink.html?inkId=1519",
+    "hex": "#008f87",
+    "note": null
+  },
+  "Golden Lapis": {
+    "name": "Golden Lapis",
+    "url": "https://inkswatch.com/ink.html?inkId=874",
+    "hex": "#215b6b",
+    "note": null
+  },
+  "Bram Stoker Dracula": {
+    "name": "Bram Stoker Dracula",
+    "url": "https://inkswatch.com/ink.html?inkId=2635",
+    "hex": "#b82040",
+    "note": null
+  },
+  "Enki": {
+    "name": "Enki",
+    "url": "https://inkswatch.com/ink.html?inkId=2636",
+    "hex": "#9ab2ca",
+    "note": null
+  },
+  "Wendy Darling": {
+    "name": "Wendy Darling",
+    "url": "https://inkswatch.com/ink.html?inkId=2616",
+    "hex": "#d6e6f5",
+    "note": null
+  },
+  "A Little Princess": {
+    "name": "A Little Princess",
+    "url": "https://inkswatch.com/ink.html?inkId=1357",
+    "hex": "#bd55b1",
+    "note": null
+  },
+  "Pinocchio": {
+    "name": "Pinocchio",
+    "url": "https://inkswatch.com/ink.html?inkId=894",
+    "hex": "#383656",
+    "note": null
+  },
+  "20000 Leagues Under the Sea": {
+    "name": "20000 Leagues Under the Sea",
+    "url": "https://inkswatch.com/ink.html?inkId=1522",
+    "hex": "#f8936e",
+    "note": null
+  },
+  "Hades": {
+    "name": "Hades",
+    "url": "https://inkswatch.com/ink.html?inkId=2279",
+    "hex": "#284139",
+    "note": null
+  },
+  "The Glass Bead Game": {
+    "name": "The Glass Bead Game",
+    "url": "https://inkswatch.com/ink.html?inkId=1931",
+    "hex": "#405040",
+    "note": null
+  },
+  "Paradiso": {
+    "name": "Paradiso",
+    "url": "https://inkswatch.com/ink.html?inkId=1906",
+    "hex": "#1e9e9e",
+    "note": null
+  },
+  "Alice": {
+    "name": "Alice",
+    "url": "https://inkswatch.com/ink.html?inkId=2634",
+    "hex": "#74acbc",
+    "note": null
+  },
+  "The Count of Monte Cristo": {
+    "name": "The Count of Monte Cristo",
+    "url": "https://inkswatch.com/ink.html?inkId=1750",
+    "hex": "#982830",
+    "note": null
+  },
+  "Robinson Crusoe": {
+    "name": "Robinson Crusoe",
+    "url": "https://inkswatch.com/ink.html?inkId=2641",
+    "hex": "#3ca5b5",
+    "note": null
+  },
+  "2024 Blue Dragon": {
+    "name": "2024 Blue Dragon",
+    "url": "https://inkswatch.com/ink.html?inkId=2532",
+    "hex": "#112c35",
+    "note": null
+  },
+  "Quetzalcoatl": {
+    "name": "Quetzalcoatl",
+    "url": "https://inkswatch.com/ink.html?inkId=2331",
+    "hex": "#7d2d25",
+    "note": null
+  },
+  "Marley": {
+    "name": "Marley",
+    "url": "https://inkswatch.com/ink.html?inkId=2697",
+    "hex": "#473f4f",
+    "note": null
+  },
+  "Salted Caramel": {
+    "name": "Salted Caramel",
+    "url": "https://inkswatch.com/ink.html?inkId=2713",
+    "hex": "#89573a",
+    "note": null
+  },
+  "Nutmeg": {
+    "name": "Nutmeg",
+    "url": "https://inkswatch.com/ink.html?inkId=2711",
+    "hex": "#6b5342",
+    "note": null
+  },
+  "Grotto": {
+    "name": "Grotto",
+    "url": "https://inkswatch.com/ink.html?inkId=2700",
+    "hex": "#ac2e2b",
+    "note": null
+  },
+  "Cosmic Glow": {
+    "name": "Cosmic Glow",
+    "url": "https://inkswatch.com/ink.html?inkId=2710",
+    "hex": "#2d2a75",
+    "note": null
+  },
+  "Icy Lilac": {
+    "name": "Icy Lilac",
+    "url": "https://inkswatch.com/ink.html?inkId=2694",
+    "hex": "#6c5e76",
+    "note": null
+  },
+  "Sleigh Ride": {
+    "name": "Sleigh Ride",
+    "url": "https://inkswatch.com/ink.html?inkId=2704",
+    "hex": "#681f25",
+    "note": null
+  },
+  "Noble Fir": {
+    "name": "Noble Fir",
+    "url": "https://inkswatch.com/ink.html?inkId=2692",
+    "hex": "#046941",
+    "note": null
+  },
+  "Chilly Nights": {
+    "name": "Chilly Nights",
+    "url": "https://inkswatch.com/ink.html?inkId=2699",
+    "hex": "#35353d",
+    "note": null
+  },
+  "Winterberry": {
+    "name": "Winterberry",
+    "url": "https://inkswatch.com/ink.html?inkId=2706",
+    "hex": "#af2532",
+    "note": null
+  },
+  "Wishing Tree": {
+    "name": "Wishing Tree",
+    "url": "https://inkswatch.com/ink.html?inkId=2698",
+    "hex": "#504840",
+    "note": null
+  },
+  "Lemon and Lime": {
+    "name": "Lemon and Lime",
+    "url": "https://inkswatch.com/ink.html?inkId=2696",
+    "hex": "#b7a334",
+    "note": null
+  },
+  "Mint Twist": {
+    "name": "Mint Twist",
+    "url": "https://inkswatch.com/ink.html?inkId=2703",
+    "hex": "#42886a",
+    "note": null
+  },
+  "Cranberry": {
+    "name": "Cranberry",
+    "url": "https://inkswatch.com/ink.html?inkId=912",
+    "hex": "#464040",
+    "note": null
+  },
+  "Pine Needle": {
+    "name": "Pine Needle",
+    "url": "https://inkswatch.com/ink.html?inkId=2712",
+    "hex": "#406028",
+    "note": null
+  },
+  "Snow Globe": {
+    "name": "Snow Globe",
+    "url": "https://inkswatch.com/ink.html?inkId=2701",
+    "hex": "#3a4860",
+    "note": null
+  },
+  "Baltic Breeze": {
+    "name": "Baltic Breeze",
+    "url": "https://inkswatch.com/ink.html?inkId=2690",
+    "hex": "#585474",
+    "note": null
+  },
+  "Potpourri": {
+    "name": "Potpourri",
+    "url": "https://inkswatch.com/ink.html?inkId=2709",
+    "hex": "#805860",
+    "note": null
+  },
+  "Vibe": {
+    "name": "Vibe",
+    "url": "https://inkswatch.com/ink.html?inkId=2707",
+    "hex": "#274252",
+    "note": null
+  },
+  "Lullaby": {
+    "name": "Lullaby",
+    "url": "https://inkswatch.com/ink.html?inkId=2702",
+    "hex": "#a16189",
+    "note": null
+  },
+  "Blue": {
+    "name": "Blue",
+    "url": "https://inkswatch.com/ink.html?inkId=1218",
+    "hex": "#2a4a7a",
+    "note": null
+  },
+  "Atlas": {
+    "name": "Atlas",
+    "url": "https://inkswatch.com/ink.html?inkId=2304",
+    "hex": "#1cb282",
+    "note": null
+  },
+  "Ama-Iro": {
+    "name": "Ama-Iro",
+    "url": "https://inkswatch.com/ink.html?inkId=544",
+    "hex": "#189bcb",
+    "note": null
+  },
+  "Asa-Gao": {
+    "name": "Asa-Gao",
+    "url": "https://inkswatch.com/ink.html?inkId=659",
+    "hex": "#005ad2",
+    "note": null
+  },
+  "Rikka": {
+    "name": "Rikka",
+    "url": "https://inkswatch.com/ink.html?inkId=291",
+    "hex": "#f95839",
+    "note": null
+  },
+  "Pastel Pink Julia 1991": {
+    "name": "Pastel Pink Julia 1991",
+    "url": "https://inkswatch.com/ink.html?inkId=508",
+    "hex": "#ae3e56",
+    "note": null
+  },
+  "Shocking Blue": {
+    "name": "Shocking Blue",
+    "url": "https://inkswatch.com/ink.html?inkId=342",
+    "hex": "#4d5cb4",
+    "note": null
+  },
+  "Good Tidings": {
+    "name": "Good Tidings",
+    "url": "https://inkswatch.com/ink.html?inkId=2714",
+    "hex": "#303022",
+    "note": null
+  },
+  "Warfarer": {
+    "name": "Warfarer",
+    "url": "https://inkswatch.com/ink.html?inkId=2346",
+    "hex": "#0c5459",
+    "note": null
+  },
+  "7 Colored Ocean": {
+    "name": "7 Colored Ocean",
+    "url": "https://inkswatch.com/ink.html?inkId=2037",
+    "hex": "#6090b8",
+    "note": null
+  },
+  "Dewy Starlight": {
+    "name": "Dewy Starlight",
+    "url": "https://inkswatch.com/ink.html?inkId=2416",
+    "hex": "#383848",
+    "note": null
+  },
+  "A Watery Star": {
+    "name": "A Watery Star",
+    "url": "https://inkswatch.com/ink.html?inkId=534",
+    "hex": "#52727a",
+    "note": null
+  },
+  "Nadeshiko": {
+    "name": "Nadeshiko",
+    "url": "https://inkswatch.com/ink.html?inkId=918",
+    "hex": "#4c6cb0",
+    "note": null
+  },
+  "Ajisai": {
+    "name": "Ajisai",
+    "url": "https://inkswatch.com/ink.html?inkId=466",
+    "hex": "#4762c2",
+    "note": null
+  },
+  "Tsuki-Yo": {
+    "name": "Tsuki-Yo",
+    "url": "https://inkswatch.com/ink.html?inkId=382",
+    "hex": "#3f7e9e",
+    "note": null
+  },
+  "Neutron Star Twinkle": {
+    "name": "Neutron Star Twinkle",
+    "url": "https://inkswatch.com/ink.html?inkId=1086",
+    "hex": "#3a4f67",
+    "note": null
+  },
+  "Bonsai": {
+    "name": "Bonsai",
+    "url": "https://inkswatch.com/ink.html?inkId=2812",
+    "hex": "#315433",
+    "note": null
+  },
+  "Quantum Teal": {
+    "name": "Quantum Teal",
+    "url": "https://inkswatch.com/ink.html?inkId=2246",
+    "hex": "#23302c",
+    "note": null
+  },
+  "Sterling Silver": {
+    "name": "Sterling Silver",
+    "url": "https://inkswatch.com/ink.html?inkId=1553",
+    "hex": "#74746c",
+    "note": null
+  },
+  "Aqueduct": {
+    "name": "Aqueduct",
+    "url": "https://inkswatch.com/ink.html?inkId=2384",
+    "hex": "#204840",
+    "note": null
+  },
+  "Dart Frog": {
+    "name": "Dart Frog",
+    "url": "https://inkswatch.com/ink.html?inkId=1339",
+    "hex": "#532931",
+    "note": null
+  },
+  "Suncatcher": {
+    "name": "Suncatcher",
+    "url": "https://inkswatch.com/ink.html?inkId=2816",
+    "hex": "#204474",
+    "note": null
+  },
+  "Tesla Coil": {
+    "name": "Tesla Coil",
+    "url": "https://inkswatch.com/ink.html?inkId=2398",
+    "hex": "#101d6e",
+    "note": null
+  },
+  "Tiger Lily": {
+    "name": "Tiger Lily",
+    "url": "https://inkswatch.com/ink.html?inkId=2840",
+    "hex": "#de472f",
+    "note": null
+  }
+}
