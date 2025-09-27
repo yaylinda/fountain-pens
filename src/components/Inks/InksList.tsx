@@ -33,6 +33,7 @@ import {
     deleteInk,
     getAllInks,
     getAllRefillLogs,
+    getPenById,
     updateInk,
 } from '../../services/dataService';
 
@@ -48,9 +49,39 @@ const stringToColor = (str: string) => {
 
 // Type for sorting
 type SortConfig = {
-    key: keyof Ink | 'usageCount';
+    key: keyof Ink | 'usageCount' | 'dateInked';
     direction: 'asc' | 'desc';
 } | null;
+
+// Utility function to find all current pens for an ink and when it was inked into each
+const getCurrentPensForInk = (inkId: string, refillLogs: any[]) => {
+    // Get all unique pen IDs from refill logs
+    const penIds = [...new Set(refillLogs.map((log) => log.penId))];
+    const currentPens = [];
+
+    for (const penId of penIds) {
+        // Find the most recent refill for this specific pen
+        const penLogs = refillLogs
+            .filter((log) => log.penId === penId)
+            .sort(
+                (a, b) =>
+                    new Date(b.date).getTime() - new Date(a.date).getTime()
+            );
+
+        if (penLogs.length > 0) {
+            const mostRecentLog = penLogs[0];
+            // Check if this ink is in the most recent refill for this pen
+            if (mostRecentLog.inkIds && mostRecentLog.inkIds.includes(inkId)) {
+                const pen = getPenById(penId);
+                if (pen) {
+                    currentPens.push({ pen, date: mostRecentLog.date });
+                }
+            }
+        }
+    }
+
+    return currentPens.length > 0 ? currentPens : null;
+};
 
 const InksList: React.FC = () => {
     const [inks, setInks] = useState<Ink[]>([]);
@@ -92,13 +123,27 @@ const InksList: React.FC = () => {
         setInks(allInks);
     };
 
-    // Calculate ink usage counts
+    // Calculate ink usage counts and current pen data
     const inkUsageData = useMemo(() => {
         return inks.reduce((acc, ink) => {
             const usageCount = getInkUsageCount(ink.id, refillLogs);
-            acc[ink.id] = { usageCount };
+            const currentPensData = getCurrentPensForInk(ink.id, refillLogs);
+            // For date sorting, use the most recent date if there are multiple pens
+            const mostRecentDate = currentPensData
+                ? currentPensData.sort(
+                      (a, b) =>
+                          new Date(b.date).getTime() -
+                          new Date(a.date).getTime()
+                  )[0].date
+                : null;
+
+            acc[ink.id] = {
+                usageCount,
+                currentPens: currentPensData || [],
+                dateInked: mostRecentDate,
+            };
             return acc;
-        }, {} as Record<string, { usageCount: number }>);
+        }, {} as Record<string, { usageCount: number; currentPens: Array<{ pen: any; date: string }>; dateInked: string | null }>);
     }, [inks, refillLogs]);
 
     const handleOpen = (ink?: Ink) => {
@@ -174,7 +219,7 @@ const InksList: React.FC = () => {
     }, [inks]);
 
     // Handle sorting
-    const requestSort = (key: keyof Ink | 'usageCount') => {
+    const requestSort = (key: keyof Ink | 'usageCount' | 'dateInked') => {
         let direction: 'asc' | 'desc' = 'asc';
         if (
             sortConfig &&
@@ -198,6 +243,24 @@ const InksList: React.FC = () => {
                     return sortConfig.direction === 'asc'
                         ? countA - countB
                         : countB - countA;
+                }
+
+                // Special handling for date inked
+                if (sortConfig.key === 'dateInked') {
+                    const dateA = inkUsageData[a.id]?.dateInked;
+                    const dateB = inkUsageData[b.id]?.dateInked;
+
+                    // Handle cases where date might be null
+                    if (!dateA && !dateB) return 0;
+                    if (!dateA) return 1; // Put nulls at the end
+                    if (!dateB) return -1;
+
+                    const timeA = new Date(dateA).getTime();
+                    const timeB = new Date(dateB).getTime();
+
+                    return sortConfig.direction === 'asc'
+                        ? timeA - timeB
+                        : timeB - timeA;
                 }
 
                 // Default string comparison for other keys
@@ -254,7 +317,7 @@ const InksList: React.FC = () => {
     }, [sortedInks, sortConfig]);
 
     // Render the sort direction indicator
-    const getSortDirection = (key: keyof Ink | 'usageCount') => {
+    const getSortDirection = (key: keyof Ink | 'usageCount' | 'dateInked') => {
         if (!sortConfig || sortConfig.key !== key) {
             return null;
         }
@@ -379,6 +442,23 @@ const InksList: React.FC = () => {
                                 </Box>
                             </TableCell>
                             <TableCell>
+                                <strong>Current Pens</strong>
+                            </TableCell>
+                            <TableCell
+                                onClick={() => requestSort('dateInked')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <strong>Date Inked</strong>
+                                    {getSortDirection('dateInked')}
+                                </Box>
+                            </TableCell>
+                            <TableCell>
                                 <strong>Actions</strong>
                             </TableCell>
                         </TableRow>
@@ -414,6 +494,70 @@ const InksList: React.FC = () => {
                                 <TableCell>{ink.name}</TableCell>
                                 <TableCell align="center">
                                     {inkUsageData[ink.id]?.usageCount || 0}
+                                </TableCell>
+                                <TableCell>
+                                    {inkUsageData[ink.id]?.currentPens.length >
+                                    0 ? (
+                                        <Box>
+                                            {inkUsageData[
+                                                ink.id
+                                            ].currentPens.map(
+                                                (penData, index) => (
+                                                    <Box
+                                                        key={penData.pen.id}
+                                                        sx={{
+                                                            mb:
+                                                                index <
+                                                                inkUsageData[
+                                                                    ink.id
+                                                                ].currentPens
+                                                                    .length -
+                                                                    1
+                                                                    ? 1
+                                                                    : 0,
+                                                        }}
+                                                    >
+                                                        <Box>
+                                                            <strong>
+                                                                {
+                                                                    penData.pen
+                                                                        .brand
+                                                                }
+                                                            </strong>{' '}
+                                                            {penData.pen.model}
+                                                            {penData.pen
+                                                                .color &&
+                                                                ` (${penData.pen.color})`}
+                                                        </Box>
+                                                        <Box
+                                                            sx={{
+                                                                fontSize:
+                                                                    '0.8em',
+                                                                color: '#666',
+                                                            }}
+                                                        >
+                                                            {new Date(
+                                                                penData.date
+                                                            ).toLocaleDateString()}
+                                                        </Box>
+                                                    </Box>
+                                                )
+                                            )}
+                                        </Box>
+                                    ) : (
+                                        <em style={{ color: '#999' }}>
+                                            Not currently inked
+                                        </em>
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {inkUsageData[ink.id]?.dateInked ? (
+                                        new Date(
+                                            inkUsageData[ink.id].dateInked!
+                                        ).toLocaleDateString()
+                                    ) : (
+                                        <em style={{ color: '#999' }}>-</em>
+                                    )}
                                 </TableCell>
                                 <TableCell>
                                     <IconButton
@@ -457,7 +601,7 @@ const InksList: React.FC = () => {
                                 fullWidth
                             />
                         )}
-                        onChange={(event, newValue) => {
+                        onChange={(_, newValue) => {
                             setCurrentInk((prev) => ({
                                 ...prev,
                                 brand: newValue || '',
@@ -476,7 +620,7 @@ const InksList: React.FC = () => {
                                 fullWidth
                             />
                         )}
-                        onChange={(event, newValue) => {
+                        onChange={(_, newValue) => {
                             setCurrentInk((prev) => ({
                                 ...prev,
                                 collection: newValue || '',

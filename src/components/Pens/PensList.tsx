@@ -29,6 +29,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import { Ink, Pen } from '../../models/types';
 import {
+    getMostRecentInkDateForPen,
     getMostRecentInkForPen,
     getPenRefillCount,
 } from '../../services/countService';
@@ -91,7 +92,7 @@ const compareNibSizes = (a: string, b: string): number => {
 
 // Type for sorting
 type SortConfig = {
-    key: keyof Pen | 'refillCount' | 'currentInk';
+    key: keyof Pen | 'refillCount' | 'currentInk' | 'dateInked';
     direction: 'asc' | 'desc';
 } | null;
 
@@ -145,15 +146,17 @@ const PensList: React.FC = () => {
             const currentInk = currentInkId
                 ? getInkById(currentInkId)
                 : undefined;
+            const dateInked = getMostRecentInkDateForPen(pen.id, refillLogs);
 
             acc[pen.id] = {
                 refillCount,
                 currentInkId,
                 currentInk,
+                dateInked,
             };
 
             return acc;
-        }, {} as Record<string, { refillCount: number; currentInkId?: string; currentInk?: Ink }>);
+        }, {} as Record<string, { refillCount: number; currentInkId?: string; currentInk?: Ink; dateInked?: string }>);
     }, [pens, refillLogs]);
 
     const handleOpen = (pen?: Pen) => {
@@ -280,7 +283,9 @@ const PensList: React.FC = () => {
     }, [pens]);
 
     // Handle sorting
-    const requestSort = (key: keyof Pen | 'refillCount' | 'currentInk') => {
+    const requestSort = (
+        key: keyof Pen | 'refillCount' | 'currentInk' | 'dateInked'
+    ) => {
         let direction: 'asc' | 'desc' = 'asc';
         if (
             sortConfig &&
@@ -312,6 +317,24 @@ const PensList: React.FC = () => {
                     return sortConfig.direction === 'asc'
                         ? inkA.localeCompare(inkB)
                         : inkB.localeCompare(inkA);
+                }
+
+                // Special handling for date inked
+                if (sortConfig.key === 'dateInked') {
+                    const dateA = penRefillData[a.id]?.dateInked;
+                    const dateB = penRefillData[b.id]?.dateInked;
+
+                    // Handle cases where date might be null/undefined
+                    if (!dateA && !dateB) return 0;
+                    if (!dateA) return 1; // Put nulls at the end
+                    if (!dateB) return -1;
+
+                    const timeA = new Date(dateA).getTime();
+                    const timeB = new Date(dateB).getTime();
+
+                    return sortConfig.direction === 'asc'
+                        ? timeA - timeB
+                        : timeB - timeA;
                 }
 
                 // Special handling for nibSize
@@ -379,7 +402,7 @@ const PensList: React.FC = () => {
 
     // Render the sort direction indicator
     const getSortDirection = (
-        key: keyof Pen | 'refillCount' | 'currentInk'
+        key: keyof Pen | 'refillCount' | 'currentInk' | 'dateInked'
     ) => {
         if (!sortConfig || sortConfig.key !== key) {
             return null;
@@ -556,6 +579,20 @@ const PensList: React.FC = () => {
                                     {getSortDirection('currentInk')}
                                 </Box>
                             </TableCell>
+                            <TableCell
+                                onClick={() => requestSort('dateInked')}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <strong>Date Inked</strong>
+                                    {getSortDirection('dateInked')}
+                                </Box>
+                            </TableCell>
                             <TableCell>
                                 <strong>Actions</strong>
                             </TableCell>
@@ -653,6 +690,15 @@ const PensList: React.FC = () => {
                                         <span style={{ color: '#999' }}>
                                             None
                                         </span>
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    {penRefillData[pen.id]?.dateInked ? (
+                                        new Date(
+                                            penRefillData[pen.id].dateInked!
+                                        ).toLocaleDateString()
+                                    ) : (
+                                        <em style={{ color: '#999' }}>-</em>
                                     )}
                                 </TableCell>
                                 <TableCell>

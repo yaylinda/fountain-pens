@@ -2494,9 +2494,11 @@
     "date": "2025-09-06",
     "penId": "pen_29",
     "inkIds": [
-      "e7c8b9a4-1d32-4f5e-8b7c-9d0e1f2a3b4c"
+      "e7c8b9a4-1d32-4f5e-8b7c-9d0e1f2a3b4c",
+      "ink_36"
     ],
-    "notes": ""
+    "notes": "",
+    "index": 304
   },
   {
     "date": "2025-09-06",
@@ -2559,6 +2561,82 @@
     "penId": "pen_1",
     "inkIds": [
       "ink_35"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-09-14",
+    "penId": "pen_17",
+    "inkIds": [
+      "3249ce3c-a99b-4893-ac35-fe981ad03ac1"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-09-14",
+    "penId": "pen_18",
+    "inkIds": [
+      "17f7a0f4-789b-40cc-8f3a-c6ff7e796de3"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-09-26",
+    "penId": "871ae877-9a35-48c7-874d-50930ebc8bbe",
+    "inkIds": [
+      "ink_68"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-09-26",
+    "penId": "pen_9",
+    "inkIds": [
+      "578b0fe8-5cad-4f72-89dc-a4834d395789"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-09-27",
+    "penId": "pen_31",
+    "inkIds": [
+      "ink_39"
+    ],
+    "notes": "",
+    "index": 317
+  },
+  {
+    "date": "2025-09-27",
+    "penId": "pen_31",
+    "inkIds": [
+      "ink_38"
+    ],
+    "notes": "",
+    "index": 318
+  },
+  {
+    "date": "2025-09-27",
+    "penId": "b98fae65-4661-4435-900c-8dffbe810c36",
+    "inkIds": [
+      "ink_36"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-09-27",
+    "penId": "pen_30",
+    "inkIds": [
+      "ink_64",
+      "17f7a0f4-789b-40cc-8f3a-c6ff7e796de3"
+    ],
+    "notes": "",
+    "index": 320
+  },
+  {
+    "date": "2025-09-27",
+    "penId": "pen_25",
+    "inkIds": [
+      "ink_66"
     ],
     "notes": ""
   }

@@ -310,5 +310,13 @@
     "nibSize": "Music (3 tines)",
     "nibType": "Gold, 14k",
     "id": "1bfee9a6-f42a-4e1f-8ad7-4d48a962c57a"
+  },
+  {
+    "brand": "Pelikan",
+    "model": "M200",
+    "color": "Pastel Blue",
+    "nibSize": "Fine",
+    "nibType": "Steel",
+    "id": "871ae877-9a35-48c7-874d-50930ebc8bbe"
   }
 ]
