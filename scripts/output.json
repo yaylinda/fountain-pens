@@ -676,5 +676,47 @@
     "url": "https://inkswatch.com/ink.html?inkId=2840",
     "hex": "#de472f",
     "note": null
+  },
+  "Yu-Yake": {
+    "name": "Yu-Yake",
+    "url": "https://inkswatch.com/ink.html?inkId=1005",
+    "hex": "#f04820",
+    "note": null
+  },
+  "Sui-Gyoku": {
+    "name": "Sui-Gyoku",
+    "url": "https://inkswatch.com/ink.html?inkId=1796",
+    "hex": "#2d8065",
+    "note": null
+  },
+  "Ku-Jaku": {
+    "name": "Ku-Jaku",
+    "url": "https://inkswatch.com/ink.html?inkId=336",
+    "hex": "#187981",
+    "note": null
+  },
+  "Syo-Ro": {
+    "name": "Syo-Ro",
+    "url": "https://inkswatch.com/ink.html?inkId=661",
+    "hex": "#008880",
+    "note": null
+  },
+  "A Dream Within a Dream": {
+    "name": "A Dream Within a Dream",
+    "url": "https://inkswatch.com/ink.html?inkId=1240",
+    "hex": "#374f6f",
+    "note": null
+  },
+  "Twelfth Night": {
+    "name": "Twelfth Night",
+    "url": "https://inkswatch.com/ink.html?inkId=309",
+    "hex": "#3b657c",
+    "note": null
+  },
+  "Little Lord Fauntleroy": {
+    "name": "Little Lord Fauntleroy",
+    "url": "https://inkswatch.com/ink.html?inkId=36",
+    "hex": "#fc8343",
+    "note": null
   }
 }

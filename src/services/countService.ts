@@ -1,5 +1,5 @@
 import { parseISO } from 'date-fns';
-import { Ink, Pen, RefillLog } from '../models/types';
+import { RefillLog } from '../models/types';
 import { getAllRefillLogs } from './dataService';
 
 /**

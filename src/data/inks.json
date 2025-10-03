@@ -710,7 +710,7 @@
   {
     "brand": "Wearingeul",
     "collection": "",
-    "name": "Warfarer",
+    "name": "Wayfarer",
     "id": "0bba4e52-8916-4ab0-8499-5b88449df5e4"
   },
   {
@@ -808,5 +808,47 @@
     "collection": "Iroshizuku",
     "name": "Yu-Yake",
     "id": "3249ce3c-a99b-4893-ac35-fe981ad03ac1"
+  },
+  {
+    "brand": "Pilot",
+    "collection": "Iroshizuku",
+    "name": "Sui-Gyoku",
+    "id": "83f60264-ea54-473f-b249-8dfbad46ffd4"
+  },
+  {
+    "brand": "Pilot",
+    "collection": "Iroshizuku",
+    "name": "Ku-Jaku",
+    "id": "0c05b68c-2500-4867-9b48-5a6d31874723"
+  },
+  {
+    "brand": "Pilot",
+    "collection": "Iroshizuku",
+    "name": "Syo-Ro",
+    "id": "890a5fc1-8c68-49d9-a8be-0be6461bd13a"
+  },
+  {
+    "brand": "Wearingeul",
+    "collection": "",
+    "name": "A Dream Within a Dream (Edgar Allan Poe)",
+    "id": "a1c5596c-2fce-4993-8d99-4bd09dabc7bf"
+  },
+  {
+    "brand": "Wearingeul",
+    "collection": "",
+    "name": "Twelfth Night (William Shakespeare)",
+    "id": "29e98327-ff17-4f74-a17b-4cf86d7cb160"
+  },
+  {
+    "brand": "Wearingeul",
+    "collection": "",
+    "name": "Little Lord Fauntleroy (Frances Hodgson Burnett)",
+    "id": "36b696cf-eaac-442e-af68-66ad21e4fffb"
+  },
+  {
+    "brand": "KWZ",
+    "collection": "",
+    "name": "NONE",
+    "id": "d23867dd-b2df-41fa-a198-fffa5afba31c"
   }
 ]
