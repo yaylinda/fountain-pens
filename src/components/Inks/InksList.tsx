@@ -339,6 +339,9 @@ const InksList: React.FC = () => {
         ].sort();
     }, [inks]);
 
+    console.log(JSON.stringify(displaySortedInks));
+    console.log(JSON.stringify(inkUsageData));
+
     return (
         <Box
             sx={{
