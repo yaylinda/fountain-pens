@@ -2725,7 +2725,7 @@
     "date": "2025-10-03",
     "penId": "pen_17",
     "inkIds": [
-      "d23867dd-b2df-41fa-a198-fffa5afba31c"
+      "NONE"
     ],
     "notes": ""
   },
@@ -2733,7 +2733,7 @@
     "date": "2025-10-03",
     "penId": "pen_29",
     "inkIds": [
-      "d23867dd-b2df-41fa-a198-fffa5afba31c"
+      "NONE"
     ],
     "notes": "UPDATE: silver twisty thing is broken; purple STUB nib is broken.\n\nthis pen is combined as the MINI SILVER",
     "index": 333
@@ -2742,7 +2742,7 @@
     "date": "2025-10-03",
     "penId": "pen_18",
     "inkIds": [
-      "d23867dd-b2df-41fa-a198-fffa5afba31c"
+      "NONE"
     ],
     "notes": ""
   },
@@ -2786,7 +2786,7 @@
     "date": "2025-10-03",
     "penId": "pen_30",
     "inkIds": [
-      "d23867dd-b2df-41fa-a198-fffa5afba31c"
+      "NONE"
     ],
     "notes": "UPDATE: silver twisty thing is broken; purple STUB nib is broken.\n\nthis pen is combined as the MINI GRAPE",
     "index": 339
@@ -2795,7 +2795,7 @@
     "date": "2025-10-03",
     "penId": "pen_31",
     "inkIds": [
-      "d23867dd-b2df-41fa-a198-fffa5afba31c"
+      "NONE"
     ],
     "notes": ""
   },
@@ -2816,5 +2816,190 @@
     ],
     "notes": "",
     "index": 342
+  },
+  {
+    "date": "2025-10-07",
+    "penId": "pen_31",
+    "inkIds": [
+      "ink_63"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-10-07",
+    "penId": "pen_k1uo3l",
+    "inkIds": [
+      "29e98327-ff17-4f74-a17b-4cf86d7cb160"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-10-07",
+    "penId": "pen_8s551e",
+    "inkIds": [
+      "02b23862-6f58-4c69-8b39-a2e8ae3a6af4"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-10-07",
+    "penId": "pen_meeas3",
+    "inkIds": [
+      "36b696cf-eaac-442e-af68-66ad21e4fffb"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-10-07",
+    "penId": "pen_6efced",
+    "inkIds": [
+      "dc812d3b-1a22-4dd4-89aa-1864e5761dda"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-10-07",
+    "penId": "pen_8ogqpj",
+    "inkIds": [
+      "ink_32"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-10-07",
+    "penId": "pen_1f0pv3",
+    "inkIds": [
+      "ink_103"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-10-07",
+    "penId": "pen_t11a4s",
+    "inkIds": [
+      "ink_10"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-10-11",
+    "penId": "pen_22",
+    "inkIds": [
+      "NONE"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-10-11",
+    "penId": "pen_k1uo3l",
+    "inkIds": [
+      "ink_42"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-10-11",
+    "penId": "pen_11",
+    "inkIds": [
+      "f8d9a7b3-2c45-4e6f-9a8b-1c2d3e4f5a6b"
+    ],
+    "notes": "",
+    "index": 353
+  },
+  {
+    "date": "2025-10-11",
+    "penId": "pen_7",
+    "inkIds": [
+      "NONE"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-07",
+    "penId": "pen_17",
+    "inkIds": [
+      "ink_27"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-07",
+    "penId": "pen_18",
+    "inkIds": [
+      "ink_61"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_11",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_12",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_13",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_14",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_15",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_meeas3",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_1f0pv3",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_t11a4s",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_k1uo3l",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_8s551e",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_6efced",
+    "inkIds": ["NONE"],
+    "notes": ""
+  },
+  {
+    "date": "2025-11-22",
+    "penId": "pen_8ogqpj",
+    "inkIds": ["NONE"],
+    "notes": ""
   }
 ]
