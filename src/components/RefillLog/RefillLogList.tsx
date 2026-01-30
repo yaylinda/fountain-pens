@@ -47,7 +47,11 @@ interface RefillLogWithIndex extends RefillLogDisplay {
     index: number;
 }
 
-const RefillLogList: React.FC = () => {
+interface RefillLogListProps {
+    isLocal: boolean;
+}
+
+const RefillLogList: React.FC<RefillLogListProps> = ({ isLocal }) => {
     const [refillLogs, setRefillLogs] = useState<RefillLogWithIndex[]>([]);
     const [pens, setPens] = useState<Pen[]>([]);
     const [inks, setInks] = useState<Ink[]>([]);
@@ -293,15 +297,17 @@ const RefillLogList: React.FC = () => {
                         </Select>
                     </FormControl>
                 </Box>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpen()}
-                    size="small"
-                >
-                    Add Pen Refill
-                </Button>
+                {isLocal && (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpen()}
+                        size="small"
+                    >
+                        Add Pen Refill
+                    </Button>
+                )}
             </Box>
 
             <TableContainer
@@ -330,9 +336,11 @@ const RefillLogList: React.FC = () => {
                             <TableCell>
                                 <strong>Notes</strong>
                             </TableCell>
-                            <TableCell>
-                                <strong>Actions</strong>
-                            </TableCell>
+                            {isLocal && (
+                                <TableCell>
+                                    <strong>Actions</strong>
+                                </TableCell>
+                            )}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -346,20 +354,22 @@ const RefillLogList: React.FC = () => {
                                     {renderInks(item.inkDetails)}
                                 </TableCell>
                                 <TableCell>{item.notes}</TableCell>
-                                <TableCell>
-                                    <IconButton
-                                        color="primary"
-                                        onClick={() => handleOpen(item)}
-                                    >
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton
-                                        color="error"
-                                        onClick={() => handleDelete(item.index)}
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TableCell>
+                                {isLocal && (
+                                    <TableCell>
+                                        <IconButton
+                                            color="primary"
+                                            onClick={() => handleOpen(item)}
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            color="error"
+                                            onClick={() => handleDelete(item.index)}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </TableCell>
+                                )}
                             </TableRow>
                         ))}
                     </TableBody>

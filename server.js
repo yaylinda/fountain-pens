@@ -51,6 +51,67 @@ app.get('/health', (req, res) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
+// Check if request is from local network
+function isLocalNetwork(req) {
+    // Get the client IP - check X-Forwarded-For first (for reverse proxy setups like nginx)
+    const forwardedFor = req.headers['x-forwarded-for'] || '';
+    let clientIp;
+    
+    if (forwardedFor) {
+        // X-Forwarded-For can contain multiple IPs: "client, proxy1, proxy2"
+        // The first IP is the original client
+        clientIp = forwardedFor.split(',')[0].trim();
+    } else {
+        // Fall back to remote address for direct connections
+        clientIp = req.socket?.remoteAddress || req.ip || '';
+    }
+    
+    if (!clientIp) {
+        return false;
+    }
+    
+    // Remove IPv6 prefix if present (::ffff:192.168.1.1 -> 192.168.1.1)
+    if (clientIp.startsWith('::ffff:')) {
+        clientIp = clientIp.slice(7);
+    }
+    
+    // Check for localhost
+    if (clientIp === '127.0.0.1' || clientIp === '::1' || clientIp === 'localhost') {
+        return true;
+    }
+    
+    // Check for private network ranges
+    // 10.0.0.0/8
+    if (clientIp.startsWith('10.')) {
+        return true;
+    }
+    
+    // 172.16.0.0/12 (172.16.x.x - 172.31.x.x)
+    if (clientIp.startsWith('172.')) {
+        const secondOctet = parseInt(clientIp.split('.')[1], 10);
+        if (secondOctet >= 16 && secondOctet <= 31) {
+            return true;
+        }
+    }
+    
+    // 192.168.0.0/16
+    if (clientIp.startsWith('192.168.')) {
+        return true;
+    }
+    
+    return false;
+}
+
+// API: Check if user is on local network
+app.get('/api/is-local', (req, res) => {
+    const isLocal = isLocalNetwork(req);
+    const forwardedFor = req.headers['x-forwarded-for'] || '';
+    const clientIp = forwardedFor ? forwardedFor.split(',')[0].trim() : (req.socket?.remoteAddress || req.ip || 'unknown');
+    
+    console.log(`Network check - IP: ${clientIp}, isLocal: ${isLocal}`);
+    res.json({ isLocal, clientIp });
+});
+
 // API: Get all data
 app.get('/api/data', async (req, res) => {
     try {

@@ -83,7 +83,11 @@ const getCurrentPensForInk = (inkId: string, refillLogs: any[]) => {
     return currentPens.length > 0 ? currentPens : null;
 };
 
-const InksList: React.FC = () => {
+interface InksListProps {
+    isLocal: boolean;
+}
+
+const InksList: React.FC<InksListProps> = ({ isLocal }) => {
     const [inks, setInks] = useState<Ink[]>([]);
     const [open, setOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -363,15 +367,17 @@ const InksList: React.FC = () => {
                 }}
             >
                 <Typography variant="h6">Inks Inventory</Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpen()}
-                    size="small"
-                >
-                    Add Ink
-                </Button>
+                {isLocal && (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpen()}
+                        size="small"
+                    >
+                        Add Ink
+                    </Button>
+                )}
             </Box>
 
             <TableContainer
@@ -461,9 +467,11 @@ const InksList: React.FC = () => {
                                     {getSortDirection('dateInked')}
                                 </Box>
                             </TableCell>
-                            <TableCell>
-                                <strong>Actions</strong>
-                            </TableCell>
+                            {isLocal && (
+                                <TableCell>
+                                    <strong>Actions</strong>
+                                </TableCell>
+                            )}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -562,20 +570,22 @@ const InksList: React.FC = () => {
                                         <em style={{ color: '#999' }}>-</em>
                                     )}
                                 </TableCell>
-                                <TableCell>
-                                    <IconButton
-                                        color="primary"
-                                        onClick={() => handleOpen(ink)}
-                                    >
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton
-                                        color="error"
-                                        onClick={() => handleDelete(ink.id)}
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TableCell>
+                                {isLocal && (
+                                    <TableCell>
+                                        <IconButton
+                                            color="primary"
+                                            onClick={() => handleOpen(ink)}
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            color="error"
+                                            onClick={() => handleDelete(ink.id)}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </TableCell>
+                                )}
                             </TableRow>
                         ))}
                     </TableBody>

@@ -96,7 +96,11 @@ type SortConfig = {
     direction: 'asc' | 'desc';
 } | null;
 
-const PensList: React.FC = () => {
+interface PensListProps {
+    isLocal: boolean;
+}
+
+const PensList: React.FC<PensListProps> = ({ isLocal }) => {
     const [pens, setPens] = useState<Pen[]>([]);
     const [open, setOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -436,15 +440,17 @@ const PensList: React.FC = () => {
                 }}
             >
                 <Typography variant="h6">Pens Inventory</Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    onClick={() => handleOpen()}
-                    size="small"
-                >
-                    Add Pen
-                </Button>
+                {isLocal && (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddIcon />}
+                        onClick={() => handleOpen()}
+                        size="small"
+                    >
+                        Add Pen
+                    </Button>
+                )}
             </Box>
 
             <TableContainer
@@ -573,9 +579,11 @@ const PensList: React.FC = () => {
                                     {getSortDirection('dateInked')}
                                 </Box>
                             </TableCell>
-                            <TableCell>
-                                <strong>Actions</strong>
-                            </TableCell>
+                            {isLocal && (
+                                <TableCell>
+                                    <strong>Actions</strong>
+                                </TableCell>
+                            )}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -681,20 +689,22 @@ const PensList: React.FC = () => {
                                         <em style={{ color: '#999' }}>-</em>
                                     )}
                                 </TableCell>
-                                <TableCell>
-                                    <IconButton
-                                        color="primary"
-                                        onClick={() => handleOpen(pen)}
-                                    >
-                                        <EditIcon />
-                                    </IconButton>
-                                    <IconButton
-                                        color="error"
-                                        onClick={() => handleDelete(pen.id)}
-                                    >
-                                        <DeleteIcon />
-                                    </IconButton>
-                                </TableCell>
+                                {isLocal && (
+                                    <TableCell>
+                                        <IconButton
+                                            color="primary"
+                                            onClick={() => handleOpen(pen)}
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton
+                                            color="error"
+                                            onClick={() => handleDelete(pen.id)}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </TableCell>
+                                )}
                             </TableRow>
                         ))}
                     </TableBody>

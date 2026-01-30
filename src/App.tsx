@@ -1,4 +1,5 @@
 import {
+    Alert,
     AppBar,
     Box,
     CircularProgress,
@@ -17,6 +18,7 @@ import PensList from './components/Pens/PensList';
 import RefillLogList from './components/RefillLog/RefillLogList';
 import SaveButton from './components/SaveButton';
 import SaveDialog from './components/SaveDialog';
+import { useLocalNetwork } from './context/LocalNetworkContext';
 import { loadData } from './services/dataService';
 
 interface TabPanelProps {
@@ -52,6 +54,7 @@ function App() {
     const [error, setError] = useState<string | null>(null);
     const [saveDialogOpen, setSaveDialogOpen] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const { isLocal, isLoading: networkLoading } = useLocalNetwork();
 
     const handleSaveSuccess = () => {
         setSnackbarOpen(true);
@@ -78,7 +81,7 @@ function App() {
         setValue(newValue);
     };
 
-    if (loading) {
+    if (loading || networkLoading) {
         return (
             <Box
                 sx={{
@@ -119,6 +122,17 @@ function App() {
             }}
         >
             <CssBaseline />
+            {!isLocal && (
+                <Alert 
+                    severity="info" 
+                    sx={{ 
+                        borderRadius: 0,
+                        py: 0.5,
+                    }}
+                >
+                    You're viewing this app from outside the home network, so editing is disabled.
+                </Alert>
+            )}
             <AppBar
                 position="static"
                 color="primary"
@@ -131,7 +145,7 @@ function App() {
                     >
                         Fountain Pen & Ink Manager
                     </Typography>
-                    <SaveButton onClick={() => setSaveDialogOpen(true)} />
+                    {isLocal && <SaveButton onClick={() => setSaveDialogOpen(true)} />}
                     <Tabs
                         value={value}
                         onChange={handleChange}
@@ -157,19 +171,19 @@ function App() {
                     value={value}
                     index={0}
                 >
-                    <RefillLogList />
+                    <RefillLogList isLocal={isLocal} />
                 </TabPanel>
                 <TabPanel
                     value={value}
                     index={1}
                 >
-                    <InksList />
+                    <InksList isLocal={isLocal} />
                 </TabPanel>
                 <TabPanel
                     value={value}
                     index={2}
                 >
-                    <PensList />
+                    <PensList isLocal={isLocal} />
                 </TabPanel>
             </Box>
 
