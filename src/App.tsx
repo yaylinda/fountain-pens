@@ -1,18 +1,19 @@
 import {
     AppBar,
     Box,
-    Container,
+    CircularProgress,
     CssBaseline,
     Tab,
     Tabs,
     Toolbar,
     Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import InksList from './components/Inks/InksList';
 import PensList from './components/Pens/PensList';
 import RefillLogList from './components/RefillLog/RefillLogList';
+import { loadData } from './services/dataService';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -43,10 +44,55 @@ function TabPanel(props: TabPanelProps) {
 
 function App() {
     const [value, setValue] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        loadData()
+            .then(() => {
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error('Failed to load data:', err);
+                setError('Failed to load data. Please refresh the page.');
+                setLoading(false);
+            });
+    }, []);
 
     const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
+
+    if (loading) {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                }}
+            >
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100vh',
+                    color: 'error.main',
+                }}
+            >
+                <Typography variant="h6">{error}</Typography>
+            </Box>
+        );
+    }
 
     return (
         <Box
