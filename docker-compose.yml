@@ -3,6 +3,7 @@ services:
     image: ghcr.io/yaylinda/fountain-pens:prod
     container_name: fountain-pens
     restart: unless-stopped
+    user: "2010:2010"  # Run as fountain-pens user to match host file ownership
     ports:
       - "127.0.0.1:8045:8080"
     environment:
