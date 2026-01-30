@@ -1,5 +1,5 @@
 {
-  "$schema": "../../../schemas/prompt.schema.json",
+  "$schema": "../schemas/prompt.schema.json",
   "id": "save-and-push-button",
   "title": "Add Save Button with Git Push and Diff Preview",
   "description": "Add a Save button that pushes data changes to GitHub with a diff preview dialog",
