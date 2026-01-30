@@ -6,15 +6,62 @@ import {
     saveRefillLogsToFile,
 } from './fileService';
 
-// Import initial data
-import inksData from '../data/inks.json';
-import pensData from '../data/pens.json';
-import refillLogData from '../data/refillLog.json';
+// In-memory storage (initialized from API)
+let inks: Ink[] = [];
+let pens: Pen[] = [];
+let refillLogs: RefillLog[] = [];
+let isInitialized = false;
 
-// In-memory storage
-let inks: Ink[] = [...inksData];
-let pens: Pen[] = [...pensData];
-let refillLogs: RefillLog[] = [...refillLogData];
+// Check if data is loaded
+export const isDataLoaded = (): boolean => isInitialized;
+
+// Load data from API
+export const loadData = async (): Promise<void> => {
+    if (isInitialized) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/data');
+        if (!response.ok) {
+            throw new Error(`Failed to load data: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        inks = data.inks || [];
+        pens = data.pens || [];
+        refillLogs = data.refillLog || [];
+        isInitialized = true;
+
+        console.log(
+            `Data loaded: ${inks.length} inks, ${pens.length} pens, ${refillLogs.length} refill logs`
+        );
+    } catch (error) {
+        console.error('Failed to load data from API:', error);
+        // Fallback: try loading from static imports for dev mode
+        try {
+            const [inksModule, pensModule, refillLogModule] = await Promise.all(
+                [
+                    import('../data/inks.json'),
+                    import('../data/pens.json'),
+                    import('../data/refillLog.json'),
+                ]
+            );
+            inks = inksModule.default || [];
+            pens = pensModule.default || [];
+            refillLogs = refillLogModule.default || [];
+            isInitialized = true;
+            console.log('Loaded data from static imports (dev fallback)');
+        } catch {
+            console.error('Failed to load data from static imports');
+            // Initialize with empty arrays
+            inks = [];
+            pens = [];
+            refillLogs = [];
+            isInitialized = true;
+        }
+    }
+};
 
 // Ink methods
 export const getAllInks = (): Ink[] => {
