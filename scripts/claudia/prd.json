@@ -2,5 +2,131 @@
   "project": "fountain-pens",
   "version": "0.1.0",
   "branchName": "main",
-  "userStories": []
+  "userStories": [
+    {
+      "id": "fountain-pens-00001",
+      "title": "Docker configuration for git support",
+      "acceptanceCriteria": [
+        "Dockerfile installs git package",
+        "docker-compose.yml mounts the .git directory from host into container",
+        "Container can run git commands successfully (git status, git diff)",
+        "Git user.email and user.name are configured in container (can use environment variables or startup script)"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "This is a blocking dependency for all git-related backend features. Without git in the container, the API endpoints cannot function."
+    },
+    {
+      "id": "fountain-pens-00002",
+      "title": "Backend API endpoint: GET /api/git/diff",
+      "acceptanceCriteria": [
+        "GET /api/git/diff endpoint exists in server.js",
+        "Returns JSON with { diff: string, hasChanges: boolean }",
+        "diff contains the output of git diff for data files (src/data/*.json)",
+        "hasChanges is true when there are uncommitted changes, false otherwise",
+        "Handles errors gracefully and returns appropriate error response"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Depends on fountain-pens-00001 (git must be available in container). This endpoint is needed by the SaveDialog component."
+    },
+    {
+      "id": "fountain-pens-00003",
+      "title": "Backend API endpoint: POST /api/git/push",
+      "acceptanceCriteria": [
+        "POST /api/git/push endpoint exists in server.js",
+        "Executes: git add src/data/*.json, git commit with timestamp message, git push origin main",
+        "On success returns { success: true, message: string }",
+        "On failure returns { success: false, error: string, stdout: string, stderr: string }",
+        "Commit message includes a human-readable timestamp"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Depends on fountain-pens-00001 (git must be available in container). This endpoint is called when user confirms the push."
+    },
+    {
+      "id": "fountain-pens-00004",
+      "title": "DirtyStateContext for tracking unsaved changes",
+      "acceptanceCriteria": [
+        "Create a React Context (DirtyStateContext) that tracks global dirty state",
+        "Context provides isDirty boolean and setDirty function",
+        "Context is wrapped around the app in App.tsx or index.tsx",
+        "dirty state defaults to false"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "This is a blocking dependency for the SaveButton and dataService integration. No external dependencies."
+    },
+    {
+      "id": "fountain-pens-00005",
+      "title": "Integrate dirty state with data mutations",
+      "acceptanceCriteria": [
+        "dataService.ts (or mutation handlers) sets dirty state to true on ink add/update/delete",
+        "dataService.ts (or mutation handlers) sets dirty state to true on pen add/update/delete",
+        "dataService.ts (or mutation handlers) sets dirty state to true on refill log add/update/delete",
+        "All CRUD operations correctly trigger dirty state"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Depends on fountain-pens-00004 (DirtyStateContext must exist). This connects the data layer to the UI state."
+    },
+    {
+      "id": "fountain-pens-00006",
+      "title": "SaveButton component in AppBar header",
+      "acceptanceCriteria": [
+        "SaveButton component renders in the AppBar to the right of the title",
+        "Uses an appropriate MUI icon (CloudUpload, Save, or Backup)",
+        "Button is disabled when isDirty is false",
+        "Button is enabled when isDirty is true",
+        "Clicking the button opens the SaveDialog"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Depends on fountain-pens-00004 (DirtyStateContext). The SaveDialog implementation is separate."
+    },
+    {
+      "id": "fountain-pens-00007",
+      "title": "SaveDialog component with diff preview",
+      "acceptanceCriteria": [
+        "MUI Dialog opens when SaveButton is clicked",
+        "Dialog title is 'Review Changes Before Saving' or similar",
+        "Dialog fetches diff from GET /api/git/diff on open",
+        "Diff is displayed in a readable format (pre/code block)",
+        "Additions are color-coded green, deletions are color-coded red",
+        "Dialog has Cancel button that closes without action",
+        "Dialog has 'Confirm & Push' button"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Depends on fountain-pens-00002 (diff API endpoint) and fountain-pens-00006 (SaveButton triggers this dialog)."
+    },
+    {
+      "id": "fountain-pens-00008",
+      "title": "Push process with loading state and error handling",
+      "acceptanceCriteria": [
+        "Clicking 'Confirm & Push' calls POST /api/git/push",
+        "Shows MUI CircularProgress spinner with 'Pushing to GitHub...' text during push",
+        "Both Cancel and Confirm buttons are disabled during push",
+        "On failure: dialog stays open and shows exact error output (stdout, stderr) in scrollable code block",
+        "On failure: user can retry or cancel",
+        "On success: dialog closes and dirty state is set to false"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Depends on fountain-pens-00003 (push API endpoint) and fountain-pens-00007 (SaveDialog structure)."
+    },
+    {
+      "id": "fountain-pens-00009",
+      "title": "Success celebration with confetti and snackbar",
+      "acceptanceCriteria": [
+        "Install confetti library (canvas-confetti or react-confetti)",
+        "On successful push, confetti animation plays",
+        "On successful push, MUI Snackbar shows brief success message",
+        "Confetti animation is visually appealing and not too long"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Depends on fountain-pens-00008 (success state handling). This is the final polish task."
+    }
+  ]
 }
