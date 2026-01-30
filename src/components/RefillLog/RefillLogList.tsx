@@ -13,12 +13,10 @@ import {
     DialogContent,
     DialogTitle,
     FormControl,
-    Grid,
     IconButton,
     InputLabel,
     MenuItem,
     OutlinedInput,
-    Pagination,
     Paper,
     Select,
     SelectChangeEvent,
@@ -26,7 +24,6 @@ import {
     TableBody,
     TableCell,
     TableContainer,
-    TableFooter,
     TableHead,
     TablePagination,
     TableRow,
@@ -121,7 +118,7 @@ const RefillLogList: React.FC = () => {
         setPage(0); // Reset to first page when filter changes
     };
 
-    const handleChangePage = (event: unknown, newPage: number) => {
+    const handleChangePage = (_event: unknown, newPage: number) => {
         setPage(newPage);
     };
 

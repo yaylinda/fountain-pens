@@ -242,26 +242,6 @@ const PensList: React.FC = () => {
         }, {} as Record<string, string>);
     }, [pens]);
 
-    // Color chips for pen colors
-    const penColorColors = useMemo(() => {
-        const colors = [
-            ...new Set(pens.map((pen) => pen.color).filter(Boolean)),
-        ];
-        return colors.reduce((colorMap, color) => {
-            colorMap[color] = stringToColor(color);
-            return colorMap;
-        }, {} as Record<string, string>);
-    }, [pens]);
-
-    // Get models that are used 2+ times
-    const modelCounts = useMemo(() => {
-        const counts: Record<string, number> = {};
-        pens.forEach((pen) => {
-            counts[pen.model] = (counts[pen.model] || 0) + 1;
-        });
-        return counts;
-    }, [pens]);
-
     const nibSizeColors = useMemo(() => {
         const nibSizes = [
             ...new Set(pens.map((pen) => pen.nibSize).filter(Boolean)),
