@@ -68,3 +68,46 @@ Connected dataService mutations to DirtyStateContext via callback mechanism. All
 - Used callback pattern to bridge module-level dataService with React context (avoids circular imports and keeps dataService framework-agnostic)
 
 ---
+
+## 2026-01-30: fountain-pens-00006 - SaveButton component in AppBar header
+
+### Summary
+Verified SaveButton component implementation that renders in AppBar with CloudUpload icon. Button correctly responds to isDirty state (disabled when clean, enabled when dirty) and opens SaveDialog when clicked.
+
+### Files Changed
+- src/components/SaveButton.tsx (new)
+- src/App.tsx
+
+---
+
+## 2026-01-30: fountain-pens-00007 - SaveDialog component with diff preview
+
+### Summary
+Verified SaveDialog component with full diff preview functionality. Fetches diff from API on open, displays changes with color-coded additions (green) and deletions (red), and provides Cancel and 'Confirm & Push' buttons.
+
+### Files Changed
+- src/components/SaveDialog.tsx (new)
+- src/App.tsx
+
+---
+
+## 2026-01-30: fountain-pens-00008 - Push process with loading state and error handling
+
+### Summary
+Verified push process implementation with CircularProgress spinner showing 'Pushing to GitHub...' text, disabled buttons during push, scrollable error display on failure with retry capability, and automatic dialog close with dirty state reset on success.
+
+### Files Changed
+- src/components/SaveDialog.tsx
+
+---
+
+## 2026-01-30: fountain-pens-00009 - Success celebration with confetti and snackbar
+
+### Summary
+Verified confetti animation (canvas-confetti library) and MUI Snackbar success message. On successful push, confetti plays with moderate particle count (100) and spread (70), while snackbar displays 'Changes pushed to GitHub successfully!' for 4 seconds.
+
+### Files Changed
+- package.json (canvas-confetti dependency)
+- src/App.tsx
+
+---

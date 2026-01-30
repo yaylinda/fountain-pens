@@ -81,7 +81,7 @@
         "Clicking the button opens the SaveDialog"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on fountain-pens-00004 (DirtyStateContext). The SaveDialog implementation is separate."
     },
     {
@@ -97,7 +97,7 @@
         "Dialog has 'Confirm & Push' button"
       ],
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on fountain-pens-00002 (diff API endpoint) and fountain-pens-00006 (SaveButton triggers this dialog)."
     },
     {
@@ -112,7 +112,7 @@
         "On success: dialog closes and dirty state is set to false"
       ],
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on fountain-pens-00003 (push API endpoint) and fountain-pens-00007 (SaveDialog structure)."
     },
     {
@@ -125,7 +125,7 @@
         "Confetti animation is visually appealing and not too long"
       ],
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on fountain-pens-00008 (success state handling). This is the final polish task."
     }
   ]

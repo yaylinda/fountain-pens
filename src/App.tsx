@@ -3,16 +3,20 @@ import {
     Box,
     CircularProgress,
     CssBaseline,
+    Snackbar,
     Tab,
     Tabs,
     Toolbar,
     Typography,
 } from '@mui/material';
+import confetti from 'canvas-confetti';
 import { useEffect, useState } from 'react';
 import './App.css';
 import InksList from './components/Inks/InksList';
 import PensList from './components/Pens/PensList';
 import RefillLogList from './components/RefillLog/RefillLogList';
+import SaveButton from './components/SaveButton';
+import SaveDialog from './components/SaveDialog';
 import { loadData } from './services/dataService';
 
 interface TabPanelProps {
@@ -46,6 +50,17 @@ function App() {
     const [value, setValue] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+    const handleSaveSuccess = () => {
+        setSnackbarOpen(true);
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+        });
+    };
 
     useEffect(() => {
         loadData()
@@ -116,6 +131,7 @@ function App() {
                     >
                         Fountain Pen & Ink Manager
                     </Typography>
+                    <SaveButton onClick={() => setSaveDialogOpen(true)} />
                     <Tabs
                         value={value}
                         onChange={handleChange}
@@ -156,6 +172,20 @@ function App() {
                     <PensList />
                 </TabPanel>
             </Box>
+
+            <SaveDialog
+                open={saveDialogOpen}
+                onClose={() => setSaveDialogOpen(false)}
+                onSuccess={handleSaveSuccess}
+            />
+
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpen(false)}
+                message="Changes pushed to GitHub successfully!"
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            />
         </Box>
     );
 }
