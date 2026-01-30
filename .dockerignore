@@ -21,6 +21,7 @@ scripts/
 
 # Local data (production uses mounted volume)
 data/
+src/data/
 
 # Environment files
 .env*

@@ -7,10 +7,22 @@ on:
       - master
     tags:
       - 'v*'
+    paths-ignore:
+      - 'src/data/**'  # Don't rebuild when data files change
+      - '*.md'
+      - 'prompts/**'
+      - 'schemas/**'
+      - 'scripts/claudia/**'
   pull_request:
     branches:
       - main
       - master
+    paths-ignore:
+      - 'src/data/**'
+      - '*.md'
+      - 'prompts/**'
+      - 'schemas/**'
+      - 'scripts/claudia/**'
   workflow_dispatch:  # Allow manual triggers
 
 env:
