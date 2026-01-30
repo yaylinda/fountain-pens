@@ -9,14 +9,14 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8080
-      - DATA_DIR=/app/data
+      - DATA_DIR=/app/repo/src/data
+      - GIT_REPO_DIR=/app/repo
       - GIT_AUTHOR_NAME=Fountain Pen App
-      - GIT_AUTHOR_EMAIL=fountain-pens@localhost
+      - GIT_AUTHOR_EMAIL=fountain-pens@contrived.com
       - GIT_COMMITTER_NAME=Fountain Pen App
-      - GIT_COMMITTER_EMAIL=fountain-pens@localhost
+      - GIT_COMMITTER_EMAIL=fountain-pens@contrived.com
     volumes:
-      - ./src/data:/app/data
-      - ./.git:/app/.git
+      - .:/app/repo  # Mount entire sparse checkout for git to work correctly
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:8080/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 30s

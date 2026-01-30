@@ -15,6 +15,9 @@ const PORT = process.env.PORT || 8080;
 // Data directory - use environment variable or default to ./data
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 
+// Git repo directory - where the sparse checkout is mounted
+const GIT_REPO_DIR = process.env.GIT_REPO_DIR || __dirname;
+
 // Ensure data directory exists
 async function ensureDataDir() {
     if (!existsSync(DATA_DIR)) {
@@ -108,7 +111,7 @@ app.post('/api/save-json', async (req, res) => {
 app.get('/api/git/diff', async (req, res) => {
     try {
         const { stdout } = await execAsync('git diff src/data/*.json', {
-            cwd: __dirname,
+            cwd: GIT_REPO_DIR,
         });
         const hasChanges = stdout.trim().length > 0;
         res.json({ diff: stdout, hasChanges });
@@ -120,11 +123,35 @@ app.get('/api/git/diff', async (req, res) => {
     }
 });
 
+// API: Pull latest data from git
+app.post('/api/git/pull', async (req, res) => {
+    try {
+        const { stdout, stderr } = await execAsync('git pull origin main', {
+            cwd: GIT_REPO_DIR,
+        });
+        res.json({
+            success: true,
+            message: 'Successfully pulled latest data',
+            stdout,
+            stderr,
+        });
+    } catch (error) {
+        console.error('Error pulling from git:', error);
+        const execError = error;
+        res.status(500).json({
+            success: false,
+            error: execError.message || 'Failed to pull from git',
+            stdout: execError.stdout || '',
+            stderr: execError.stderr || '',
+        });
+    }
+});
+
 // API: Push changes to git
 app.post('/api/git/push', async (req, res) => {
     try {
         // Add data files
-        await execAsync('git add src/data/*.json', { cwd: __dirname });
+        await execAsync('git add src/data/*.json', { cwd: GIT_REPO_DIR });
 
         // Create commit with timestamp
         const timestamp = new Date().toLocaleString('en-US', {
@@ -132,11 +159,11 @@ app.post('/api/git/push', async (req, res) => {
             timeStyle: 'short',
         });
         const commitMessage = `Update data files - ${timestamp}`;
-        await execAsync(`git commit -m "${commitMessage}"`, { cwd: __dirname });
+        await execAsync(`git commit -m "${commitMessage}"`, { cwd: GIT_REPO_DIR });
 
         // Push to remote
         const { stdout, stderr } = await execAsync('git push origin main', {
-            cwd: __dirname,
+            cwd: GIT_REPO_DIR,
         });
 
         res.json({
@@ -165,14 +192,34 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
+// Pull latest data from git on startup
+async function pullLatestData() {
+    try {
+        console.log(`Pulling latest data from git (repo: ${GIT_REPO_DIR})...`);
+        const { stdout, stderr } = await execAsync('git pull origin main', {
+            cwd: GIT_REPO_DIR,
+        });
+        if (stdout.trim()) console.log(`Git pull stdout: ${stdout.trim()}`);
+        if (stderr.trim()) console.log(`Git pull stderr: ${stderr.trim()}`);
+        console.log('Git pull complete');
+    } catch (error) {
+        console.error('Warning: Failed to pull latest data from git:', error.message);
+        // Don't fail startup if pull fails - we'll use whatever data we have
+    }
+}
+
 // Start server
 async function start() {
+    // Pull latest data from GitHub before starting
+    await pullLatestData();
+    
     await ensureDataDir();
     await initializeDataFiles();
 
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
         console.log(`Data directory: ${DATA_DIR}`);
+        console.log(`Git repo directory: ${GIT_REPO_DIR}`);
     });
 }
 
