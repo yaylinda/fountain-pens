@@ -116,7 +116,6 @@ async function start() {
     app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
         console.log(`Data directory: ${DATA_DIR}`);
-        console.log(`Git push enabled: ${GIT_PUSH_ENABLED}`);
     });
 }
 
