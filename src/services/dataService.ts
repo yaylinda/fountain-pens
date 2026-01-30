@@ -51,28 +51,11 @@ export const loadData = async (): Promise<void> => {
         );
     } catch (error) {
         console.error('Failed to load data from API:', error);
-        // Fallback: try loading from static imports for dev mode
-        try {
-            const [inksModule, pensModule, refillLogModule] = await Promise.all(
-                [
-                    import('../data/inks.json'),
-                    import('../data/pens.json'),
-                    import('../data/refillLog.json'),
-                ]
-            );
-            inks = inksModule.default || [];
-            pens = pensModule.default || [];
-            refillLogs = refillLogModule.default || [];
-            isInitialized = true;
-            console.log('Loaded data from static imports (dev fallback)');
-        } catch {
-            console.error('Failed to load data from static imports');
-            // Initialize with empty arrays
-            inks = [];
-            pens = [];
-            refillLogs = [];
-            isInitialized = true;
-        }
+        // Initialize with empty arrays if API fails
+        inks = [];
+        pens = [];
+        refillLogs = [];
+        isInitialized = true;
     }
 };
 
