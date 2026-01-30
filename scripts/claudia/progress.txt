@@ -4,3 +4,67 @@ This file tracks completed work by the Claudia autonomous agent.
 Each entry documents what was implemented and lessons learned.
 
 ---
+
+## 2026-01-30: fountain-pens-00001 - Docker configuration for git support
+
+### Summary
+Added git package installation to Dockerfile and configured docker-compose.yml to mount .git directory with proper git user configuration via environment variables.
+
+### Files Changed
+- Dockerfile
+- docker-compose.yml
+
+### Learnings
+- Git 2.35.2+ requires safe.directory configuration when repo ownership differs from user - added global config in Dockerfile
+- Git author/committer can be configured via GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL, GIT_COMMITTER_NAME, GIT_COMMITTER_EMAIL env vars
+
+---
+
+## 2026-01-30: fountain-pens-00002 - Backend API endpoint: GET /api/git/diff
+
+### Summary
+Implemented GET /api/git/diff endpoint that returns JSON with diff output and hasChanges boolean for data files.
+
+### Files Changed
+- server.js
+
+---
+
+## 2026-01-30: fountain-pens-00003 - Backend API endpoint: POST /api/git/push
+
+### Summary
+Implemented POST /api/git/push endpoint that stages data files, commits with human-readable timestamp, and pushes to origin main. Returns success/error status with stdout/stderr.
+
+### Files Changed
+- server.js
+
+### Learnings
+- Used child_process exec with promisify for async git operations
+- Error handling captures stdout/stderr from failed git commands for debugging
+
+---
+
+## 2026-01-30: fountain-pens-00004 - DirtyStateContext for tracking unsaved changes
+
+### Summary
+Created React Context for global dirty state tracking, wrapped around app in main.tsx. Provides isDirty boolean and setDirty function.
+
+### Files Changed
+- src/context/DirtyStateContext.tsx (new)
+- src/main.tsx
+
+---
+
+## 2026-01-30: fountain-pens-00005 - Integrate dirty state with data mutations
+
+### Summary
+Connected dataService mutations to DirtyStateContext via callback mechanism. All CRUD operations on inks, pens, and refill logs now trigger dirty state.
+
+### Files Changed
+- src/services/dataService.ts
+- src/context/DirtyStateContext.tsx
+
+### Learnings
+- Used callback pattern to bridge module-level dataService with React context (avoids circular imports and keeps dataService framework-agnostic)
+
+---

@@ -9,8 +9,13 @@ services:
       - NODE_ENV=production
       - PORT=8080
       - DATA_DIR=/app/data
+      - GIT_AUTHOR_NAME=Fountain Pen App
+      - GIT_AUTHOR_EMAIL=fountain-pens@localhost
+      - GIT_COMMITTER_NAME=Fountain Pen App
+      - GIT_COMMITTER_EMAIL=fountain-pens@localhost
     volumes:
       - ./src/data:/app/data
+      - ./.git:/app/.git
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:8080/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 30s

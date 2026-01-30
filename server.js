@@ -1,7 +1,11 @@
+import { exec } from 'child_process';
 import express from 'express';
 import { existsSync, promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -96,6 +100,59 @@ app.post('/api/save-json', async (req, res) => {
         console.error('Error saving data:', error);
         res.status(500).json({
             error: error instanceof Error ? error.message : 'Unknown error',
+        });
+    }
+});
+
+// API: Get git diff for data files
+app.get('/api/git/diff', async (req, res) => {
+    try {
+        const { stdout } = await execAsync('git diff src/data/*.json', {
+            cwd: __dirname,
+        });
+        const hasChanges = stdout.trim().length > 0;
+        res.json({ diff: stdout, hasChanges });
+    } catch (error) {
+        console.error('Error getting git diff:', error);
+        res.status(500).json({
+            error: error instanceof Error ? error.message : 'Failed to get git diff',
+        });
+    }
+});
+
+// API: Push changes to git
+app.post('/api/git/push', async (req, res) => {
+    try {
+        // Add data files
+        await execAsync('git add src/data/*.json', { cwd: __dirname });
+
+        // Create commit with timestamp
+        const timestamp = new Date().toLocaleString('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+        });
+        const commitMessage = `Update data files - ${timestamp}`;
+        await execAsync(`git commit -m "${commitMessage}"`, { cwd: __dirname });
+
+        // Push to remote
+        const { stdout, stderr } = await execAsync('git push origin main', {
+            cwd: __dirname,
+        });
+
+        res.json({
+            success: true,
+            message: `Successfully pushed changes: ${commitMessage}`,
+            stdout,
+            stderr,
+        });
+    } catch (error) {
+        console.error('Error pushing to git:', error);
+        const execError = error;
+        res.status(500).json({
+            success: false,
+            error: execError.message || 'Failed to push to git',
+            stdout: execError.stdout || '',
+            stderr: execError.stderr || '',
         });
     }
 });

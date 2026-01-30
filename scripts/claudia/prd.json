@@ -13,7 +13,7 @@
         "Git user.email and user.name are configured in container (can use environment variables or startup script)"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "This is a blocking dependency for all git-related backend features. Without git in the container, the API endpoints cannot function."
     },
     {
@@ -27,7 +27,7 @@
         "Handles errors gracefully and returns appropriate error response"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on fountain-pens-00001 (git must be available in container). This endpoint is needed by the SaveDialog component."
     },
     {
@@ -41,7 +41,7 @@
         "Commit message includes a human-readable timestamp"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on fountain-pens-00001 (git must be available in container). This endpoint is called when user confirms the push."
     },
     {
@@ -54,7 +54,7 @@
         "dirty state defaults to false"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "This is a blocking dependency for the SaveButton and dataService integration. No external dependencies."
     },
     {
@@ -67,7 +67,7 @@
         "All CRUD operations correctly trigger dirty state"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Depends on fountain-pens-00004 (DirtyStateContext must exist). This connects the data layer to the UI state."
     },
     {

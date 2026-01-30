@@ -12,6 +12,19 @@ let pens: Pen[] = [];
 let refillLogs: RefillLog[] = [];
 let isInitialized = false;
 
+// Mutation callback for dirty state tracking
+let onMutationCallback: (() => void) | null = null;
+
+export const setOnMutationCallback = (callback: (() => void) | null): void => {
+    onMutationCallback = callback;
+};
+
+const notifyMutation = (): void => {
+    if (onMutationCallback) {
+        onMutationCallback();
+    }
+};
+
 // Check if data is loaded
 export const isDataLoaded = (): boolean => isInitialized;
 
@@ -79,6 +92,7 @@ export const addInk = (ink: Omit<Ink, 'id'>): Ink => {
     saveInksToFile(inks).catch((err) =>
         console.error('Failed to save inks to file:', err)
     );
+    notifyMutation();
     return newInk;
 };
 
@@ -88,6 +102,7 @@ export const updateInk = (updatedInk: Ink): Ink => {
     saveInksToFile(inks).catch((err) =>
         console.error('Failed to save inks to file:', err)
     );
+    notifyMutation();
     return updatedInk;
 };
 
@@ -97,6 +112,7 @@ export const deleteInk = (id: string): void => {
     saveInksToFile(inks).catch((err) =>
         console.error('Failed to save inks to file:', err)
     );
+    notifyMutation();
 };
 
 // Pen methods
@@ -115,6 +131,7 @@ export const addPen = (pen: Omit<Pen, 'id'>): Pen => {
     savePensToFile(pens).catch((err) =>
         console.error('Failed to save pens to file:', err)
     );
+    notifyMutation();
     return newPen;
 };
 
@@ -124,6 +141,7 @@ export const updatePen = (updatedPen: Pen): Pen => {
     savePensToFile(pens).catch((err) =>
         console.error('Failed to save pens to file:', err)
     );
+    notifyMutation();
     return updatedPen;
 };
 
@@ -133,6 +151,7 @@ export const deletePen = (id: string): void => {
     savePensToFile(pens).catch((err) =>
         console.error('Failed to save pens to file:', err)
     );
+    notifyMutation();
 };
 
 // Refill Log methods
@@ -167,6 +186,7 @@ export const addRefillLog = (
     saveRefillLogsToFile(refillLogs).catch((err) =>
         console.error('Failed to save refill logs to file:', err)
     );
+    notifyMutation();
 
     const penDetails = getPenById(item.penId) as Pen;
     const inkDetails = item.inkIds.map((id) => getInkById(id) as Ink);
@@ -188,6 +208,7 @@ export const updateRefillLog = (
         saveRefillLogsToFile(refillLogs).catch((err) =>
             console.error('Failed to save refill logs to file:', err)
         );
+        notifyMutation();
     }
 
     const penDetails = getPenById(updatedItem.penId) as Pen;
@@ -206,5 +227,6 @@ export const deleteRefillLog = (index: number): void => {
         saveRefillLogsToFile(refillLogs).catch((err) =>
             console.error('Failed to save refill logs to file:', err)
         );
+        notifyMutation();
     }
 };

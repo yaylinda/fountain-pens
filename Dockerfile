@@ -20,6 +20,9 @@ FROM node:22-slim AS production
 
 WORKDIR /app
 
+# Install git for API endpoints
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
 # Create non-root user
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 
@@ -49,6 +52,9 @@ EXPOSE 8080
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD node -e "fetch('http://localhost:8080/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+
+# Configure git safe directory (needed because .git is mounted from host)
+RUN git config --global --add safe.directory /app
 
 # Run as non-root user
 USER appuser
