@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/prompt.schema.json",
+  "id": "fix-sparse-checkout-git-add",
+  "title": "Fix Git Add for Sparse Checkout",
+  "description": "Add --sparse flag to git add command to support sparse checkout repositories",
+  "authors": [
+    {
+      "name": "User",
+      "type": "human"
+    },
+    {
+      "name": "Claude",
+      "type": "model"
+    }
+  ],
+  "createdAt": "2026-02-01T12:00:00Z",
+  "status": "ready",
+  "tags": [
+    "bugfix",
+    "git",
+    "sparse-checkout"
+  ],
+  "content": "## Bug Fix: Git Add Fails in Sparse Checkout\n\n### Problem\nWhen trying to commit and push data file changes via the `/api/git/push` endpoint, the operation fails with an error indicating that the commit failed due to a sparse checkout configuration.\n\n### Root Cause\nThe git repository is configured with sparse checkout, meaning only certain files/directories are checked out into the working directory. The current `git add src/data/*.json` command on line 215 of `server.js` fails because git doesn't allow adding files outside the sparse-checkout cone by default.\n\n### Solution\nAdd the `--sparse` flag to the `git add` command. This flag (available in Git 2.34+) tells git to allow staging files that are outside the sparse-checkout cone.\n\n### Implementation\n\nIn `server.js`, locate the `/api/git/push` endpoint (around line 212-246).\n\nChange line 215 from:\n```javascript\nawait execAsync('git add src/data/*.json', { cwd: GIT_REPO_DIR });\n```\n\nTo:\n```javascript\nawait execAsync('git add --sparse src/data/*.json', { cwd: GIT_REPO_DIR });\n```\n\nAlso update the comment on line 214 to explain why the flag is needed:\n```javascript\n// Add data files (--sparse flag needed for sparse checkout repos)\n```\n\n### Acceptance Criteria\n- [ ] The `git add` command in `/api/git/push` includes the `--sparse` flag\n- [ ] Committing and pushing data changes works successfully in sparse checkout environments\n- [ ] The comment explains why the `--sparse` flag is used",
+  "executions": []
+}
