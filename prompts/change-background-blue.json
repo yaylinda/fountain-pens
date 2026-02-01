@@ -1,0 +1,25 @@
+{
+  "$schema": "../schemas/prompt.schema.json",
+  "id": "change-background-blue",
+  "title": "Change Background Color to Blue",
+  "description": "Update the application background color to blue",
+  "authors": [
+    {
+      "name": "User",
+      "type": "human"
+    },
+    {
+      "name": "Claude",
+      "type": "model"
+    }
+  ],
+  "createdAt": "2026-02-01T12:00:00Z",
+  "status": "ready",
+  "tags": [
+    "styling",
+    "ui",
+    "theme"
+  ],
+  "content": "## Task: Change Background Color to Blue\n\n### Context\nThe fountain-pens app is a React TypeScript application using Material UI (MUI). The user wants to change the application's background color to blue.\n\n### Requirements\n- Change the main application background color to blue\n- Ensure the blue color works well with the existing UI elements and text readability\n- Use an appropriate shade of blue that doesn't clash with the MUI components\n\n### Implementation Approach\n1. Check if there's an existing MUI theme configuration (look for `createTheme` calls)\n2. If a theme exists, update `palette.background.default` to a blue color\n3. If no theme exists, either:\n   - Create a theme with the blue background, or\n   - Add the background color via global CSS in `src/index.css` or the root App component\n4. Consider using a light blue shade (e.g., `#e3f2fd` or MUI's `blue[50]`) to maintain readability\n5. Test that text and other UI elements remain visible and accessible\n\n### Acceptance Criteria\n- [ ] Application background is blue\n- [ ] Text remains readable against the blue background\n- [ ] All existing UI components still look good\n- [ ] No accessibility issues with color contrast",
+  "executions": []
+}
