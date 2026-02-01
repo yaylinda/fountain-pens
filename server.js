@@ -212,7 +212,9 @@ app.post('/api/git/pull', async (req, res) => {
 app.post('/api/git/push', async (req, res) => {
     try {
         // Add data files
-        await execAsync('git add src/data/*.json', { cwd: GIT_REPO_DIR });
+        // The --sparse flag (Git 2.34+) allows staging files outside the sparse-checkout cone,
+        // which is required when the repo is mounted as a sparse checkout in Docker
+        await execAsync('git add --sparse src/data/*.json', { cwd: GIT_REPO_DIR });
 
         // Create commit with timestamp
         const timestamp = new Date().toLocaleString('en-US', {

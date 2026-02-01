@@ -137,7 +137,7 @@
         "Committing and pushing data changes works successfully in sparse checkout environments"
       ],
       "priority": 0,
-      "passes": false,
+      "passes": true,
       "notes": "Bug fix for existing fountain-pens-00003. The --sparse flag (Git 2.34+) allows staging files outside the sparse-checkout cone."
     }
   ]

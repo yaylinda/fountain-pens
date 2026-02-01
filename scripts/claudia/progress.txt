@@ -111,3 +111,17 @@ Verified confetti animation (canvas-confetti library) and MUI Snackbar success m
 - src/App.tsx
 
 ---
+
+## 2026-02-01: fountain-pens-00010 - Fix git add failure in sparse checkout environments
+
+### Summary
+Added --sparse flag to the git add command in the /api/git/push endpoint. This flag (Git 2.34+) allows staging files that are outside the sparse-checkout cone, which is necessary when the repo is mounted as a sparse checkout in Docker.
+
+### Files Changed
+- server.js
+
+### Learnings
+- When using sparse-checkout, git add without --sparse will fail to stage files outside the cone
+- The --sparse flag was introduced in Git 2.34 specifically for this use case
+
+---
