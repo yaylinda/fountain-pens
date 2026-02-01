@@ -127,6 +127,18 @@
       "priority": 9,
       "passes": true,
       "notes": "Depends on fountain-pens-00008 (success state handling). This is the final polish task."
+    },
+    {
+      "id": "fountain-pens-00010",
+      "title": "Fix git add failure in sparse checkout environments",
+      "acceptanceCriteria": [
+        "The git add command in /api/git/push endpoint (server.js line 215) includes the --sparse flag",
+        "The comment above the git add command explains why --sparse flag is needed for sparse checkout repos",
+        "Committing and pushing data changes works successfully in sparse checkout environments"
+      ],
+      "priority": 0,
+      "passes": false,
+      "notes": "Bug fix for existing fountain-pens-00003. The --sparse flag (Git 2.34+) allows staging files outside the sparse-checkout cone."
     }
   ]
 }
