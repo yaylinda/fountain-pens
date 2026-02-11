@@ -3537,5 +3537,13 @@
       "ink_60"
     ],
     "notes": "refill"
+  },
+  {
+    "date": "2026-02-10",
+    "penId": "pen_3",
+    "inkIds": [
+      "0ef1725f-3c1c-4d13-a10b-f474d63e9feb"
+    ],
+    "notes": "refill"
   }
 ]
