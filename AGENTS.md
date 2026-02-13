@@ -45,3 +45,12 @@ The app uses an **in-memory data store** with JSON file persistence during devel
 ### Data Relationships
 - RefillLog references pens by `penId` and inks by `inkIds[]` (supports ink mixing)
 - Components join data at render time via `getPenById()` / `getInkById()`
+
+## Deploy Auth Responsibilities
+
+- Deployment auth is infra-owned in `homelab-infra` and read at runtime from Vault.
+- Canonical deploy-auth path for this repo: `secret/homelab/deploy-auth/fountain-pens`.
+- The deploy PAT from that path is used for both HTTPS git fetch and GHCR image pulls.
+- This repo continues to own only its application secret schema/policies in Vault.
+- Do not rely on persistent deployment creds in `~/.docker/config.json` or `~/.git-credentials`.
+
