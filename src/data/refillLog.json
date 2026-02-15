@@ -3553,5 +3553,21 @@
       "ink_35"
     ],
     "notes": "refill"
+  },
+  {
+    "date": "2026-02-15",
+    "penId": "pen_27",
+    "inkIds": [
+      "NONE"
+    ],
+    "notes": ""
+  },
+  {
+    "date": "2026-02-15",
+    "penId": "pen_28",
+    "inkIds": [
+      "NONE"
+    ],
+    "notes": ""
   }
 ]
