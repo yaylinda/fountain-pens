@@ -1,0 +1,26 @@
+{
+  "$schema": "../schemas/prompt.schema.json",
+  "id": "fix-git-push-resilience",
+  "title": "Fix Git Push Failures in Save Flow",
+  "description": "Diagnose and fix git push non-fast-forward and credential lock errors in the automated save workflow",
+  "authors": [
+    {
+      "name": "User",
+      "type": "human"
+    },
+    {
+      "name": "Claude",
+      "type": "model"
+    }
+  ],
+  "createdAt": "2026-02-19T12:00:00Z",
+  "status": "ready",
+  "tags": [
+    "bugfix",
+    "git",
+    "save-flow",
+    "resilience"
+  ],
+  "content": "## Bug Fix: Git Push Fails with Non-Fast-Forward and Credential Lock Errors\n\n### Problem\nWhen a user hits save, the automated git workflow in `server.js` fails with two issues:\n1. **Non-fast-forward rejection**: The local branch is behind the remote, so `git push origin main` is rejected.\n2. **Credential storage lock**: `fatal: unable to get credential storage lock in 1000 ms: Permission denied` — the credential helper file lock cannot be acquired, likely due to concurrent git operations or stale lock files.\n\nFull error:\n```\nCommand failed: git push origin main\nfatal: unable to get credential storage lock in 1000 ms: Permission denied\nTo https://github.com/yaylinda/fountain-pens.git\n ! [rejected]        main -> main (non-fast-forward)\nerror: failed to push some refs to 'https://github.com/yaylinda/fountain-pens.git'\n```\n\n### Root Cause Analysis\n1. The `/api/git/push` endpoint in `server.js` runs `git push origin main` without first pulling/rebasing remote changes.\n2. If another process (or a previous failed operation) holds the credential storage lock file, subsequent git operations fail.\n3. There is no retry logic or concurrency guard, so concurrent save requests can collide.\n\n### Requirements\n1. **Integrate remote changes before push** — run `git pull --rebase origin main` before pushing, so local commits are replayed on top of remote. Do NOT use `git push --force`.\n2. **Fix credential storage lock** — detect and handle stale `.git-credential-store.lock` files. Consider using a mutex/queue so only one git operation runs at a time.\n3. **Make save flow resilient to concurrent edits** — serialize git operations (add/commit/pull/push) so concurrent save requests don't collide. Use a queue or lock mechanism.\n4. **Provide clear user-facing error handling** — if push still fails after retry, return a meaningful error message to the UI so the user knows what happened and can retry.\n\n### Implementation Guide\n\nIn `server.js`, locate the `/api/git/push` endpoint.\n\n1. **Add a git operation queue/mutex** — ensure only one git push flow runs at a time. Use a simple in-memory lock or async queue (e.g., `p-queue` with concurrency 1, or a manual promise chain).\n\n2. **Pull before push** — after `git commit`, run `git pull --rebase origin main` before `git push origin main`. Handle rebase conflicts by aborting the rebase and returning an error.\n\n3. **Handle credential lock** — before git operations, check for and remove stale `.git-credential-store.lock` files. Add a short retry (1-2 attempts with delay) if the lock error occurs.\n\n4. **Structured error responses** — return JSON error responses with actionable messages:\n   - If rebase conflict: `{ error: 'conflict', message: 'Remote changes conflict with your edits. Please refresh and try again.' }`\n   - If push fails after retry: `{ error: 'push_failed', message: 'Unable to save changes. Please try again in a moment.' }`\n   - If credential error: `{ error: 'auth_failed', message: 'Authentication error. Please check deploy credentials.' }`\n\n5. **Update the UI** — in the save handler (likely in `fileService.ts`), parse the error response and show appropriate toast notifications.\n\n### Acceptance Criteria\n- [ ] `git pull --rebase origin main` runs before `git push origin main` in the push endpoint\n- [ ] No `git push --force` is used anywhere\n- [ ] Concurrent save requests are serialized (only one git operation at a time)\n- [ ] Stale credential lock files are detected and handled\n- [ ] Push failures return structured JSON errors with user-friendly messages\n- [ ] The UI displays meaningful error toasts when push fails\n- [ ] The save flow retries once on transient failures before giving up",
+  "executions": []
+}
