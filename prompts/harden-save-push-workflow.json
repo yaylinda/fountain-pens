@@ -1,0 +1,26 @@
+{
+  "$schema": "../schemas/prompt.schema.json",
+  "id": "harden-save-push-workflow",
+  "title": "Harden Save-and-Push Workflow Against Git Failures",
+  "description": "Make the save flow resilient to non-fast-forward rejections, credential lock contention, and concurrent edits",
+  "authors": [
+    {
+      "name": "User",
+      "type": "human"
+    },
+    {
+      "name": "Claude",
+      "type": "model"
+    }
+  ],
+  "createdAt": "2026-02-20T12:00:00Z",
+  "status": "ready",
+  "tags": [
+    "bugfix",
+    "git",
+    "save-flow",
+    "resilience"
+  ],
+  "content": "## Harden Save-and-Push Workflow Against Git Failures\n\n### Problem\nThe automated save flow calls `git push origin main` and fails with two simultaneous issues:\n\n```\nCommand failed: git push origin main\nfatal: unable to get credential storage lock in 1000 ms: Permission denied\nTo https://github.com/yaylinda/fountain-pens.git\n ! [rejected]        main -> main (non-fast-forward)\nerror: failed to push some refs to 'https://github.com/yaylinda/fountain-pens.git'\nhint: Updates were rejected because the tip of your current branch is behind\nhint: its remote counterpart.\n```\n\n### Root Cause Analysis\n1. **Non-fast-forward rejection** — the push endpoint runs `git push origin main` without first integrating remote changes. If the remote has commits not present locally, the push is rejected.\n2. **Credential storage lock** — `fatal: unable to get credential storage lock in 1000 ms: Permission denied` indicates either a stale `.git-credential-store.lock` file or concurrent git processes competing for the lock.\n3. **No concurrency control** — multiple save requests can trigger overlapping git operations that interfere with each other.\n\n### Requirements\n1. **Pull-rebase before push** — run `git pull --rebase origin main` before `git push origin main` so local commits replay on top of remote. Never use `git push --force`.\n2. **Resolve credential lock contention** — detect stale lock files and clean them up. Serialize git operations so concurrent saves don't compete for the credential lock.\n3. **Serialize git operations** — use an in-memory mutex or async queue (concurrency 1) so only one add/commit/pull/push sequence runs at a time.\n4. **Retry transient failures** — retry the pull-then-push sequence once on transient errors (lock contention, network blip) before giving up.\n5. **User-facing error handling** — return structured JSON errors from the push endpoint and display clear toast messages in the UI:\n   - Rebase conflict: \"Remote changes conflict with your edits. Please refresh and try again.\"\n   - Push failed after retry: \"Unable to save changes. Please try again in a moment.\"\n   - Auth/credential error: \"Authentication error. Please check deploy credentials.\"\n\n### Implementation Steps\n\n1. In `server.js`, locate the `/api/git/push` endpoint.\n2. Add a git operation queue or mutex that serializes all git workflows.\n3. Change the push flow to: `git add` → `git commit` → `git pull --rebase origin main` → `git push origin main`.\n4. Before git operations, check for and remove stale `.git-credential-store.lock` if it exists and no git process holds it.\n5. Wrap the pull/push sequence in a retry loop (max 2 attempts) with a short delay between retries.\n6. On rebase conflicts, run `git rebase --abort` and return an error.\n7. Return structured JSON error responses with appropriate HTTP status codes.\n8. In the frontend save handler, parse error responses and show user-friendly toast notifications.\n\n### Acceptance Criteria\n- [ ] `git pull --rebase origin main` runs before every `git push origin main`\n- [ ] No `git push --force` is used\n- [ ] Concurrent save requests are serialized via a queue or mutex\n- [ ] Stale credential lock files are detected and cleaned up\n- [ ] Transient failures trigger one automatic retry\n- [ ] Push failures return structured JSON errors with user-friendly messages\n- [ ] The UI displays meaningful toast notifications on save failure",
+  "executions": []
+}
