@@ -26,6 +26,8 @@ interface PushResponse {
     success: boolean;
     message?: string;
     error?: string;
+    errorCode?: string;
+    transient?: boolean;
     stdout?: string;
     stderr?: string;
 }
@@ -36,6 +38,7 @@ export default function SaveDialog({ open, onClose, onSuccess }: SaveDialogProps
     const [loading, setLoading] = useState(false);
     const [pushing, setPushing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isTransient, setIsTransient] = useState(false);
 
     useEffect(() => {
         if (open) {
@@ -57,6 +60,7 @@ export default function SaveDialog({ open, onClose, onSuccess }: SaveDialogProps
     const handlePush = async () => {
         setPushing(true);
         setError(null);
+        setIsTransient(false);
         try {
             const res = await fetch('/api/git/push', { method: 'POST' });
             const data: PushResponse = await res.json();
@@ -65,17 +69,16 @@ export default function SaveDialog({ open, onClose, onSuccess }: SaveDialogProps
                 onClose();
                 onSuccess?.();
             } else {
-                const errorDetails = [
-                    data.error,
-                    data.stdout && `stdout: ${data.stdout}`,
-                    data.stderr && `stderr: ${data.stderr}`,
-                ]
-                    .filter(Boolean)
-                    .join('\n\n');
-                setError(errorDetails || 'Push failed');
+                setIsTransient(data.transient ?? false);
+                const parts = [data.error];
+                if (data.transient) {
+                    parts.push('You can retry — the issue may resolve itself.');
+                }
+                setError(parts.join('\n\n'));
             }
         } catch (err) {
-            setError(`Push failed: ${err instanceof Error ? err.message : String(err)}`);
+            setIsTransient(true);
+            setError(`Push failed: ${err instanceof Error ? err.message : String(err)}\n\nYou can retry — the issue may resolve itself.`);
         } finally {
             setPushing(false);
         }
@@ -167,6 +170,17 @@ export default function SaveDialog({ open, onClose, onSuccess }: SaveDialogProps
                         >
                             {error}
                         </Box>
+                        {isTransient && (
+                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    onClick={handlePush}
+                                >
+                                    Retry Push
+                                </Button>
+                            </Box>
+                        )}
                     </Box>
                 ) : (
                     <Box

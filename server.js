@@ -1,11 +1,87 @@
 import { exec } from 'child_process';
 import express from 'express';
 import { existsSync, promises as fs } from 'fs';
+import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
+
+// --- Credential lock cleanup ---
+const CREDENTIAL_LOCK_PATH = path.join(os.homedir(), '.git-credential-store.lock');
+const STALE_LOCK_THRESHOLD_MS = 30_000;
+
+async function cleanStaleCredentialLock() {
+    try {
+        const stat = await fs.stat(CREDENTIAL_LOCK_PATH);
+        const ageMs = Date.now() - stat.mtimeMs;
+        if (ageMs > STALE_LOCK_THRESHOLD_MS) {
+            await fs.unlink(CREDENTIAL_LOCK_PATH);
+            console.log(`Removed stale credential lock (age: ${Math.round(ageMs / 1000)}s)`);
+        } else {
+            // Lock is fresh — wait briefly and retry once
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            try {
+                await fs.stat(CREDENTIAL_LOCK_PATH);
+                // Still exists after wait — let git deal with it
+            } catch {
+                // Lock gone after wait — good
+            }
+        }
+    } catch (err) {
+        if (err.code !== 'ENOENT') throw err;
+        // No lock file — happy path
+    }
+}
+
+// --- Serialization queue for git operations ---
+let gitQueue = Promise.resolve();
+
+function enqueueGitOperation(fn) {
+    const op = gitQueue.then(fn, fn); // run even if previous op rejected
+    gitQueue = op.catch(() => {}); // swallow so next op still runs
+    return op;
+}
+
+// --- Error classification ---
+function classifyGitError(error) {
+    const msg = `${error.message || ''} ${error.stderr || ''} ${error.stdout || ''}`;
+
+    if (/credential.*lock/i.test(msg)) {
+        return {
+            errorCode: 'CREDENTIAL_LOCK',
+            error: 'Git credential storage is temporarily locked. Please try again in a few seconds.',
+            transient: true,
+        };
+    }
+    if (/non-fast-forward/i.test(msg)) {
+        return {
+            errorCode: 'NON_FAST_FORWARD',
+            error: 'Remote has newer changes. Pull and retry.',
+            transient: false,
+        };
+    }
+    if (/could not read from remote/i.test(msg)) {
+        return {
+            errorCode: 'NETWORK_ERROR',
+            error: 'Cannot connect to GitHub. Check network and try again.',
+            transient: true,
+        };
+    }
+    if (/authentication failed/i.test(msg)) {
+        return {
+            errorCode: 'AUTH_FAILURE',
+            error: 'GitHub authentication failed. Credentials may need to be refreshed.',
+            transient: false,
+        };
+    }
+    return {
+        errorCode: 'UNKNOWN',
+        error: msg.trim() || 'An unknown error occurred',
+        transient: false,
+    };
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -187,6 +263,7 @@ app.get('/api/git/diff', async (req, res) => {
 // API: Pull latest data from git
 app.post('/api/git/pull', async (req, res) => {
     try {
+        await cleanStaleCredentialLock();
         const { stdout, stderr } = await execAsync('git pull origin main', {
             cwd: GIT_REPO_DIR,
         });
@@ -211,38 +288,91 @@ app.post('/api/git/pull', async (req, res) => {
 // API: Push changes to git
 app.post('/api/git/push', async (req, res) => {
     try {
-        // Add data files
-        // The --sparse flag (Git 2.34+) allows staging files outside the sparse-checkout cone,
-        // which is required when the repo is mounted as a sparse checkout in Docker
-        await execAsync('git add --sparse src/data/*.json', { cwd: GIT_REPO_DIR });
+        const result = await enqueueGitOperation(async () => {
+            // Clean stale credential lock before any remote-contacting operation
+            await cleanStaleCredentialLock();
 
-        // Create commit with timestamp
-        const timestamp = new Date().toLocaleString('en-US', {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-        });
-        const commitMessage = `Update data files - ${timestamp}`;
-        await execAsync(`git commit -m "${commitMessage}"`, { cwd: GIT_REPO_DIR });
+            // Add data files
+            // The --sparse flag (Git 2.34+) allows staging files outside the sparse-checkout cone,
+            // which is required when the repo is mounted as a sparse checkout in Docker
+            await execAsync('git add --sparse src/data/*.json', { cwd: GIT_REPO_DIR });
 
-        // Push to remote
-        const { stdout, stderr } = await execAsync('git push origin main', {
-            cwd: GIT_REPO_DIR,
+            // Create commit with timestamp
+            const timestamp = new Date().toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+            });
+            const commitMessage = `Update data files - ${timestamp}`;
+
+            let nothingToCommit = false;
+            try {
+                await execAsync(`git commit -m "${commitMessage}"`, { cwd: GIT_REPO_DIR });
+            } catch (commitError) {
+                if (/nothing to commit/i.test(commitError.stdout || commitError.message)) {
+                    nothingToCommit = true;
+                } else {
+                    throw commitError;
+                }
+            }
+
+            if (nothingToCommit) {
+                return { success: true, message: 'No changes to push' };
+            }
+
+            // Pull --rebase before push to avoid non-fast-forward rejections
+            await cleanStaleCredentialLock();
+            try {
+                await execAsync('git pull --rebase origin main', { cwd: GIT_REPO_DIR });
+            } catch (pullError) {
+                // If rebase hit conflicts, abort to restore working tree
+                if (/conflict/i.test(`${pullError.message || ''} ${pullError.stderr || ''}`)) {
+                    try {
+                        await execAsync('git rebase --abort', { cwd: GIT_REPO_DIR });
+                    } catch {
+                        // best-effort abort
+                    }
+                    const classified = {
+                        errorCode: 'REBASE_CONFLICT',
+                        error: 'Remote has conflicting changes. Your local commit is preserved but could not be pushed.',
+                        transient: false,
+                    };
+                    return {
+                        success: false,
+                        ...classified,
+                        stdout: pullError.stdout || '',
+                        stderr: pullError.stderr || '',
+                    };
+                }
+                throw pullError;
+            }
+
+            // Push to remote
+            await cleanStaleCredentialLock();
+            const { stdout, stderr } = await execAsync('git push origin main', {
+                cwd: GIT_REPO_DIR,
+            });
+
+            return {
+                success: true,
+                message: `Successfully pushed changes: ${commitMessage}`,
+                stdout,
+                stderr,
+            };
         });
 
-        res.json({
-            success: true,
-            message: `Successfully pushed changes: ${commitMessage}`,
-            stdout,
-            stderr,
-        });
+        if (result.success) {
+            res.json(result);
+        } else {
+            res.status(500).json(result);
+        }
     } catch (error) {
         console.error('Error pushing to git:', error);
-        const execError = error;
+        const classified = classifyGitError(error);
         res.status(500).json({
             success: false,
-            error: execError.message || 'Failed to push to git',
-            stdout: execError.stdout || '',
-            stderr: execError.stderr || '',
+            ...classified,
+            stdout: error.stdout || '',
+            stderr: error.stderr || '',
         });
     }
 });
@@ -259,6 +389,7 @@ app.get('*', (req, res) => {
 async function pullLatestData() {
     try {
         console.log(`Pulling latest data from git (repo: ${GIT_REPO_DIR})...`);
+        await cleanStaleCredentialLock();
         const { stdout, stderr } = await execAsync('git pull origin main', {
             cwd: GIT_REPO_DIR,
         });
