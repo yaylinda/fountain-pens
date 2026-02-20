@@ -1,0 +1,26 @@
+{
+  "$schema": "../schemas/prompt.schema.json",
+  "id": "implement-hardened-git-push",
+  "title": "Implement Hardened Git Push with Rebase and Concurrency Safety",
+  "description": "Apply production-safe git push hardening: serialized operations, stale credential lock cleanup, pull-rebase before push, and classified user-facing errors",
+  "authors": [
+    {
+      "name": "User",
+      "type": "human"
+    },
+    {
+      "name": "Claude",
+      "type": "model"
+    }
+  ],
+  "createdAt": "2026-02-20T12:00:00Z",
+  "status": "ready",
+  "tags": [
+    "bugfix",
+    "git",
+    "save-flow",
+    "concurrency"
+  ],
+  "content": "## Implement Hardened Git Push with Rebase and Concurrency Safety\n\nThe save flow's `git push origin main` fails with credential storage lock permission denied and non-fast-forward rejection when the branch is behind remote. Implement the following production-safe fixes across `server.js` (backend) and `SaveDialog.tsx` (frontend).\n\n### Backend: `server.js`\n\n#### 1. Git Operation Serialization\n\nAdd an async queue that ensures only one git workflow (add/commit/pull/push) runs at a time. This prevents credential lock contention and interleaved git state.\n\n- Create a `gitOpQueue` initialized to `Promise.resolve()`.\n- Create a `serializeGitOp(fn)` function that chains `fn` onto the queue. The queue must swallow rejections so subsequent operations still run.\n- Wrap the entire `/api/git/push` handler body in `serializeGitOp()`.\n\n#### 2. Stale Credential Lock Cleanup\n\nAdd a `cleanStaleLock()` function that:\n- Checks for `~/.git-credential-store.lock`.\n- If the file exists and is older than 30 seconds, removes it (a live credential helper wouldn't hold the lock that long).\n- Ignores ENOENT (no lock file is the happy path).\n- Call `cleanStaleLock()` at the start of every serialized git operation, before any remote-touching command.\n\n#### 3. Pull-Rebase Before Push Flow\n\nReplace the `/api/git/push` handler with this sequence:\n1. `cleanStaleLock()`\n2. `git add --sparse src/data/*.json`\n3. `git commit -m \"Update data files - {timestamp}\"` — if \"nothing to commit\", return `{ success: true, message: 'No changes to push' }` (not an error).\n4. `git pull --rebase origin main` — if a rebase conflict is detected, run `git rebase --abort` (best-effort) and throw with code `REBASE_CONFLICT`.\n5. `git push origin main` — never use `--force`.\n\n#### 4. Classified Error Responses\n\nCatch errors from the push flow and classify them by `errorCode` with user-friendly messages:\n\n| `errorCode` | Detection pattern | `userMessage` |\n|---|---|---|\n| `REBASE_CONFLICT` | Custom code from step 4 | \"Rebase conflict: remote has conflicting changes. Your commit has been preserved locally but not pushed.\" |\n| `CREDENTIAL_LOCK` | `/credential.*lock/i` in stderr or message | \"Git credential storage is temporarily locked. Please try again in a few seconds.\" |\n| `NON_FAST_FORWARD` | `/non-fast-forward/i` in stderr | \"Remote has newer changes. This should not happen — please report this bug.\" |\n| `NETWORK` | `/could not read from remote/i` or `/connection refused/i` in stderr | \"Could not connect to GitHub. Check network connectivity and try again.\" |\n| `AUTH` | `/authentication failed/i` or `/invalid credentials/i` in stderr | \"GitHub authentication failed. Credentials may need to be refreshed.\" |\n| `UNKNOWN` | fallback | Raw error message |\n\nReturn HTTP 500 with `{ success: false, error: userMessage, errorCode, stdout, stderr }`.\n\n### Frontend: `SaveDialog.tsx`\n\n#### 1. Update PushResponse Interface\n\nAdd `errorCode?: string` to the `PushResponse` interface.\n\n#### 2. Update handlePush\n\n- On failure, check if `errorCode` is `CREDENTIAL_LOCK` or `NETWORK` (retryable errors).\n- For retryable errors, append \"You can retry by clicking Confirm & Push again.\" to the displayed error.\n- Show error details including stdout/stderr for debugging.\n\n#### 3. Add Retry Button\n\nIn the error display state, add a \"Retry Push\" button that calls `handlePush` again. Disable it while `pushing` is true.\n\n### Safety Properties\n- Never force pushes — only `git push origin main`.\n- Rebase conflicts abort cleanly — `git rebase --abort` restores pre-rebase state.\n- \"Nothing to commit\" is handled gracefully, not as an error.\n- Stale lock age threshold (30s) avoids deleting locks held by active processes.\n- Serialization queue survives errors so subsequent operations still run.\n\n### Acceptance Criteria\n- [ ] All git operations in the push endpoint are serialized through a single-concurrency queue\n- [ ] Stale `.git-credential-store.lock` files older than 30s are cleaned up before remote operations\n- [ ] `git pull --rebase origin main` runs after commit and before push\n- [ ] Rebase conflicts trigger `git rebase --abort` and return a classified error\n- [ ] No `git push --force` is used anywhere\n- [ ] \"Nothing to commit\" returns success, not an error\n- [ ] Error responses include `errorCode` and user-friendly `error` message\n- [ ] Frontend shows classified error messages with retry button for transient failures",
+  "executions": []
+}
