@@ -44,6 +44,30 @@ function enqueueGitOperation(fn) {
     return op;
 }
 
+function gitExecEnv() {
+    return {
+        ...process.env,
+        GIT_TERMINAL_PROMPT: '0',
+    };
+}
+
+async function execGitAsync(command, options = {}) {
+    return execAsync(command, {
+        ...options,
+        env: {
+            ...gitExecEnv(),
+            ...options.env,
+        },
+    });
+}
+
+async function getUnpushedCommitCount() {
+    const { stdout } = await execGitAsync('git rev-list --count origin/main..HEAD', {
+        cwd: GIT_REPO_DIR,
+    });
+    return parseInt(stdout.trim(), 10) || 0;
+}
+
 // --- Error classification ---
 function classifyGitError(error) {
     const msg = `${error.message || ''} ${error.stderr || ''} ${error.stdout || ''}`;
@@ -74,6 +98,13 @@ function classifyGitError(error) {
             errorCode: 'AUTH_FAILURE',
             error: 'GitHub authentication failed. Credentials may need to be refreshed.',
             transient: false,
+        };
+    }
+    if (/could not read Username/i.test(msg)) {
+        return {
+            errorCode: 'AUTH_FAILURE',
+            error: 'GitHub authentication is not configured. Please try again in a minute or contact support.',
+            transient: true,
         };
     }
     return {
@@ -264,7 +295,7 @@ app.get('/api/git/diff', async (req, res) => {
 app.post('/api/git/pull', async (req, res) => {
     try {
         await cleanStaleCredentialLock();
-        const { stdout, stderr } = await execAsync('git pull origin main', {
+        const { stdout, stderr } = await execGitAsync('git pull origin main', {
             cwd: GIT_REPO_DIR,
         });
         res.json({
@@ -295,7 +326,7 @@ app.post('/api/git/push', async (req, res) => {
             // Add data files
             // The --sparse flag (Git 2.34+) allows staging files outside the sparse-checkout cone,
             // which is required when the repo is mounted as a sparse checkout in Docker
-            await execAsync('git add --sparse src/data/*.json', { cwd: GIT_REPO_DIR });
+            await execGitAsync('git add --sparse src/data/*.json', { cwd: GIT_REPO_DIR });
 
             // Create commit with timestamp
             const timestamp = new Date().toLocaleString('en-US', {
@@ -306,7 +337,7 @@ app.post('/api/git/push', async (req, res) => {
 
             let nothingToCommit = false;
             try {
-                await execAsync(`git commit -m "${commitMessage}"`, { cwd: GIT_REPO_DIR });
+                await execGitAsync(`git commit -m "${commitMessage}"`, { cwd: GIT_REPO_DIR });
             } catch (commitError) {
                 if (/nothing to commit/i.test(commitError.stdout || commitError.message)) {
                     nothingToCommit = true;
@@ -316,18 +347,23 @@ app.post('/api/git/push', async (req, res) => {
             }
 
             if (nothingToCommit) {
-                return { success: true, message: 'No changes to push' };
+                const unpushed = await getUnpushedCommitCount();
+                if (unpushed === 0) {
+                    return { success: true, message: 'No changes to push' };
+                }
             }
+
+            const unpushedBeforePush = nothingToCommit ? await getUnpushedCommitCount() : 0;
 
             // Pull --rebase before push to avoid non-fast-forward rejections
             await cleanStaleCredentialLock();
             try {
-                await execAsync('git pull --rebase origin main', { cwd: GIT_REPO_DIR });
+                await execGitAsync('git pull --rebase origin main', { cwd: GIT_REPO_DIR });
             } catch (pullError) {
                 // If rebase hit conflicts, abort to restore working tree
                 if (/conflict/i.test(`${pullError.message || ''} ${pullError.stderr || ''}`)) {
                     try {
-                        await execAsync('git rebase --abort', { cwd: GIT_REPO_DIR });
+                        await execGitAsync('git rebase --abort', { cwd: GIT_REPO_DIR });
                     } catch {
                         // best-effort abort
                     }
@@ -348,13 +384,15 @@ app.post('/api/git/push', async (req, res) => {
 
             // Push to remote
             await cleanStaleCredentialLock();
-            const { stdout, stderr } = await execAsync('git push origin main', {
+            const { stdout, stderr } = await execGitAsync('git push origin main', {
                 cwd: GIT_REPO_DIR,
             });
 
             return {
                 success: true,
-                message: `Successfully pushed changes: ${commitMessage}`,
+                message: nothingToCommit
+                    ? `Successfully pushed ${unpushedBeforePush} previously unpushed commit(s)`
+                    : `Successfully pushed changes: ${commitMessage}`,
                 stdout,
                 stderr,
             };
@@ -390,7 +428,7 @@ async function pullLatestData() {
     try {
         console.log(`Pulling latest data from git (repo: ${GIT_REPO_DIR})...`);
         await cleanStaleCredentialLock();
-        const { stdout, stderr } = await execAsync('git pull origin main', {
+        const { stdout, stderr } = await execGitAsync('git pull origin main', {
             cwd: GIT_REPO_DIR,
         });
         if (stdout.trim()) console.log(`Git pull stdout: ${stdout.trim()}`);

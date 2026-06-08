@@ -55,7 +55,7 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD node -e "fetch('http://localhost:8080/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
 # Configure git safe directory (needed because .git is mounted from host)
-RUN git config --global --add safe.directory /app
+RUN git config --global --add safe.directory /app/repo
 
 # Run as non-root user
 USER appuser
