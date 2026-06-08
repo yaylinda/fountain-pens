@@ -339,7 +339,7 @@ app.post('/api/git/push', async (req, res) => {
             try {
                 await execGitAsync(`git commit -m "${commitMessage}"`, { cwd: GIT_REPO_DIR });
             } catch (commitError) {
-                if (/nothing to commit/i.test(commitError.stdout || commitError.message)) {
+                if (/nothing (added )?to commit/i.test(commitError.stdout || commitError.message)) {
                     nothingToCommit = true;
                 } else {
                     throw commitError;
