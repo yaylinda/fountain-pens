@@ -3800,5 +3800,13 @@
       "NONE"
     ],
     "notes": "it is stuck"
+  },
+  {
+    "date": "2026-07-04",
+    "penId": "pen_18",
+    "inkIds": [
+      "NONE"
+    ],
+    "notes": "broken :("
   }
 ]
