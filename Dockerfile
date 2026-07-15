@@ -17,7 +17,8 @@ RUN npm run build
 
 # Stage 2: Production image
 # 2026-03-06: FROM node:22-slim AS production
-FROM ghcr.io/contrived-com/node-22-slim-visa:2026-03-07_sha-9c2c405_rt-fountain-pens-fountain-pens_tp-2823763c_iss-20260307T003101Z AS production
+# 2026-07-15: FROM ghcr.io/contrived-com/node-22-slim-visa:2026-03-07_sha-9c2c405_rt-fountain-pens-fountain-pens_tp-2823763c_iss-20260307T003101Z AS production
+FROM ghcr.io/contrived-com/node-22-slim-visa:2026-07-15_sha-6c74791_rt-fountain-pens-fountain-pens_tp-3840044d_iss-20260715T065238Z AS production
 
 WORKDIR /app
 
