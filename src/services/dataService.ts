@@ -11,6 +11,7 @@ let inks: Ink[] = [];
 let pens: Pen[] = [];
 let refillLogs: RefillLog[] = [];
 let isInitialized = false;
+let pendingLoad: Promise<void> | null = null;
 
 // Mutation callback for dirty state tracking
 let onMutationCallback: (() => void) | null = null;
@@ -29,11 +30,19 @@ const notifyMutation = (): void => {
 export const isDataLoaded = (): boolean => isInitialized;
 
 // Load data from API
-export const loadData = async (): Promise<void> => {
+export const loadData = (): Promise<void> => {
     if (isInitialized) {
-        return;
+        return Promise.resolve();
     }
+    if (pendingLoad) return pendingLoad;
 
+    pendingLoad = fetchData().finally(() => {
+        pendingLoad = null;
+    });
+    return pendingLoad;
+};
+
+const fetchData = async (): Promise<void> => {
     try {
         const response = await fetch('/api/data');
         if (!response.ok) {
@@ -41,9 +50,17 @@ export const loadData = async (): Promise<void> => {
         }
 
         const data = await response.json();
-        inks = data.inks || [];
-        pens = data.pens || [];
-        refillLogs = data.refillLog || [];
+        if (
+            !data ||
+            !Array.isArray(data.inks) ||
+            !Array.isArray(data.pens) ||
+            !Array.isArray(data.refillLog)
+        ) {
+            throw new Error('Invalid collection response: expected inks, pens, and refillLog arrays');
+        }
+        inks = data.inks;
+        pens = data.pens;
+        refillLogs = data.refillLog;
         isInitialized = true;
 
         console.log(
