@@ -6,6 +6,8 @@ services:
     user: "2010:2010"  # Run as fountain-pens user to match host file ownership
     ports:
       - "127.0.0.1:8045:8080"
+    env_file:
+      - .git-http-env
     environment:
       - NODE_ENV=production
       - PORT=8080
@@ -14,12 +16,15 @@ services:
       - VAULT_ADDR=${VAULT_ADDR}
       - VAULT_ROLE_ID=${VAULT_ROLE_ID}
       - VAULT_SECRET_ID=${VAULT_SECRET_ID}
+      - GIT_ASKPASS=/app/git-askpass-env.sh
+      - GIT_TERMINAL_PROMPT=0
       - GIT_AUTHOR_NAME=Fountain Pen App
       - GIT_AUTHOR_EMAIL=fountain-pens@contrived.com
       - GIT_COMMITTER_NAME=Fountain Pen App
       - GIT_COMMITTER_EMAIL=fountain-pens@contrived.com
     volumes:
       - .:/app/repo  # Mount entire sparse checkout for git to work correctly
+      - ./git-askpass-env.sh:/app/git-askpass-env.sh:ro
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:8080/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 30s
