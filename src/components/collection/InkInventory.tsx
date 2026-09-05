@@ -4,10 +4,12 @@ import {
     formatDate,
     inkLabel,
     penLabel,
+    penDescription,
     type CollectionModel,
     type EditorState,
 } from '../../lib/collection';
 import { Icon, Swatch } from './Primitives';
+import { HoverDetails } from './HoverDetails';
 
 interface Props {
     inks: Ink[];
@@ -149,24 +151,35 @@ export default function InkInventory({
             {inks.map((ink) => {
                 const current = model.currentPens(ink.id);
                 return (
-                    <button
-                        type="button"
+                    <article
                         key={ink.id}
                         className="ink-card"
-                        data-focus-key={`ink-${ink.id}`}
-                        onClick={() => onOpen({ kind: 'ink', item: ink })}
+                        aria-labelledby={`ink-card-${ink.id}`}
                     >
-                        <div className="ink-card-color">
-                            <Swatch ink={ink} large />
-                            <span className="ink-card-action">
-                                <Icon name={canEdit ? 'edit' : 'arrow'} />
+                        <button
+                            type="button"
+                            className="ink-card-main"
+                            data-focus-key={`ink-${ink.id}`}
+                            aria-label={`${canEdit ? 'Edit' : 'View'} ${inkLabel(ink)}`}
+                            onClick={() => onOpen({ kind: 'ink', item: ink })}
+                        >
+                            <div className="ink-card-color">
+                                <Swatch ink={ink} large />
+                                <span className="ink-card-action">
+                                    <Icon name={canEdit ? 'edit' : 'arrow'} />
+                                </span>
+                            </div>
+                            <span className="overline">{ink.brand}</span>
+                            <span
+                                className="ink-card-name"
+                                id={`ink-card-${ink.id}`}
+                            >
+                                {ink.name}
                             </span>
-                        </div>
-                        <span className="overline">{ink.brand}</span>
-                        <h2>{ink.name}</h2>
-                        <span className="ink-collection">
-                            {ink.collection || 'Standard collection'}
-                        </span>
+                            <span className="ink-collection">
+                                {ink.collection || 'Standard collection'}
+                            </span>
+                        </button>
                         <span className="ink-card-footer">
                             <span>
                                 {model.inkCount(ink.id)
@@ -174,14 +187,38 @@ export default function InkInventory({
                                     : 'Not tried yet'}
                             </span>
                             {current.length > 0 && (
-                                <span className="status-dot">
+                                <HoverDetails
+                                    className="status-dot"
+                                    label={`Pens using ${inkLabel(ink)}`}
+                                    details={
+                                        <>
+                                            <span className="overline">
+                                                Currently inked
+                                            </span>
+                                            <ul className="detail-pen-list">
+                                                {current.map((pen) => (
+                                                    <li key={pen.id}>
+                                                        <strong>
+                                                            {penLabel(pen)}
+                                                        </strong>
+                                                        <span className="small muted block">
+                                                            {penDescription(
+                                                                pen,
+                                                            )}
+                                                        </span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </>
+                                    }
+                                >
                                     In {current.length}{' '}
                                     {current.length === 1 ? 'pen' : 'pens'}
-                                </span>
+                                </HoverDetails>
                             )}
                             {ink.archived && <span>Archived</span>}
                         </span>
-                    </button>
+                    </article>
                 );
             })}
         </div>

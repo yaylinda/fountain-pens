@@ -719,6 +719,17 @@
 .inventory-name .overline {
     font-size: 0.6875rem;
 }
+.pen-name-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+}
+.pen-name-meta .badge {
+    font-size: 0.625rem;
+    line-height: 1;
+    padding: 2px 6px;
+}
 .inventory-name strong {
     font-size: 0.9375rem;
     font-weight: 600;
@@ -767,6 +778,14 @@
     text-align: left;
     border-bottom: 1px solid var(--line);
 }
+.ink-card-main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    text-align: left;
+    padding: 0;
+}
 .ink-card-color {
     width: 100%;
     height: 136px;
@@ -800,10 +819,14 @@
     width: 15px;
     height: 15px;
 }
-.ink-card > .overline {
+.ink-card-main > .overline {
     font-size: 0.6875rem;
 }
-.ink-card h2 {
+.ink-card-name {
+    font-family: var(--display);
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
     font-size: 1.1875rem;
     margin: 5px 0;
     overflow-wrap: anywhere;
@@ -834,6 +857,58 @@
     height: 4px;
     background: var(--green);
     border-radius: 50%;
+}
+.detail-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0;
+    text-align: left;
+    border-radius: 3px;
+    text-decoration: underline dotted
+        color-mix(in oklch, currentColor 45%, transparent);
+    text-underline-offset: 4px;
+    cursor: pointer;
+}
+.detail-trigger:hover {
+    text-decoration-style: solid;
+}
+.hover-details {
+    position: fixed;
+    z-index: 100;
+    width: max-content;
+    max-width: min(300px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    overflow: auto;
+    padding: var(--space-lg);
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    box-shadow: 0 6px 24px color-mix(in oklch, var(--ink) 12%, transparent);
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+}
+.hover-details .overline {
+    display: block;
+    font-size: 0.6875rem;
+    color: var(--muted);
+}
+.detail-name {
+    display: block;
+    margin: var(--space-xs) 0;
+}
+.detail-pen-list {
+    display: grid;
+    gap: var(--space-md);
+    list-style: none;
+    padding: 0;
+    margin: var(--space-sm) 0 0;
+}
+@media (pointer: coarse) {
+    .detail-trigger {
+        min-height: 44px;
+    }
 }
 .date-filter {
     flex: 0 0 auto;
@@ -942,10 +1017,6 @@
 .badge.refill-badge {
     color: oklch(43% 0.07 75);
     background: oklch(94% 0.04 85);
-}
-.pen-list-badge {
-    display: inline-block;
-    margin-top: 8px;
 }
 .inventory-status-note {
     margin: 16px 0 0;
@@ -1914,7 +1985,7 @@
     .ink-card-color {
         height: 122px;
     }
-    .ink-card h2 {
+    .ink-card-name {
         font-size: 1.125rem;
     }
     .ink-card-color .swatch-large {

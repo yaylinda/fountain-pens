@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { Ink } from '../../models/types';
+import { HoverDetails } from './HoverDetails';
 import {
     getSwatch,
     type CollectionModel,
@@ -96,7 +97,15 @@ export function Icon({
         </svg>
     );
 }
-export function Swatch({ ink, large = false }: { ink?: Ink; large?: boolean }) {
+export function Swatch({
+    ink,
+    large = false,
+    showTitle = true,
+}: {
+    ink?: Ink;
+    large?: boolean;
+    showTitle?: boolean;
+}) {
     const swatch = getSwatch(ink);
     return (
         <span
@@ -107,7 +116,11 @@ export function Swatch({ ink, large = false }: { ink?: Ink; large?: boolean }) {
                     : undefined
             }
             title={
-                swatch ? `${ink?.name} · ${swatch.source}` : 'No color recorded'
+                showTitle
+                    ? swatch
+                        ? `${ink?.name} · ${swatch.source}`
+                        : 'No color recorded'
+                    : undefined
             }
             aria-hidden="true"
         >
@@ -118,22 +131,45 @@ export function Swatch({ ink, large = false }: { ink?: Ink; large?: boolean }) {
 export function InkNames({
     entry,
     model,
+    details = false,
 }: {
     entry?: JournalEntry;
     model: CollectionModel;
+    details?: boolean;
 }) {
     if (!entry) return <span className="muted">No ink recorded</span>;
     if (isCleaning(entry))
         return <span className="muted">Cleaned & empty</span>;
     return (
         <span className="ink-names">
-            {realInkIds(entry).map((id) => (
-                <span key={id}>
-                    <Swatch ink={model.inkById.get(id)} />
-                    {model.inkById.get(id)?.name ||
-                        'Ink no longer in inventory'}
-                </span>
-            ))}
+            {realInkIds(entry).map((id) => {
+                const ink = model.inkById.get(id);
+                return details && ink ? (
+                    <HoverDetails
+                        key={id}
+                        label={`Ink details for ${ink.brand} ${ink.name}`}
+                        details={
+                            <>
+                                <span className="overline">{ink.brand}</span>
+                                <strong className="detail-name">
+                                    {ink.name}
+                                </strong>
+                                <span className="small muted">
+                                    {ink.collection || 'Standard collection'}
+                                </span>
+                            </>
+                        }
+                    >
+                        <Swatch ink={ink} showTitle={false} />
+                        <span>{ink.name}</span>
+                    </HoverDetails>
+                ) : (
+                    <span key={id}>
+                        <Swatch ink={ink} />
+                        {ink?.name || 'Ink no longer in inventory'}
+                    </span>
+                );
+            })}
         </span>
     );
 }

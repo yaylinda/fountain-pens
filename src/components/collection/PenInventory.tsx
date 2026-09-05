@@ -121,6 +121,7 @@ export default function PenInventory({
                                     <InkNames
                                         entry={model.latest.get(pen.id)}
                                         model={model}
+                                        details
                                     />
                                     <span className="small muted block">
                                         {formatDate(
@@ -171,25 +172,27 @@ export default function PenInventory({
                                         onOpen({ kind: 'pen', item: pen })
                                     }
                                 >
-                                    <span className="overline">
-                                        {pen.brand}
+                                    <span className="pen-name-meta">
+                                        <span className="overline">
+                                            {pen.brand}
+                                        </span>
+                                        {pen.archived ? (
+                                            <span className="badge neutral">
+                                                Archived
+                                            </span>
+                                        ) : (
+                                            pen.needsRefill && (
+                                                <span className="badge refill-badge">
+                                                    Needs refill
+                                                </span>
+                                            )
+                                        )}
                                     </span>
                                     <strong>{pen.model}</strong>
                                     <span className="small muted">
                                         {pen.color || 'No finish recorded'}
                                     </span>
                                 </button>
-                                {pen.archived ? (
-                                    <span className="badge neutral pen-list-badge">
-                                        Archived
-                                    </span>
-                                ) : (
-                                    pen.needsRefill && (
-                                        <span className="badge refill-badge pen-list-badge">
-                                            Needs refill
-                                        </span>
-                                    )
-                                )}
                             </td>
                             <td data-label="Nib">
                                 <span>{pen.nibSize || '—'}</span>
@@ -201,6 +204,7 @@ export default function PenInventory({
                                 <InkNames
                                     entry={model.latest.get(pen.id)}
                                     model={model}
+                                    details
                                 />
                                 <span className="small muted block">
                                     {formatDate(model.latest.get(pen.id)?.date)}

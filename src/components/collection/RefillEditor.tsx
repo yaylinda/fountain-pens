@@ -120,8 +120,10 @@ export function RefillEditor({
             return;
         }
         const payload = refillPayload(draft);
-        if (draft.index !== undefined) updateRefillLog(payload, draft.index);
-        else addRefillLog(payload);
+        const saved =
+            draft.index !== undefined
+                ? updateRefillLog(payload, draft.index)
+                : addRefillLog(payload);
         if (updatesRefillQueue && selectedPen) {
             const needsRefill = cleaning
                 ? (draft.needsRefill ?? selectedPen.needsRefill ?? false)
@@ -135,6 +137,8 @@ export function RefillEditor({
                 : cleaning
                   ? 'Cleaning recorded.'
                   : 'Refill added to your journal.',
+            undefined,
+            saved,
         );
     };
     return (
@@ -499,7 +503,11 @@ export function RefillEditor({
                                         className="button danger"
                                         onClick={() => {
                                             deleteRefillLog(draft.index!);
-                                            onSaved('Journal entry deleted.');
+                                            onSaved(
+                                                'Journal entry deleted.',
+                                                undefined,
+                                                null,
+                                            );
                                         }}
                                     >
                                         Delete entry

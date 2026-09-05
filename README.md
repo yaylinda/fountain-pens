@@ -15,6 +15,10 @@ Pens have an optional **Needs refill** checkbox and a matching inventory filter.
 
 Open any item to edit its details and see its history. Refill entry supports searchable pen and ink choices, mixtures, cleaning events, and reusing the last pairing. Add a missing pen or ink from the refill workspace and return to the unfinished entry. Unsaved edits are protected when navigating away.
 
+Editors have their own URL and browser history entry. Back returns to the previous workspace with its filters, layout, and inventory scroll position; Forward reopens the editor. Unsaved changes are protected for browser navigation as well as in-app links. Returning from a new pen or ink restores the unfinished refill. Direct editor links can also return safely to the collection.
+
+Hover over, focus, or tap an ink name in the pen inventory to see its brand and collection. The ink grid's **In N pens** indicator previews the pens currently using that ink, including their finish and nib details. Escape or a tap outside dismisses the preview. Refill badges share the pen's brand line in list view to keep rows compact.
+
 Archive an item to remove it from the active collection while keeping its journal history. Restore it from the Archived filter. Inventory items without history can also be deleted; deleting a journal entry recalculates the latest pairing.
 
 ## Development
@@ -49,6 +53,7 @@ The legacy ink ID `NONE` represents a cleaned/empty pen. It is excluded from ink
 
 - `src/lib/collection.ts`: typed selectors, calendar-date handling, search, reference swatches, and refill validation.
 - `src/hooks/useCollection.ts`: app-level loading, retry, and refresh.
+- `src/hooks/useEditorNavigation.ts`: editor URLs, browser history, draft protection, and return positions.
 - `src/components/collection/`: dashboard, inventories, journal, editing workspaces, and shared presentation components.
 - `src/App.tsx`: navigation, draft protection, feedback, and the existing data-tools entry point.
 - `src/index.css` and `src/App.css`: design tokens, shared controls, layouts, and responsive rules.

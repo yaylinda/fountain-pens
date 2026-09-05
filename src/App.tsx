@@ -1,22 +1,9 @@
-import {
-    lazy,
-    Suspense,
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-} from 'react';
-import {
-    Link,
-    NavLink,
-    Route,
-    Routes,
-    useLocation,
-    useNavigate,
-} from 'react-router-dom';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import type { Ink, Pen } from './models/types';
-import type { EditorState } from './lib/collection';
+import type { JournalEntry } from './lib/collection';
 import { useCollection } from './hooks/useCollection';
+import { useEditorNavigation } from './hooks/useEditorNavigation';
 import { useLocalNetwork } from './context/LocalNetworkContext';
 import { useDirtyState } from './context/DirtyStateContext';
 import Overview from './components/collection/Overview';
@@ -44,30 +31,25 @@ export default function App() {
         useCollection();
     const { isLocal, isLoading: networkLoading } = useLocalNetwork();
     const { isDirty: hasSyncChanges } = useDirtyState();
-    const [editor, setEditor] = useState<EditorState | null>(null);
-    const [editorKey, setEditorKey] = useState(0);
-    const [dirty, setDirty] = useState(false);
-    const [pending, setPending] = useState<(() => void) | null>(null);
+    const {
+        editor,
+        editorRequested,
+        editorKey,
+        onOpen,
+        onClose,
+        onDirty,
+        onSaved: finishEditing,
+        pending,
+        keepEditing,
+        discard,
+    } = useEditorNavigation(model);
     const [message, setMessage] = useState('');
     const [syncOpen, setSyncOpen] = useState(false);
-    const opener = useRef<HTMLElement | null>(null);
-    const returnPosition = useRef({ top: 0, focusKey: '' });
-    const navigate = useNavigate();
     const location = useLocation();
     const canEdit = isLocal && !networkLoading;
-    const onDirty = useCallback((value: boolean) => setDirty(value), []);
     useEffect(() => {
         window.scrollTo({ top: 0 });
     }, [location.pathname]);
-    useEffect(() => {
-        if (!dirty) return;
-        const warn = (event: BeforeUnloadEvent) => {
-            event.preventDefault();
-            event.returnValue = '';
-        };
-        window.addEventListener('beforeunload', warn);
-        return () => window.removeEventListener('beforeunload', warn);
-    }, [dirty]);
     useEffect(() => {
         if (!message) return;
         const timeout = window.setTimeout(() => setMessage(''), 4500);
@@ -76,86 +58,14 @@ export default function App() {
     useEffect(() => {
         document.title = `${editor ? (editor.kind === 'refill' ? 'Refill' : editor.kind === 'pen' ? 'Pen details' : 'Ink details') : navItems.find((item) => item.to === location.pathname)?.label || 'Collection'} · Ink & nib`;
     }, [editor, location.pathname]);
-    const confirmIfDirty = (action: () => void) => {
-        if (dirty) setPending(() => action);
-        else action();
-    };
-    const openDirect = (next: EditorState) => {
-        setEditor(next);
-        setEditorKey((value) => value + 1);
-        setDirty(false);
-        setPending(null);
-        window.scrollTo({ top: 0 });
-    };
-    const onOpen = (next: EditorState) => {
-        if (next.kind !== 'refill' && next.returnTo) {
-            openDirect({
-                ...next,
-                returnTo: { ...next.returnTo, hasUnsavedChanges: true },
-            });
-            return;
-        }
-        confirmIfDirty(() => {
-            if (!editor) {
-                opener.current = document.activeElement as HTMLElement;
-                returnPosition.current = {
-                    top: window.scrollY,
-                    focusKey: opener.current?.dataset.focusKey || '',
-                };
-            }
-            openDirect(next);
-        });
-    };
-    const closeDirect = (restorePosition = true) => {
-        setEditor(null);
-        setDirty(false);
-        setPending(null);
-        window.setTimeout(() => {
-            const returnedItem =
-                restorePosition && returnPosition.current.focusKey
-                    ? [
-                          ...document.querySelectorAll<HTMLElement>(
-                              '[data-focus-key]',
-                          ),
-                      ].find(
-                          (element) =>
-                              element.dataset.focusKey ===
-                              returnPosition.current.focusKey,
-                      )
-                    : undefined;
-            const target =
-                returnedItem ||
-                (restorePosition && opener.current?.isConnected
-                    ? opener.current
-                    : document.getElementById('main-content'));
-            target?.focus({ preventScroll: true });
-            window.scrollTo({
-                top: restorePosition ? returnPosition.current.top : 0,
-            });
-        }, 0);
-    };
-    const onClose = () =>
-        confirmIfDirty(() => {
-            if (editor && editor.kind !== 'refill' && editor.returnTo)
-                openDirect({ kind: 'refill', draft: editor.returnTo });
-            else closeDirect();
-        });
-    const onSaved = (text: string, item?: Pen | Ink) => {
+    const onSaved = (
+        text: string,
+        item?: Pen | Ink,
+        entry?: JournalEntry | null,
+    ) => {
         refresh();
         setMessage(text);
-        setDirty(false);
-        if (editor && editor.kind !== 'refill' && editor.returnTo && item) {
-            const draft = { ...editor.returnTo };
-            if (editor.kind === 'pen') {
-                draft.penId = item.id;
-                draft.needsRefill = undefined;
-            } else
-                draft.inkIds = [
-                    ...draft.inkIds.filter((id) => id !== 'NONE'),
-                    item.id,
-                ];
-            openDirect({ kind: 'refill', draft });
-        } else closeDirect();
+        finishEditing(item, entry);
     };
     const backLabel =
         location.pathname === '/pens'
@@ -188,19 +98,7 @@ export default function App() {
                 Skip to collection
             </a>
             <aside className="sidebar">
-                <Link
-                    to="/"
-                    className="wordmark"
-                    onClick={(event) => {
-                        if (editor) {
-                            event.preventDefault();
-                            confirmIfDirty(() => {
-                                closeDirect(false);
-                                navigate('/');
-                            });
-                        }
-                    }}
-                >
+                <Link to="/" className="wordmark">
                     <span className="brand-mark">
                         <Icon name="pen" />
                     </span>
@@ -220,15 +118,6 @@ export default function App() {
                             end={item.to === '/'}
                             key={item.to}
                             to={item.to}
-                            onClick={(event) => {
-                                if (editor) {
-                                    event.preventDefault();
-                                    confirmIfDirty(() => {
-                                        closeDirect(false);
-                                        navigate(item.to);
-                                    });
-                                }
-                            }}
                         >
                             <Icon name={item.icon} />
                             <span>{item.label}</span>
@@ -310,18 +199,13 @@ export default function App() {
                         <div>
                             <button
                                 className="button primary small-button"
-                                onClick={() => setPending(null)}
+                                onClick={keepEditing}
                             >
                                 Keep editing
                             </button>
                             <button
                                 className="button secondary small-button"
-                                onClick={() => {
-                                    const action = pending;
-                                    setPending(null);
-                                    setDirty(false);
-                                    action();
-                                }}
+                                onClick={discard}
                             >
                                 Discard changes
                             </button>
@@ -345,6 +229,20 @@ export default function App() {
                     >
                         Your inventory hasn’t been changed. Try loading it
                         again.
+                    </EmptyState>
+                ) : editorRequested && !editor ? (
+                    <EmptyState
+                        title="This item is no longer available"
+                        action={
+                            <button
+                                className="button primary"
+                                onClick={onClose}
+                            >
+                                Back to the collection
+                            </button>
+                        }
+                    >
+                        It may have been removed. Your collection is still here.
                     </EmptyState>
                 ) : editor ? (
                     <div key={editorKey} className="page-enter">

@@ -17,6 +17,7 @@ for (const key of [
     'Node',
     'Element',
     'MutationObserver',
+    'FormData',
     'getComputedStyle',
     'Event',
     'MouseEvent',
@@ -48,7 +49,7 @@ const source = {
         {
             id: 'ink-a',
             brand: 'Diamine',
-            collection: '',
+            collection: 'Inkvent',
             name: 'Happy Holidays',
         },
         {
@@ -83,29 +84,37 @@ globalThis.fetch = async (input: string, init?: RequestInit) => {
     }
     throw new Error(`Unexpected request in isolated UI test: ${input}`);
 };
-const { render, screen, within, waitFor, cleanup, fireEvent } =
+const { render, screen, within, waitFor, cleanup, fireEvent, act } =
     await import('@testing-library/react');
 const userEvent = (await import('@testing-library/user-event')).default;
-const { MemoryRouter } = await import('react-router-dom');
+const { createMemoryRouter, createHashRouter, RouterProvider } =
+    await import('react-router-dom');
 const { default: App } = await import('../src/App');
 const { LocalNetworkProvider } =
     await import('../src/context/LocalNetworkContext');
 const { DirtyStateProvider } = await import('../src/context/DirtyStateContext');
+
+let appRouter: ReturnType<typeof createMemoryRouter>;
+const mountApp = (initialEntries = ['/']) => {
+    appRouter?.dispose();
+    appRouter = createMemoryRouter([{ path: '*', element: <App /> }], {
+        initialEntries,
+    });
+    render(
+        <LocalNetworkProvider>
+            <DirtyStateProvider>
+                <RouterProvider router={appRouter} />
+            </DirtyStateProvider>
+        </LocalNetworkProvider>,
+    );
+};
 
 const latestWrite = (filename: string) =>
     [...writes].reverse().find((write) => write.filename === filename)!;
 
 test('collection workflows work against isolated API fixtures without touching real inventory', async (t) => {
     const user = userEvent.setup({ document: dom.window.document });
-    render(
-        <MemoryRouter>
-            <LocalNetworkProvider>
-                <DirtyStateProvider>
-                    <App />
-                </DirtyStateProvider>
-            </LocalNetworkProvider>
-        </MemoryRouter>,
-    );
+    mountApp();
     await t.test('failed initial data load can be retried', async () => {
         await screen.findByRole('heading', {
             name: 'Your collection couldn’t be opened',
@@ -394,7 +403,11 @@ test('collection workflows work against isolated API fixtures without touching r
             const card = document.querySelector('.ink-card')!;
             assert.match(card.textContent!, /Népal Test/);
             assert.ok(card.querySelector('.swatch-unknown'));
-            await user.click(card);
+            await user.click(
+                within(card).getByRole('button', {
+                    name: 'Edit Sailor Népal Test',
+                }),
+            );
             assert.ok(screen.getByText('No swatch recorded yet'));
         },
     );
@@ -520,6 +533,181 @@ test('collection workflows work against isolated API fixtures without touching r
         },
     );
     await t.test(
+        'editor Back and Forward preserve inventory filters and protect unsaved changes',
+        async () => {
+            const before = writes.length;
+            await user.click(
+                screen.getByRole('link', { name: /Fountain pens/ }),
+            );
+            await user.selectOptions(
+                screen.getByRole('combobox', { name: 'Brand' }),
+                'Pilot',
+            );
+            await user.type(
+                screen.getByRole('searchbox', {
+                    name: 'Search pens, nibs, or current ink…',
+                }),
+                'falcon',
+            );
+            const returnUrl = appRouter.state.location.search;
+            await user.click(
+                screen.getByRole('button', { name: /Edit Pilot Falcon/ }),
+            );
+            assert.match(appRouter.state.location.search, /editor=pen/);
+            await act(async () => {
+                await appRouter.navigate(-1);
+            });
+            assert.equal(appRouter.state.location.search, returnUrl);
+            assert.equal(document.querySelectorAll('.pen-card').length, 1);
+            await act(async () => {
+                await appRouter.navigate(1);
+            });
+            assert.equal(screen.getByLabelText('Model').value, 'Falcon');
+            await user.type(screen.getByLabelText('Model'), ' unfinished');
+            await act(async () => {
+                await appRouter.navigate(-1);
+            });
+            assert.ok(screen.getByRole('alert'));
+            await user.click(
+                screen.getByRole('button', { name: 'Keep editing' }),
+            );
+            assert.equal(
+                screen.getByLabelText('Model').value,
+                'Falcon unfinished',
+            );
+            await act(async () => {
+                await appRouter.navigate(-1);
+            });
+            await user.click(
+                screen.getByRole('button', { name: 'Discard changes' }),
+            );
+            assert.equal(appRouter.state.location.search, returnUrl);
+            await act(async () => {
+                await appRouter.navigate(1);
+            });
+            assert.equal(screen.getByLabelText('Model').value, 'Falcon');
+            await user.click(
+                screen.getByRole('button', { name: 'Cancel', exact: true }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Clear filters' }),
+            );
+            await user.click(screen.getByRole('link', { name: /Ink cabinet/ }));
+            await user.click(
+                screen.getByRole('button', { name: 'Edit Sailor Népal Test' }),
+            );
+            assert.match(appRouter.state.location.search, /editor=ink/);
+            await act(async () => {
+                await appRouter.navigate(-1);
+            });
+            assert.ok(screen.getByRole('table', { name: 'Ink inventory' }));
+            assert.equal(writes.length, before);
+        },
+    );
+    await t.test(
+        'Back from a nested new ink restores the unfinished refill before leaving the journal editor',
+        async () => {
+            const before = writes.length;
+            await user.click(
+                screen.getByRole('link', { name: 'Refill journal' }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Log a refill' }),
+            );
+            await user.click(
+                screen.getByRole('radio', { name: /Pilot Falcon/ }),
+            );
+            await user.click(
+                screen.getByRole('checkbox', { name: /Happy Holidays/ }),
+            );
+            await user.type(
+                screen.getByLabelText('NotesOptional'),
+                'Draft survives Back',
+            );
+            await user.click(screen.getByRole('button', { name: 'New ink' }));
+            await act(async () => {
+                await appRouter.navigate(-1);
+            });
+            assert.equal(
+                screen.getByLabelText('NotesOptional').value,
+                'Draft survives Back',
+            );
+            assert.equal(
+                screen.getByRole('radio', { name: /Pilot Falcon/ }).checked,
+                true,
+            );
+            assert.equal(
+                screen.getByRole('checkbox', { name: /Happy Holidays/ })
+                    .checked,
+                true,
+            );
+            await act(async () => {
+                await appRouter.navigate(-1);
+            });
+            assert.ok(screen.getByRole('alert'));
+            await user.click(
+                screen.getByRole('button', { name: 'Keep editing' }),
+            );
+            assert.equal(
+                screen.getByLabelText('NotesOptional').value,
+                'Draft survives Back',
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Cancel', exact: true }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Discard changes' }),
+            );
+            assert.equal(appRouter.state.location.search, '');
+            assert.equal(writes.length, before);
+        },
+    );
+    await t.test(
+        'inventory previews expose ink metadata and current pens on hover, focus, and tap without editing',
+        async () => {
+            const before = writes.length;
+            await user.click(
+                screen.getByRole('link', { name: /Fountain pens/ }),
+            );
+            const label = 'Ink details for Diamine Happy Holidays';
+            await user.hover(screen.getByRole('button', { name: label }));
+            let preview = screen.getByRole('tooltip');
+            assert.match(
+                preview.textContent!,
+                /Diamine.*Happy Holidays.*Inkvent/,
+            );
+            await user.unhover(screen.getByRole('button', { name: label }));
+            await waitFor(() => assert.ok(!screen.queryByRole('tooltip')));
+            await user.click(screen.getByRole('button', { name: 'List view' }));
+            const trigger = screen.getByRole('button', { name: label });
+            await act(async () => {
+                trigger.focus();
+            });
+            assert.ok(screen.getByRole('tooltip'));
+            await user.keyboard('{Escape}');
+            assert.equal(screen.queryByRole('tooltip'), null);
+            await user.click(screen.getByRole('button', { name: 'Grid view' }));
+            await user.click(screen.getByRole('link', { name: /Ink cabinet/ }));
+            await user.click(screen.getByRole('button', { name: 'Grid view' }));
+            const indicator = screen.getByRole('button', {
+                name: 'Pens using Diamine Happy Holidays',
+            });
+            assert.match(indicator.textContent!, /In 1 pen/);
+            assert.equal(indicator.parentElement?.closest('button'), null);
+            await user.click(indicator);
+            preview = screen.getByRole('tooltip');
+            assert.match(preview.textContent!, /Pilot Falcon.*Sapphire.*Fine/);
+            assert.equal(
+                screen.queryByRole('heading', { name: 'Edit ink' }),
+                null,
+            );
+            await user.click(indicator);
+            assert.equal(screen.queryByRole('tooltip'), null);
+            await user.click(screen.getByRole('button', { name: 'List view' }));
+            assert.equal(writes.length, before);
+        },
+    );
+    await t.test(
         'empty pens can be queued independently, with saved flags in both layouts and archive exclusion',
         async () => {
             await user.click(
@@ -579,7 +767,8 @@ test('collection workflows work against isolated API fixtures without touching r
             await user.click(screen.getByRole('button', { name: 'List view' }));
             const table = screen.getByRole('table', { name: 'Pen inventory' });
             assert.equal(table.querySelectorAll('tbody tr').length, 1);
-            assert.match(table.textContent!, /Pocket writer.*Needs refill/);
+            assert.match(table.textContent!, /Needs refill.*Pocket writer/);
+            assert.ok(table.querySelector('.pen-name-meta .refill-badge'));
             await user.click(
                 screen.getByRole('button', {
                     name: /Edit New maker Pocket writer/,
@@ -860,18 +1049,73 @@ test('collection workflows work against isolated API fixtures without touching r
         },
     );
     await t.test(
+        'journal history never opens the next record after deletion and follows surviving entries when indices shift',
+        async () => {
+            await user.click(
+                screen.getByRole('link', { name: 'Refill journal' }),
+            );
+            const search = () =>
+                screen.getByRole('searchbox', {
+                    name: 'Search pens, inks, or notes…',
+                });
+            const editEntry = () =>
+                within(document.querySelector('.journal')!).getByRole(
+                    'button',
+                    { name: /Edit Pilot Falcon entry/ },
+                );
+            await user.type(search(), 'Test mixing notes');
+            await user.click(editEntry());
+            assert.match(appRouter.state.location.search, /id=1/);
+            await user.click(
+                screen.getByRole('link', { name: 'Refill journal' }),
+            );
+            await user.type(search(), 'Revised original');
+            await user.click(editEntry());
+            await user.click(
+                screen.getByRole('button', { name: 'Delete this entry' }),
+            );
+            await user.click(
+                screen.getByRole('button', {
+                    name: 'Delete entry',
+                    exact: true,
+                }),
+            );
+            await act(async () => {
+                await appRouter.navigate(1);
+            });
+            assert.ok(
+                screen.getByRole('heading', {
+                    name: 'This item is no longer available',
+                }),
+            );
+            await act(async () => {
+                await appRouter.navigate(-2);
+            });
+            assert.equal(
+                screen.getByLabelText('NotesOptional').value,
+                'Test mixing notes',
+            );
+            await user.type(
+                screen.getByLabelText('NotesOptional'),
+                ' after shifting',
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Save changes' }),
+            );
+            assert.equal(
+                latestWrite('refillLog').data[0].notes,
+                'Test mixing notes after shifting',
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Clear filters' }),
+            );
+        },
+    );
+    await t.test(
         'each inventory remembers its layout after the app remounts',
         async () => {
             cleanup();
-            render(
-                <MemoryRouter initialEntries={['/inks']}>
-                    <LocalNetworkProvider>
-                        <DirtyStateProvider>
-                            <App />
-                        </DirtyStateProvider>
-                    </LocalNetworkProvider>
-                </MemoryRouter>,
-            );
+            mountApp(['/inks']);
             await screen.findByRole('table', { name: 'Ink inventory' });
             assert.equal(
                 screen
@@ -897,15 +1141,7 @@ test('collection workflows work against isolated API fixtures without touching r
             cleanup();
             localNetwork = false;
             const before = writes.length;
-            render(
-                <MemoryRouter initialEntries={['/pens']}>
-                    <LocalNetworkProvider>
-                        <DirtyStateProvider>
-                            <App />
-                        </DirtyStateProvider>
-                    </LocalNetworkProvider>
-                </MemoryRouter>,
-            );
+            mountApp(['/pens']);
             await screen.findByText(
                 'Your collection is in view-only mode outside your home network.',
             );
@@ -946,15 +1182,7 @@ test('collection workflows work against isolated API fixtures without touching r
                 throw new Error('Storage blocked');
             };
             try {
-                render(
-                    <MemoryRouter initialEntries={['/pens']}>
-                        <LocalNetworkProvider>
-                            <DirtyStateProvider>
-                                <App />
-                            </DirtyStateProvider>
-                        </LocalNetworkProvider>
-                    </MemoryRouter>,
-                );
+                mountApp(['/pens']);
                 await screen.findByRole('table', { name: 'Pen inventory' });
                 await user.click(
                     screen.getByRole('button', { name: 'Grid view' }),
@@ -981,7 +1209,93 @@ test('collection workflows work against isolated API fixtures without touching r
             }
         },
     );
+    await t.test(
+        'direct editor URLs close safely and missing items remain recoverable',
+        async () => {
+            cleanup();
+            mountApp(['/pens?editor=pen&id=pen-a']);
+            await screen.findByRole('heading', { name: 'View pen' });
+            await user.click(
+                screen.getByRole('button', { name: 'Back to pens' }),
+            );
+            assert.equal(appRouter.state.location.search, '');
+            await act(async () => {
+                await appRouter.navigate('/inks?editor=ink&id=missing');
+            });
+            assert.ok(
+                screen.getByRole('heading', {
+                    name: 'This item is no longer available',
+                }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Back to the collection' }),
+            );
+            assert.equal(appRouter.state.location.search, '');
+        },
+    );
+    await t.test(
+        'native hash history Back and Forward keep the editor and address in sync',
+        async () => {
+            cleanup();
+            appRouter.dispose();
+            localNetwork = true;
+            window.history.replaceState(null, '', '/#/pens?brand=Pilot');
+            appRouter = createHashRouter([{ path: '*', element: <App /> }]);
+            render(
+                <LocalNetworkProvider>
+                    <DirtyStateProvider>
+                        <RouterProvider router={appRouter} />
+                    </DirtyStateProvider>
+                </LocalNetworkProvider>,
+            );
+            const step = async (delta: number) => {
+                await act(async () => {
+                    window.history.go(delta);
+                    await new Promise((resolve) => setTimeout(resolve, 30));
+                });
+            };
+            await user.click(
+                await screen.findByRole('button', {
+                    name: /Edit Pilot Falcon/,
+                }),
+            );
+            assert.match(window.location.hash, /editor=pen/);
+            await step(-1);
+            assert.equal(window.location.hash, '#/pens?brand=Pilot');
+            assert.equal(
+                screen.queryByRole('heading', { name: 'Edit pen' }),
+                null,
+            );
+            await step(1);
+            assert.ok(screen.getByRole('heading', { name: 'Edit pen' }));
+            await user.type(screen.getByLabelText('Model'), ' unfinished');
+            await step(-1);
+            assert.ok(screen.getByRole('alert'));
+            await user.click(
+                screen.getByRole('button', { name: 'Keep editing' }),
+            );
+            assert.match(window.location.hash, /editor=pen/);
+            assert.equal(
+                screen.getByLabelText('Model').value,
+                'Falcon unfinished',
+            );
+            await step(-1);
+            await user.click(
+                screen.getByRole('button', { name: 'Discard changes' }),
+            );
+            await waitFor(() =>
+                assert.equal(window.location.hash, '#/pens?brand=Pilot'),
+            );
+            await waitFor(() =>
+                assert.equal(
+                    screen.queryByRole('heading', { name: 'Edit pen' }),
+                    null,
+                ),
+            );
+        },
+    );
     cleanup();
+    appRouter.dispose();
     await waitFor(() =>
         assert.equal(document.querySelector('.app-shell'), null),
     );

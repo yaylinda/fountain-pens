@@ -4,6 +4,7 @@ import type {
     Collection,
     CollectionModel,
     EditorState,
+    JournalEntry,
 } from '../../lib/collection';
 import { Icon } from './Primitives';
 
@@ -13,7 +14,11 @@ export interface EditorProps {
     canEdit: boolean;
     onClose: () => void;
     onDirty: (value: boolean) => void;
-    onSaved: (message: string, item?: Pen | Ink) => void;
+    onSaved: (
+        message: string,
+        item?: Pen | Ink,
+        entry?: JournalEntry | null,
+    ) => void;
     onOpen: (editor: EditorState) => void;
     backLabel: string;
 }
