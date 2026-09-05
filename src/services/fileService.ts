@@ -1,3 +1,4 @@
+import { captureSaveOrigin, celebrateSave } from '../lib/saveCelebration';
 import { Ink, Pen, RefillLog } from '../models/types';
 
 /**
@@ -31,6 +32,7 @@ export const writeJsonFile = async <T>(
     filename: string,
     data: T,
 ): Promise<boolean> => {
+    const origin = captureSaveOrigin();
     try {
         const response = await fetch(`/api/save-json`, {
             method: 'POST',
@@ -50,6 +52,7 @@ export const writeJsonFile = async <T>(
             return false;
         }
 
+        celebrateSave(origin);
         return true;
     } catch (error) {
         console.error(`Error saving ${filename}.json:`, error);
