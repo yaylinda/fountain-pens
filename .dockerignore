@@ -16,8 +16,9 @@ dist/
 *.swp
 *.swo
 
-# Scripts (not needed for production)
-scripts/
+# Exclude tooling, but include the swatch reference imported by the frontend.
+scripts/*
+!scripts/output.json
 
 # Local data (production uses mounted volume)
 data/
