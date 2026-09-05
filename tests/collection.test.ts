@@ -228,3 +228,43 @@ test('the real source inventory is coherent and legacy index fields do not deter
         ).length,
     );
 });
+
+test('collection loading shares requests, rejects malformed responses, and retries', async () => {
+    const { loadData, isDataLoaded, getAllPens } = await import('../src/services/dataService');
+    const originalFetch = globalThis.fetch;
+    let calls = 0;
+    let respond!: (response: Response) => void;
+    globalThis.fetch = async () => {
+        calls += 1;
+        return new Promise<Response>((resolve) => { respond = resolve; });
+    };
+    try {
+        const first = loadData();
+        const second = loadData();
+        assert.equal(first, second);
+        assert.equal(calls, 1);
+        respond(Response.json({ inks: [], pens: [] }));
+        await assert.rejects(first, /Invalid collection response/);
+        assert.equal(isDataLoaded(), false);
+        assert.deepEqual(getAllPens(), []);
+
+        for (const invalid of [null, { inks: {}, pens: [], refillLog: [] }]) {
+            const retry = loadData();
+            respond(Response.json(invalid));
+            await assert.rejects(retry, /Invalid collection response/);
+            assert.equal(isDataLoaded(), false);
+        }
+
+        const retry = loadData();
+        const other = loadData();
+        assert.equal(retry, other);
+        respond(Response.json({ inks: [], pens: [pen('loaded')], refillLog: [] }));
+        await retry;
+        assert.equal(isDataLoaded(), true);
+        assert.equal(getAllPens()[0].id, 'loaded');
+        await loadData();
+        assert.equal(calls, 4);
+    } finally {
+        globalThis.fetch = originalFetch;
+    }
+});
