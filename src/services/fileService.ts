@@ -1,3 +1,4 @@
+import { captureSaveOrigin, celebrateSave } from '../lib/saveCelebration';
 import { Ink, Pen, RefillLog } from '../models/types';
 
 /**
@@ -33,10 +34,12 @@ export const writeJsonFile = async <T>(
     filename: string,
     data: T,
 ): Promise<boolean> => {
+    // Capture the initiating control before a queued write waits or the editor closes.
+    const origin = captureSaveOrigin();
     // Snapshot at invocation time; later edits must not change queued payloads.
     const body = JSON.stringify({ filename, data });
     const previous = pendingWrites.get(filename);
-    const send = () => sendJsonFile(filename, body);
+    const send = () => sendJsonFile(filename, body, origin);
     const write = previous ? previous.then(send, send) : send();
     pendingWrites.set(filename, write);
     const cleanup = () => {
@@ -46,7 +49,11 @@ export const writeJsonFile = async <T>(
     return write;
 };
 
-const sendJsonFile = async (filename: string, body: string): Promise<boolean> => {
+const sendJsonFile = async (
+    filename: string,
+    body: string,
+    origin: ReturnType<typeof captureSaveOrigin>,
+): Promise<boolean> => {
     try {
         const response = await fetch(`/api/save-json`, {
             method: 'POST',
@@ -63,6 +70,7 @@ const sendJsonFile = async (filename: string, body: string): Promise<boolean> =>
             return false;
         }
 
+        celebrateSave(origin);
         return true;
     } catch (error) {
         console.error(`Error saving ${filename}.json:`, error);

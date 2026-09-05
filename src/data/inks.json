@@ -474,13 +474,13 @@
     "id": "ink_78",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "Multishader Lavender (Blue Shimmer)"
+    "name": "Multishader Lavender"
   },
   {
     "id": "ink_79",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "Multishader Rainbow in a Bottle (Gold Shimmer)"
+    "name": "Multishader Rainbow in a Bottle"
   },
   {
     "id": "ink_80",
@@ -771,7 +771,7 @@
   {
     "brand": "Birmingham Pen Company",
     "collection": "",
-    "name": "Neutron Star Twinkle (Hybrid, Twinkle Formula)",
+    "name": "Neutron Star Twinkle",
     "id": "02b23862-6f58-4c69-8b39-a2e8ae3a6af4"
   },
   {
@@ -849,19 +849,19 @@
   {
     "brand": "Wearingeul",
     "collection": "",
-    "name": "A Dream Within a Dream (Edgar Allan Poe)",
+    "name": "A Dream Within a Dream",
     "id": "a1c5596c-2fce-4993-8d99-4bd09dabc7bf"
   },
   {
     "brand": "Wearingeul",
     "collection": "",
-    "name": "Twelfth Night (William Shakespeare)",
+    "name": "Twelfth Night",
     "id": "29e98327-ff17-4f74-a17b-4cf86d7cb160"
   },
   {
     "brand": "Wearingeul",
     "collection": "",
-    "name": "Little Lord Fauntleroy (Frances Hodgson Burnett)",
+    "name": "Little Lord Fauntleroy",
     "id": "36b696cf-eaac-442e-af68-66ad21e4fffb"
   },
   {
@@ -872,153 +872,176 @@
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 01] Celestial Skies",
     "id": "b0f3e5a1-3b1b-4b7f-9120-0a1ce5b8f101"
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 02] Energy",
-    "id": "e4a9b7d2-91c0-4f53-8f3d-2c4a6c8b9a02"
+    "id": "e4a9b7d2-91c0-4f53-8f3d-2c4a6c8b9a02",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 03] Carousel",
-    "id": "c9d2f4a7-5b63-49e8-9b16-3e9a8c4d3f03"
+    "id": "c9d2f4a7-5b63-49e8-9b16-3e9a8c4d3f03",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 04] Smoky Tobacco",
-    "id": "a1b4c6d8-7e29-4b31-8c5f-4f2d9e7b5a04"
+    "id": "a1b4c6d8-7e29-4b31-8c5f-4f2d9e7b5a04",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 05] Marie Rose",
-    "id": "f2c7e9b1-4d3a-4f20-92bc-5a7c3e9d6b05"
+    "id": "f2c7e9b1-4d3a-4f20-92bc-5a7c3e9d6b05",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 06] Fern and Fog",
-    "id": "d7e1a3c4-8b52-4f6e-9d21-6c8b5a2f7c06"
+    "id": "d7e1a3c4-8b52-4f6e-9d21-6c8b5a2f7c06",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 07] Blush",
-    "id": "e8f2b4d5-9c63-4a7e-8f32-7d9c6b3e8d07"
+    "id": "e8f2b4d5-9c63-4a7e-8f32-7d9c6b3e8d07",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 08] Dream Catcher",
-    "id": "a3c5e7f9-1d2b-4c8e-9a43-8e1f7d4c9e08"
+    "id": "a3c5e7f9-1d2b-4c8e-9a43-8e1f7d4c9e08",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 09] Bittersweet",
-    "id": "b4d6f8a2-2e3c-4d9f-8b54-9f2e8c5d0f09"
+    "id": "b4d6f8a2-2e3c-4d9f-8b54-9f2e8c5d0f09",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 10] Nostalgia",
-    "id": "c5e7a9b3-3f4d-4e10-9c65-a03f9d6e1a10"
+    "id": "c5e7a9b3-3f4d-4e10-9c65-a03f9d6e1a10",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 11] Brrr!!!",
-    "id": "d6f8b1c4-405e-4f21-8d76-b14a0e7f2b11"
+    "id": "d6f8b1c4-405e-4f21-8d76-b14a0e7f2b11",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 12] Bubbly",
-    "id": "e709c2d5-516f-4a32-9e87-c25b1f803c12"
+    "id": "e709c2d5-516f-4a32-9e87-c25b1f803c12",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 13] Molten Basalt",
-    "id": "f81ad3e6-6270-4b43-8f98-d36c20a14d13"
+    "id": "f81ad3e6-6270-4b43-8f98-d36c20a14d13",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 14] Mittens",
-    "id": "a92be4f7-7381-4c54-9fa9-e47d31b25e14"
+    "id": "a92be4f7-7381-4c54-9fa9-e47d31b25e14",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 15] Frostbite",
-    "id": "ba3cf508-8492-4d65-80ba-f58e42c36f15"
+    "id": "ba3cf508-8492-4d65-80ba-f58e42c36f15",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 16] Ruby Taffeta",
-    "id": "cb4d0619-95a3-4e76-91cb-069f53d47016"
+    "id": "cb4d0619-95a3-4e76-91cb-069f53d47016",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 17] Gala",
-    "id": "dc5e172a-a6b4-4f87-92dc-17a064e58117"
+    "id": "dc5e172a-a6b4-4f87-92dc-17a064e58117",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 18] Laurel",
-    "id": "ed6f283b-b7c5-4098-83ed-28b175f69218"
+    "id": "ed6f283b-b7c5-4098-83ed-28b175f69218",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 19] Overcast",
-    "id": "fe70394c-c8d6-41a9-94fe-39c28607a319"
+    "id": "fe70394c-c8d6-41a9-94fe-39c28607a319",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 20] Ambience",
-    "id": "0f814a5d-d9e7-42ba-95af-4ad39718b420"
+    "id": "0f814a5d-d9e7-42ba-95af-4ad39718b420",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 21] Chaos",
-    "id": "10925b6e-eaf8-43cb-96b0-5be4a829c521"
+    "id": "10925b6e-eaf8-43cb-96b0-5be4a829c521",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 22] Pineapple Spritz",
-    "id": "21a36c7f-fb09-44dc-a7c1-6cf5b93ad622"
+    "id": "21a36c7f-fb09-44dc-a7c1-6cf5b93ad622",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 23] Let it Snow",
     "id": "32b47d80-0c1a-45ed-b8d2-7d06ca4be723"
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 24] Antler",
-    "id": "43c58e91-1d2b-46fe-89e3-8e17db5cf824"
+    "id": "43c58e91-1d2b-46fe-89e3-8e17db5cf824",
+    "archived": true
   },
   {
     "brand": "Diamine",
-    "collection": "Teal Edition (2025)",
+    "collection": "Teal Edition 2025",
     "name": "[Day 25] The Myrrh the Merrier",
-    "id": "4f7b9c12-2a64-4e8d-9c33-bf91d7f02d25"
+    "id": "4f7b9c12-2a64-4e8d-9c33-bf91d7f02d25",
+    "archived": true
   },
   {
     "brand": "Wearingeul",
@@ -1042,37 +1065,43 @@
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 01] Martian Dust",
-    "id": "c6c2140c-33b6-4e3a-8c88-1a88cf7abe9a"
+    "id": "c6c2140c-33b6-4e3a-8c88-1a88cf7abe9a",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 02] Apollon",
-    "id": "5c0f26a9-6d84-4fb5-a7b6-e51ac6d7e073"
+    "id": "5c0f26a9-6d84-4fb5-a7b6-e51ac6d7e073",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 03] Erebus Crater",
-    "id": "cb0ef579-ce16-4e6e-948b-f90ade865f35"
+    "id": "cb0ef579-ce16-4e6e-948b-f90ade865f35",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 04] Milky Sea",
-    "id": "00901e82-2a3a-4e00-8551-2eac175fa927"
+    "id": "00901e82-2a3a-4e00-8551-2eac175fa927",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 05] The Void",
-    "id": "53ccf82d-3fbc-4e87-85a5-2e2ae260d1d8"
+    "id": "53ccf82d-3fbc-4e87-85a5-2e2ae260d1d8",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 06] Sungrazing Comet",
-    "id": "84ff6fab-af50-4cc9-a355-e731058a8901"
+    "id": "84ff6fab-af50-4cc9-a355-e731058a8901",
+    "archived": true
   },
   {
     "brand": "Colorverse",
@@ -1084,19 +1113,22 @@
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 08] Snow Angel",
-    "id": "9b8ac150-3dd7-4458-8ce3-7fb036e49753"
+    "id": "9b8ac150-3dd7-4458-8ce3-7fb036e49753",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 09] Morning Frost on Mars",
-    "id": "7432917e-a077-4e7d-9380-0fdcd7c12152"
+    "id": "7432917e-a077-4e7d-9380-0fdcd7c12152",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 10] Flame Nebula",
-    "id": "ada29d97-2939-4592-bbe8-9d6b443ef6ec"
+    "id": "ada29d97-2939-4592-bbe8-9d6b443ef6ec",
+    "archived": true
   },
   {
     "brand": "Colorverse",
@@ -1108,78 +1140,91 @@
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 12] Blood Falls",
-    "id": "15a6a86f-4bde-46a7-b3d8-f6c510967fa5"
+    "id": "15a6a86f-4bde-46a7-b3d8-f6c510967fa5",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 13] Golden Mist",
-    "id": "ef0d1de4-aa49-40e8-8943-9f21165394b0"
+    "id": "ef0d1de4-aa49-40e8-8943-9f21165394b0",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 14] MAVEN Mission",
-    "id": "f886df8a-6298-41b4-9c3f-413639259c2a"
+    "id": "f886df8a-6298-41b4-9c3f-413639259c2a",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 15] Follow the Water",
-    "id": "23199a63-630e-48a7-94a2-87d235f1ff90"
+    "id": "23199a63-630e-48a7-94a2-87d235f1ff90",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 16] Polar Night",
-    "id": "67743f6e-d2bc-48b0-a65b-e93a1a6be6e6"
+    "id": "67743f6e-d2bc-48b0-a65b-e93a1a6be6e6",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 17] Diamond Planet",
-    "id": "f2691994-dd7d-4380-90c0-780f849ef72c"
+    "id": "f2691994-dd7d-4380-90c0-780f849ef72c",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 18] Red Aurora",
-    "id": "0bddcb10-a8c6-4f4d-98a2-0f3e1a6f29bc"
+    "id": "0bddcb10-a8c6-4f4d-98a2-0f3e1a6f29bc",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 19] Cosmic Reef",
-    "id": "69665bf3-ae0f-43b0-a05d-bcc58ffd9d0a"
+    "id": "69665bf3-ae0f-43b0-a05d-bcc58ffd9d0a",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 20] Golden Airglow",
-    "id": "d7d62374-4d2b-4b52-ab89-38148905c0c5"
+    "id": "d7d62374-4d2b-4b52-ab89-38148905c0c5",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 21] Pink Salt",
-    "id": "7eceaf63-3f20-4a1d-a48e-30b83f9e9f92"
+    "id": "7eceaf63-3f20-4a1d-a48e-30b83f9e9f92",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 22] Sojourner",
-    "id": "c51cd8b9-554b-458c-bc52-6f2b59c29ebf"
+    "id": "c51cd8b9-554b-458c-bc52-6f2b59c29ebf",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 23] Lunar Black",
-    "id": "f824971b-6f05-4c87-893f-e922f22e4a00"
+    "id": "f824971b-6f05-4c87-893f-e922f22e4a00",
+    "archived": true
   },
   {
     "brand": "Colorverse",
     "collection": "2025",
     "name": "[Day 24] Winter Wonderland",
-    "id": "0cc4369d-8e25-4422-93fd-0cc79e7c0d65"
+    "id": "0cc4369d-8e25-4422-93fd-0cc79e7c0d65",
+    "archived": true
   }
 ]

@@ -5,6 +5,7 @@ import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
+import { configureResponseDelivery, serveFrontend } from './server/http-delivery.js';
 
 const execAsync = promisify(exec);
 
@@ -155,6 +156,7 @@ async function initializeDataFiles() {
 }
 
 // Middleware
+configureResponseDelivery(app);
 app.use(express.json({ limit: '10mb' }));
 
 // Health check endpoint
@@ -419,13 +421,7 @@ app.post('/api/git/push', async (req, res) => {
     }
 });
 
-// Serve static files from the dist directory
-app.use(express.static(path.join(__dirname, 'dist')));
-
-// SPA fallback - serve index.html for all non-API routes
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
+serveFrontend(app, path.join(__dirname, 'dist'));
 
 // Pull latest data from git on startup
 async function pullLatestData() {
