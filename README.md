@@ -60,4 +60,17 @@ The legacy ink ID `NONE` represents a cleaned/empty pen. It is excluded from ink
 
 Swatches use the existing `scripts/output.json` reference, with a user-recorded `colorHex` taking precedence. Unmatched inks display an explicit unknown swatch. These are approximate screen colors, not photographic ink samples. Fonts are self-hosted in `public/fonts` with their OFL licenses.
 
+## Production delivery
+
+The Express server negotiates response compression. Vite's fingerprinted `/assets/` files are cached for one year with `immutable`; HTML revalidates, and API responses use `no-store` so inventory stays fresh. Missing assets return 404 rather than the app document. Unversioned files such as fonts and the favicon retain revalidation.
+
+To compare response-body transfer sizes using the same local build and inventory:
+
+```sh
+npm run build
+node scripts/measure-delivery.mjs
+```
+
+The benchmark runs temporary local HTTP servers and performs no saves or git operations. On the September 5 snapshot, initial JS/CSS plus inventory fell from 448,376 to 127,240 bytes with gzip (71.6%). This excludes HTML, fonts, and protocol overhead and measures transfer size, not browser paint time.
+
 Read [the application review](docs/app-review.md) for findings and implementation decisions.

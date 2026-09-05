@@ -8,7 +8,7 @@ await mkdir(temporaryRoot, { recursive: true });
 const output = await mkdtemp(join(temporaryRoot, 'collection-tests-'));
 try {
     await build({
-        entryPoints: ['tests/collection.test.ts', 'tests/workflows.test.tsx'],
+        entryPoints: ['tests/collection.test.ts', 'tests/workflows.test.tsx', 'tests/http-delivery.test.mjs'],
         outdir: output,
         outExtension: { '.js': '.mjs' },
         bundle: true,
@@ -23,6 +23,7 @@ try {
             '--test',
             join(output, 'collection.test.mjs'),
             join(output, 'workflows.test.mjs'),
+            join(output, 'http-delivery.test.mjs'),
         ],
         { stdio: 'inherit', env: { ...process.env, TZ: 'America/Chicago' } },
     );
