@@ -3,6 +3,8 @@ export interface Ink {
     brand: string;
     collection: string;
     name: string;
+    colorHex?: string;
+    archived?: boolean;
 }
 
 export interface Pen {
@@ -12,6 +14,8 @@ export interface Pen {
     color: string;
     nibSize: string;
     nibType: string;
+    archived?: boolean;
+    needsRefill?: boolean;
 }
 
 export interface RefillLog {

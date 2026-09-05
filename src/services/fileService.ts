@@ -6,29 +6,20 @@ import { Ink, Pen, RefillLog } from '../models/types';
 export const showNotification = (message: string, isError = false): void => {
     // Create a toast element
     const toast = document.createElement('div');
-    toast.className = `toast ${isError ? 'error' : 'success'}`;
+    toast.className = `save-notification ${isError ? 'error' : 'success'}`;
     toast.textContent = message;
-    toast.style.position = 'fixed';
-    toast.style.bottom = '20px';
-    toast.style.right = '20px';
-    toast.style.padding = '10px 20px';
-    toast.style.borderRadius = '4px';
-    toast.style.color = 'white';
-    toast.style.backgroundColor = isError ? '#f44336' : '#4caf50';
-    toast.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
-    toast.style.zIndex = '9999';
-    toast.style.transition = 'opacity 0.3s';
+    toast.setAttribute('role', isError ? 'alert' : 'status');
 
     // Add to document
     document.body.appendChild(toast);
 
     // Fade out and remove after 3 seconds
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => {
-            document.body.removeChild(toast);
-        }, 300);
-    }, 3000);
+    setTimeout(
+        () => {
+            toast.remove();
+        },
+        isError ? 8000 : 3000,
+    );
 };
 
 /**
@@ -38,7 +29,7 @@ export const showNotification = (message: string, isError = false): void => {
  */
 export const writeJsonFile = async <T>(
     filename: string,
-    data: T
+    data: T,
 ): Promise<boolean> => {
     try {
         const response = await fetch(`/api/save-json`, {
@@ -59,7 +50,6 @@ export const writeJsonFile = async <T>(
             return false;
         }
 
-        showNotification(`${filename} data saved successfully`);
         return true;
     } catch (error) {
         console.error(`Error saving ${filename}.json:`, error);
