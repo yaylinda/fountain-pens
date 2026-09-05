@@ -119,7 +119,7 @@
     "color": "Aquatic",
     "nibSize": "Medium",
     "nibType": "Steel",
-    "needsRefill": true
+    "needsRefill": false
   },
   {
     "id": "pen_16",
