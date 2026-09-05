@@ -405,55 +405,64 @@
     "id": "ink_68",
     "brand": "Colorverse",
     "collection": "2024 Special Ink",
-    "name": "[🫙] 2024 Blue Dragon (Blue, Silver, Gold Shimmers)"
+    "name": "[🫙] 2024 Blue Dragon (Blue, Silver, Gold Shimmers)",
+    "archived": true
   },
   {
     "id": "ink_69",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "Trecolori Green Sheen (Red Color / Pink Glitter)"
+    "name": "Trecolori Green Sheen (Red Color / Pink Glitter)",
+    "archived": true
   },
   {
     "id": "ink_70",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "Trecolori Green Sheen (Purple Color / Blue Glitter)"
+    "name": "Trecolori Green Sheen (Purple Color / Blue Glitter)",
+    "archived": true
   },
   {
     "id": "ink_71",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "[🫙] Trecolori Gold Sheen (Purple Color / Silver + Rainbow Glitter)"
+    "name": "[🫙] Trecolori Gold Sheen (Purple Color / Silver + Rainbow Glitter)",
+    "archived": true
   },
   {
     "id": "ink_72",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "Trecolori Gold Sheen (Magenta Color / Pink Glitter)"
+    "name": "Trecolori Gold Sheen (Magenta Color / Pink Glitter)",
+    "archived": true
   },
   {
     "id": "ink_73",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "Trecolori Red Sheen (Green Color / Rainbow Glitter)"
+    "name": "Trecolori Red Sheen (Green Color / Rainbow Glitter)",
+    "archived": true
   },
   {
     "id": "ink_74",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "Trecolori Red Sheen (Turquoise Color / Silver Glitter)"
+    "name": "Trecolori Red Sheen (Turquoise Color / Silver Glitter)",
+    "archived": true
   },
   {
     "id": "ink_75",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "Trecolori Red Sheen (Teal Color / Pink Glitter)"
+    "name": "Trecolori Red Sheen (Teal Color / Pink Glitter)",
+    "archived": true
   },
   {
     "id": "ink_76",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "[🫙] Trecolori Red Sheen (Ultramarine Color / Green + Gold + Rainbow Glitter)"
+    "name": "[🫙] Trecolori Red Sheen (Ultramarine Color / Green + Gold + Rainbow Glitter)",
+    "archived": true
   },
   {
     "id": "ink_77",
@@ -477,7 +486,8 @@
     "id": "ink_80",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "Fairy Dust (Silver Shimmer)"
+    "name": "Fairy Dust (Silver Shimmer)",
+    "archived": true
   },
   {
     "id": "ink_81",
@@ -489,55 +499,64 @@
     "id": "ink_82",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "[DEPRECATED] Trecolori Gold Sheen (Purple Color / Silver Glitter)"
+    "name": "[DEPRECATED] Trecolori Gold Sheen (Purple Color / Silver Glitter)",
+    "archived": true
   },
   {
     "id": "ink_83",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "[DEPRECATED] Trecolori Gold Sheen (Purple Color / Rainbow Glitter)"
+    "name": "[DEPRECATED] Trecolori Gold Sheen (Purple Color / Rainbow Glitter)",
+    "archived": true
   },
   {
     "id": "ink_84",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Gold Glitter)"
+    "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Gold Glitter)",
+    "archived": true
   },
   {
     "id": "ink_85",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Rainbow Glitter)"
+    "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Rainbow Glitter)",
+    "archived": true
   },
   {
     "id": "ink_86",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Green Glitter)"
+    "name": "[DEPRECATED] Trecolori Red Sheen (Ultramarine Color / Green Glitter)",
+    "archived": true
   },
   {
     "id": "ink_87",
     "brand": "Kiwi Inks",
     "collection": "",
-    "name": "[DEPRECATED] Glamorous Peacock (green glitter)"
+    "name": "[DEPRECATED] Glamorous Peacock (green glitter)",
+    "archived": true
   },
   {
     "id": "ink_88",
     "brand": "Colorverse",
     "collection": "2024 Special Ink",
-    "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Blue)"
+    "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Blue)",
+    "archived": true
   },
   {
     "id": "ink_89",
     "brand": "Colorverse",
     "collection": "2024 Special Ink",
-    "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Silver)"
+    "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Silver)",
+    "archived": true
   },
   {
     "id": "ink_90",
     "brand": "Colorverse",
     "collection": "2024 Special Ink",
-    "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Gold)"
+    "name": "[DEPRECATED] 2024 Blue Dragon (Glistening Gold)",
+    "archived": true
   },
   {
     "id": "ink_91",

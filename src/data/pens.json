@@ -61,7 +61,8 @@
     "model": "Dialog CC",
     "color": "White",
     "nibSize": "Fine",
-    "nibType": "Gold, 14k"
+    "nibType": "Gold, 14k",
+    "archived": true
   },
   {
     "id": "pen_9",
@@ -117,7 +118,8 @@
     "model": "AL-Star",
     "color": "Aquatic",
     "nibSize": "Medium",
-    "nibType": "Steel"
+    "nibType": "Steel",
+    "needsRefill": true
   },
   {
     "id": "pen_16",
@@ -269,7 +271,8 @@
     "model": "Nautilus - Cephalopod",
     "color": "Black / Rose Gold",
     "nibSize": "Medium",
-    "nibType": "Gold, 14k"
+    "nibType": "Gold, 14k",
+    "archived": true
   },
   {
     "id": "pen_35",
@@ -277,7 +280,8 @@
     "model": "Regatta Sport",
     "color": "Santorini Blue",
     "nibSize": "Omniflex",
-    "nibType": "Steel"
+    "nibType": "Steel",
+    "archived": true
   },
   {
     "id": "pen_36",
@@ -285,7 +289,8 @@
     "model": "Regatta",
     "color": "Mondrian",
     "nibSize": "Omniflex",
-    "nibType": "Steel"
+    "nibType": "Steel",
+    "archived": true
   },
   {
     "brand": "Pilot",
@@ -317,7 +322,8 @@
     "color": "Pastel Blue",
     "nibSize": "Fine",
     "nibType": "Steel",
-    "id": "871ae877-9a35-48c7-874d-50930ebc8bbe"
+    "id": "871ae877-9a35-48c7-874d-50930ebc8bbe",
+    "archived": true
   },
   {
     "id": "pen_meeas3",
