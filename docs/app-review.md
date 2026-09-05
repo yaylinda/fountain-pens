@@ -25,7 +25,7 @@ The original source contains 48 pens, 194 ink records including the `NONE` place
 
 ## User flows
 
-1. The desk prioritizes latest pairings and offers **Log a refill**.
+1. The desk prioritizes latest pairings and offers **Log a refill**. Both inventories offer List and Grid views, remembering the choice separately in this browser without changing filters or sorting.
 2. Every inventory item opens a consistent details/edit workspace; history links open the corresponding journal entry.
 3. Refill entry supports one ink or a mix, a last-pairing shortcut, and a separate cleaning choice.
 4. Creating an inventory item during a refill preserves the date, pen, inks, and notes. The resumed refill remains protected as an unfinished draft.
@@ -42,8 +42,8 @@ The dashboard describes current pairings as inferred from the latest recorded en
 
 - TypeScript compilation and Vite production build: passed.
 - ESLint; the existing two Fast Refresh warnings in the network and dirty-state contexts remain outside the redesign.
-- 22 passing automated tests, including domain tests for mixtures, cleanings, archive counts, deterministic ordering, deletions, calendar dates, search, missing references, payloads, and real source-data integrity.
-- Isolated DOM interaction tests for load retry, new free-text inventory values, edits/cancellation, creating ink during refill entry, filtered entry editing, cleaning/deletion, archive/restore, and accent-insensitive search.
+- 26 passing automated tests, including domain tests for mixtures, cleanings, archive counts, deterministic ordering, deletions, calendar dates, search, missing references, payloads, and real source-data integrity.
+- Isolated DOM interaction tests for load retry, new free-text inventory values, edits/cancellation, creating ink during refill entry, filtered entry editing, cleaning/deletion, archive/restore, accent-insensitive search, and list/grid preferences with preserved filters and editor navigation.
 - Read-only local HTTP checks confirmed the inventory API returns all three source collections and both self-hosted WOFF2 fonts load.
 - Static responsive/accessibility review: semantic navigation, labels, focus outlines, keyboard-operable choices, explicit empty/error states, reduced motion, and small-screen layouts.
 

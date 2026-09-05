@@ -401,6 +401,159 @@ test('collection workflows work against isolated API fixtures without touching r
         },
     );
     await t.test(
+        'pen grid preserves filters, sorting, and the refill shortcut',
+        async () => {
+            const before = writes.length;
+            await user.click(
+                screen.getByRole('link', { name: /Fountain pens/ }),
+            );
+            assert.ok(screen.getByRole('table', { name: 'Pen inventory' }));
+            await user.selectOptions(
+                screen.getByRole('combobox', { name: 'Brand' }),
+                'Pilot',
+            );
+            await user.selectOptions(
+                screen.getByRole('combobox', { name: 'Sort collection' }),
+                'uses',
+            );
+            await user.type(
+                screen.getByRole('searchbox', {
+                    name: 'Search pens, nibs, or current ink…',
+                }),
+                'falcon',
+            );
+            await user.click(screen.getByRole('button', { name: 'Grid view' }));
+            assert.equal(
+                screen
+                    .getByRole('button', { name: 'Grid view' })
+                    .getAttribute('aria-pressed'),
+                'true',
+            );
+            assert.equal(document.querySelectorAll('.pen-card').length, 1);
+            assert.equal(
+                screen.getByRole('combobox', { name: 'Brand' }).value,
+                'Pilot',
+            );
+            assert.equal(
+                screen.getByRole('combobox', { name: 'Sort collection' }).value,
+                'uses',
+            );
+            const card = document.querySelector('.pen-card')!;
+            assert.match(card.textContent!, /Fine/);
+            assert.match(card.textContent!, /Lilac/);
+            assert.match(card.textContent!, /Happy Holidays/);
+            await user.click(
+                within(card).getByRole('button', {
+                    name: 'Refill',
+                    exact: true,
+                }),
+            );
+            assert.ok(
+                screen.getByRole('radio', { name: /Pilot Falcon/ }).checked,
+            );
+            assert.ok(
+                screen.getByRole('checkbox', { name: /Happy Holidays/ })
+                    .checked,
+            );
+            assert.ok(screen.getByRole('checkbox', { name: /Lilac/ }).checked);
+            await user.click(
+                screen.getByRole('button', { name: 'Cancel', exact: true }),
+            );
+            assert.equal(document.querySelectorAll('.pen-card').length, 1);
+            assert.equal(
+                screen.getByRole('searchbox', {
+                    name: 'Search pens, nibs, or current ink…',
+                }).value,
+                'falcon',
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Clear filters' }),
+            );
+            assert.equal(document.querySelectorAll('.pen-card').length, 2);
+            assert.equal(writes.length, before);
+        },
+    );
+    await t.test(
+        'ink list retains swatches and opens the correct editable ink',
+        async () => {
+            await user.click(screen.getByRole('link', { name: /Ink cabinet/ }));
+            assert.equal(
+                screen
+                    .getByRole('button', { name: 'Grid view' })
+                    .getAttribute('aria-pressed'),
+                'true',
+            );
+            await user.click(screen.getByRole('button', { name: 'List view' }));
+            const table = screen.getByRole('table', { name: 'Ink inventory' });
+            const usedInk = within(table)
+                .getByRole('button', { name: 'Edit Diamine Happy Holidays' })
+                .closest('tr')!;
+            assert.match(usedInk.textContent!, /Pilot Falcon/);
+            assert.ok(usedInk.querySelector('.swatch:not(.swatch-unknown)'));
+            await user.type(
+                screen.getByRole('searchbox', {
+                    name: 'Search inks, brands, or collections…',
+                }),
+                'nepal',
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Edit Sailor Népal Test' }),
+            );
+            assert.equal(screen.getByLabelText('Ink name').value, 'Népal Test');
+            await user.click(
+                screen.getByRole('button', { name: 'Cancel', exact: true }),
+            );
+            assert.ok(screen.getByRole('table', { name: 'Ink inventory' }));
+            assert.equal(
+                screen.getByRole('searchbox', {
+                    name: 'Search inks, brands, or collections…',
+                }).value,
+                'nepal',
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Clear filters' }),
+            );
+            assert.equal(
+                screen
+                    .getByRole('button', { name: 'List view' })
+                    .getAttribute('aria-pressed'),
+                'true',
+            );
+        },
+    );
+    await t.test(
+        'each inventory remembers its layout after the app remounts',
+        async () => {
+            cleanup();
+            render(
+                <MemoryRouter initialEntries={['/inks']}>
+                    <LocalNetworkProvider>
+                        <DirtyStateProvider>
+                            <App />
+                        </DirtyStateProvider>
+                    </LocalNetworkProvider>
+                </MemoryRouter>,
+            );
+            await screen.findByRole('table', { name: 'Ink inventory' });
+            assert.equal(
+                screen
+                    .getByRole('button', { name: 'List view' })
+                    .getAttribute('aria-pressed'),
+                'true',
+            );
+            await user.click(
+                screen.getByRole('link', { name: /Fountain pens/ }),
+            );
+            assert.equal(document.querySelectorAll('.pen-card').length, 2);
+            assert.equal(
+                screen
+                    .getByRole('button', { name: 'Grid view' })
+                    .getAttribute('aria-pressed'),
+                'true',
+            );
+        },
+    );
+    await t.test(
         'view-only mode retains browsing and disables inventory mutations',
         async () => {
             cleanup();
@@ -433,6 +586,56 @@ test('collection workflows work against isolated API fixtures without touching r
                 null,
             );
             assert.equal(writes.length, before);
+        },
+    );
+    await t.test(
+        'layout selection still works when browser storage is blocked',
+        async () => {
+            cleanup();
+            const prototype = dom.window.Storage.prototype;
+            const originalGet = prototype.getItem;
+            const originalSet = prototype.setItem;
+            const before = writes.length;
+            prototype.getItem = () => {
+                throw new Error('Storage blocked');
+            };
+            prototype.setItem = () => {
+                throw new Error('Storage blocked');
+            };
+            try {
+                render(
+                    <MemoryRouter initialEntries={['/pens']}>
+                        <LocalNetworkProvider>
+                            <DirtyStateProvider>
+                                <App />
+                            </DirtyStateProvider>
+                        </LocalNetworkProvider>
+                    </MemoryRouter>,
+                );
+                await screen.findByRole('table', { name: 'Pen inventory' });
+                await user.click(
+                    screen.getByRole('button', { name: 'Grid view' }),
+                );
+                assert.equal(document.querySelectorAll('.pen-card').length, 2);
+                assert.equal(
+                    screen
+                        .getByRole('button', { name: 'Grid view' })
+                        .getAttribute('aria-pressed'),
+                    'true',
+                );
+                assert.equal(
+                    screen.queryByRole('button', {
+                        name: 'Refill',
+                        exact: true,
+                    }),
+                    null,
+                );
+                assert.equal(writes.length, before);
+            } finally {
+                cleanup();
+                prototype.getItem = originalGet;
+                prototype.setItem = originalSet;
+            }
         },
     );
     cleanup();

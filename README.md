@@ -9,6 +9,8 @@ A personal writing desk for fountain pens, ink inventory, and refill history. Bu
 - **Ink cabinet** presents the collection with reference swatches, usage counts, brand filters, and untried/in-use views.
 - **Refill journal** groups entries by month. Search pen details, ink names, and notes; filter by pen, date range, or entry type.
 
+Both inventory pages offer **List** and **Grid** layouts. Each page remembers its choice in this browser, and switching layouts keeps your search, filters, and sorting.
+
 Open any item to edit its details and see its history. Refill entry supports searchable pen and ink choices, mixtures, cleaning events, and reusing the last pairing. Add a missing pen or ink from the refill workspace and return to the unfinished entry. Unsaved edits are protected when navigating away.
 
 Archive an item to remove it from the active collection while keeping its journal history. Restore it from the Archived filter. Inventory items without history can also be deleted; deleting a journal entry recalculates the latest pairing.

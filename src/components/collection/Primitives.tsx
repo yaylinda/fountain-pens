@@ -12,6 +12,7 @@ import {
 
 export type IconName =
     | 'desk'
+    | 'list'
     | 'pen'
     | 'ink'
     | 'journal'
@@ -24,6 +25,7 @@ export type IconName =
     | 'edit'
     | 'archive';
 const paths: Record<IconName, ReactNode> = {
+    list: <path d="M8 5h13M8 12h13M8 19h13M3 5h.01M3 12h.01M3 19h.01" />,
     desk: (
         <>
             <rect x="3" y="3" width="7" height="7" rx="1" />

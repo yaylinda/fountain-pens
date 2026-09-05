@@ -1,7 +1,6 @@
 import { useSearchParams } from 'react-router-dom';
 import {
     byName,
-    formatDate,
     inkLabel,
     isCleaning,
     matches,
@@ -11,7 +10,10 @@ import {
     type CollectionModel,
     type EditorState,
 } from '../../lib/collection';
-import { EmptyState, Icon, InkNames, SearchField, Swatch } from './Primitives';
+import { EmptyState, Icon, SearchField } from './Primitives';
+import { useInventoryLayout } from '../../hooks/useInventoryLayout';
+import PenInventory from './PenInventory';
+import InkInventory from './InkInventory';
 
 interface Props {
     kind: 'pens' | 'inks';
@@ -28,6 +30,7 @@ export default function Inventory({
     canEdit,
 }: Props) {
     const [params, setParams] = useSearchParams();
+    const [layout, setLayout] = useInventoryLayout(kind);
     const query = params.get('q') || '';
     const brand = params.get('brand') || '';
     const status = params.get('status') || 'all';
@@ -211,16 +214,45 @@ export default function Inventory({
                     </select>
                 </label>
             </div>
-            <div className="results-line">
+            <div className="results-line inventory-results-line">
                 <span aria-live="polite">
                     {count} {kind}
                     {filtered ? ' found' : ' in your collection'}
                 </span>
-                {filtered && (
-                    <button className="text-link" onClick={() => setParams({})}>
-                        Clear filters <Icon name="close" />
-                    </button>
-                )}
+                <div className="inventory-view-actions">
+                    {filtered && (
+                        <button
+                            className="text-link"
+                            onClick={() => setParams({})}
+                        >
+                            Clear filters <Icon name="close" />
+                        </button>
+                    )}
+                    <div
+                        className="layout-switch"
+                        role="group"
+                        aria-label="Inventory layout"
+                    >
+                        <button
+                            type="button"
+                            aria-label="List view"
+                            aria-pressed={layout === 'list'}
+                            onClick={() => setLayout('list')}
+                        >
+                            <Icon name="list" />
+                            <span>List</span>
+                        </button>
+                        <button
+                            type="button"
+                            aria-label="Grid view"
+                            aria-pressed={layout === 'grid'}
+                            onClick={() => setLayout('grid')}
+                        >
+                            <Icon name="desk" />
+                            <span>Grid</span>
+                        </button>
+                    </div>
+                </div>
             </div>
             {!count ? (
                 <EmptyState
@@ -235,157 +267,21 @@ export default function Inventory({
                         : 'Add a few details to begin your collection.'}
                 </EmptyState>
             ) : isPens ? (
-                <div className="pen-table-wrap">
-                    <table className="pen-table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Pen / finish</th>
-                                <th scope="col">Nib</th>
-                                <th scope="col">Latest ink</th>
-                                <th scope="col">Refills</th>
-                                <th scope="col">
-                                    <span className="sr-only">Actions</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {pens.map((pen) => (
-                                <tr key={pen.id}>
-                                    <td>
-                                        <button
-                                            className="inventory-name"
-                                            data-focus-key={`pen-${pen.id}`}
-                                            onClick={() =>
-                                                onOpen({
-                                                    kind: 'pen',
-                                                    item: pen,
-                                                })
-                                            }
-                                        >
-                                            <span className="overline">
-                                                {pen.brand}
-                                            </span>
-                                            <strong>{pen.model}</strong>
-                                            <span className="small muted">
-                                                {pen.color ||
-                                                    'No finish recorded'}
-                                            </span>
-                                        </button>
-                                    </td>
-                                    <td data-label="Nib">
-                                        <span>{pen.nibSize || '—'}</span>
-                                        <span className="small muted block">
-                                            {pen.nibType}
-                                        </span>
-                                    </td>
-                                    <td data-label="Latest ink">
-                                        <InkNames
-                                            entry={model.latest.get(pen.id)}
-                                            model={model}
-                                        />
-                                        <span className="small muted block">
-                                            {formatDate(
-                                                model.latest.get(pen.id)?.date,
-                                            )}
-                                        </span>
-                                    </td>
-                                    <td
-                                        data-label="Refills"
-                                        className="tabular"
-                                    >
-                                        {model.penCount(pen.id)}
-                                    </td>
-                                    <td className="row-actions">
-                                        <button
-                                            className="icon-button"
-                                            aria-label={`${canEdit ? 'Edit' : 'View'} ${penLabel(pen)}, ${penDescription(pen)}`}
-                                            data-focus-key={`pen-${pen.id}`}
-                                            onClick={() =>
-                                                onOpen({
-                                                    kind: 'pen',
-                                                    item: pen,
-                                                })
-                                            }
-                                        >
-                                            <Icon
-                                                name={
-                                                    canEdit ? 'edit' : 'arrow'
-                                                }
-                                            />
-                                        </button>
-                                        {canEdit && !pen.archived && (
-                                            <button
-                                                className="button subtle small-button"
-                                                onClick={() =>
-                                                    onOpen({
-                                                        kind: 'refill',
-                                                        draft: {
-                                                            penId: pen.id,
-                                                            date: '',
-                                                            inkIds:
-                                                                model.latest.get(
-                                                                    pen.id,
-                                                                )?.inkIds || [],
-                                                            notes: '',
-                                                        },
-                                                    })
-                                                }
-                                            >
-                                                Refill
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                <PenInventory
+                    pens={pens}
+                    layout={layout}
+                    model={model}
+                    onOpen={onOpen}
+                    canEdit={canEdit}
+                />
             ) : (
-                <div className="ink-grid">
-                    {inks.map((ink) => {
-                        const current = model.currentPens(ink.id);
-                        return (
-                            <button
-                                key={ink.id}
-                                className="ink-card"
-                                data-focus-key={`ink-${ink.id}`}
-                                onClick={() =>
-                                    onOpen({ kind: 'ink', item: ink })
-                                }
-                            >
-                                <div className="ink-card-color">
-                                    <Swatch ink={ink} large />
-                                    <span className="ink-card-action">
-                                        <Icon
-                                            name={canEdit ? 'edit' : 'arrow'}
-                                        />
-                                    </span>
-                                </div>
-                                <span className="overline">{ink.brand}</span>
-                                <h2>{ink.name}</h2>
-                                <span className="ink-collection">
-                                    {ink.collection || 'Standard collection'}
-                                </span>
-                                <span className="ink-card-footer">
-                                    <span>
-                                        {model.inkCount(ink.id)
-                                            ? `${model.inkCount(ink.id)} refills`
-                                            : 'Not tried yet'}
-                                    </span>
-                                    {current.length > 0 && (
-                                        <span className="status-dot">
-                                            In {current.length}{' '}
-                                            {current.length === 1
-                                                ? 'pen'
-                                                : 'pens'}
-                                        </span>
-                                    )}
-                                    {ink.archived && <span>Archived</span>}
-                                </span>
-                            </button>
-                        );
-                    })}
-                </div>
+                <InkInventory
+                    inks={inks}
+                    layout={layout}
+                    model={model}
+                    onOpen={onOpen}
+                    canEdit={canEdit}
+                />
             )}
         </>
     );
