@@ -119,8 +119,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Data directory - use environment variable or default to ./data
-const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+// Data directory - use environment variable, or local repo data when running
+// `npm start` from a checkout. The Docker image still uses its DATA_DIR env.
+const localDataDir = path.join(__dirname, 'src', 'data');
+const DATA_DIR =
+    process.env.DATA_DIR ||
+    (existsSync(localDataDir) ? localDataDir : path.join(__dirname, 'data'));
 
 // Git repo directory - where the sparse checkout is mounted
 const GIT_REPO_DIR = process.env.GIT_REPO_DIR || __dirname;
