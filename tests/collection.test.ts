@@ -172,6 +172,8 @@ test('payloads preserve simple JSON records and discard display-only indices and
         ...fixture.entries[1],
         inkIds: ['red', 'red', 'blue'],
         notes: '  nice flow  ',
+        needsRefill: true,
+        hasUnsavedChanges: true,
     });
     assert.deepEqual(payload, {
         date: '2025-01-02',

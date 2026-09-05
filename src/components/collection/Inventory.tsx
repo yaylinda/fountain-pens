@@ -56,6 +56,7 @@ export default function Inventory({
               ['all', 'All pens'],
               ['inked', 'Inked'],
               ['empty', 'Empty'],
+              ['needs-refill', 'Needs refill'],
               ['archived', 'Archived'],
           ]
         : [
@@ -74,6 +75,7 @@ export default function Inventory({
                 (!nib || pen.nibSize === nib) &&
                 (status !== 'inked' || inked) &&
                 (status !== 'empty' || !inked) &&
+                (status !== 'needs-refill' || pen.needsRefill) &&
                 matches(
                     query,
                     penLabel(pen),
@@ -154,6 +156,13 @@ export default function Inventory({
                     </button>
                 ))}
             </div>
+            {isPens && (status === 'empty' || status === 'needs-refill') && (
+                <p className="inventory-status-note small muted">
+                    {status === 'needs-refill'
+                        ? 'Pens you plan to refill. Log a fresh fill to take one off the list.'
+                        : 'All empty pens, including those queued for a refill. Mark a pen “Needs refill” when you’re ready to use it again.'}
+                </p>
+            )}
             <div className="collection-toolbar">
                 <SearchField
                     value={query}

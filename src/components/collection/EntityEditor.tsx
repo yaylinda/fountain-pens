@@ -20,6 +20,7 @@ import {
     Field,
     ErrorMessage,
     EditorHeading,
+    RefillIntentField,
     type EditorProps as SharedProps,
 } from './EditorFields';
 import { useDraft } from '../../hooks/useDraft';
@@ -46,6 +47,7 @@ export function EntityEditor({
         color: pen?.color || '',
         nibSize: pen?.nibSize || '',
         nibType: pen?.nibType || '',
+        needsRefill: pen?.needsRefill || false,
         name: ink?.name || '',
         collection: ink?.collection || '',
         colorHex: ink?.colorHex || '',
@@ -55,8 +57,10 @@ export function EntityEditor({
     const [confirmDelete, setConfirmDelete] = useState(false);
     const prefix = useId();
     const hasEdits = useDraft(initial, draft, onDirty);
-    const change = (key: keyof typeof draft, value: string) =>
-        setDraft((previous) => ({ ...previous, [key]: value }));
+    const change = <Key extends keyof typeof draft>(
+        key: Key,
+        value: (typeof draft)[Key],
+    ) => setDraft((previous) => ({ ...previous, [key]: value }));
     const history = item
         ? (penMode ? model.penHistory : model.inkHistory).get(item.id) || []
         : [];
@@ -101,6 +105,9 @@ export function EntityEditor({
                 color: draft.color.trim(),
                 nibSize: draft.nibSize.trim(),
                 nibType: draft.nibType.trim(),
+                ...(draft.needsRefill || pen?.needsRefill !== undefined
+                    ? { needsRefill: draft.needsRefill }
+                    : {}),
             };
             const saved = pen ? updatePen({ ...pen, ...data }) : addPen(data);
             onSaved(
@@ -293,6 +300,12 @@ export function EntityEditor({
                                         </datalist>
                                     </Field>
                                 </div>
+                                <RefillIntentField
+                                    checked={draft.needsRefill}
+                                    onChange={(value) =>
+                                        change('needsRefill', value)
+                                    }
+                                />
                             </>
                         ) : (
                             <>

@@ -11,6 +11,8 @@ A personal writing desk for fountain pens, ink inventory, and refill history. Bu
 
 Both inventory pages offer **List** and **Grid** layouts. Each page remembers its choice in this browser, and switching layouts keeps your search, filters, and sorting.
 
+Pens have an optional **Needs refill** checkbox and a matching inventory filter. This queue is independent of **Inked**/**Empty**: an empty pen can stay on the shelf or wait for a refill, and an inked pen can be flagged ahead of time. Choose the flag when editing a pen or logging a new current cleaning. A new refill that becomes the latest entry clears it automatically. Entries older than a pen's latest event, along with journal edits and deletions, do not change the queue; adjust the pen's checkbox when needed. Archived pens are excluded from the queue until restored.
+
 Open any item to edit its details and see its history. Refill entry supports searchable pen and ink choices, mixtures, cleaning events, and reusing the last pairing. Add a missing pen or ink from the refill workspace and return to the unfinished entry. Unsaved edits are protected when navigating away.
 
 Archive an item to remove it from the active collection while keeping its journal history. Restore it from the Archived filter. Inventory items without history can also be deleted; deleting a journal entry recalculates the latest pairing.
@@ -37,9 +39,9 @@ The app continues to use three JSON arrays:
 - `src/data/inks.json`: ink identity, brand, collection, and name.
 - `src/data/refillLog.json`: calendar date, pen ID, ink IDs, and notes.
 
-The existing data service loads and saves these collections through the existing API. Deployment and synchronization infrastructure are separate from the interface. The existing sync review is available under **Data tools**.
+During `npm run dev`, saving an inventory item or journal entry sends the updated JSON array to the Vite API, which writes the corresponding file under `src/data/` in this checkout. Those edits survive reloads and server restarts. They are local working-tree changes until explicitly committed and pushed; saving in the app does not publish them to GitHub. Browser local storage holds layout preferences, not inventory records. The existing sync review is available under **Data tools**.
 
-No source inventory migration is required. Two optional, backward-compatible fields support the interface: `archived` on pens/inks, and `colorHex` on inks. They are added only when the corresponding action is used.
+No source inventory migration is required. Optional, backward-compatible fields support the interface: `archived` on pens/inks, `needsRefill` on pens, and `colorHex` on inks. They are added only when the corresponding action is used. Pens without `needsRefill` are treated as unflagged.
 
 The legacy ink ID `NONE` represents a cleaned/empty pen. It is excluded from ink inventory and refill counts. The newest calendar date determines the latest pairing; for same-day entries, the later position in the original JSON array wins. Future entries remain in history but do not change today's pairing. Historical events retain their original array position for editing; UI-only fields are never added to new saved events.
 

@@ -146,8 +146,10 @@ export default function App() {
         setDirty(false);
         if (editor && editor.kind !== 'refill' && editor.returnTo && item) {
             const draft = { ...editor.returnTo };
-            if (editor.kind === 'pen') draft.penId = item.id;
-            else
+            if (editor.kind === 'pen') {
+                draft.penId = item.id;
+                draft.needsRefill = undefined;
+            } else
                 draft.inkIds = [
                     ...draft.inkIds.filter((id) => id !== 'NONE'),
                     item.id,

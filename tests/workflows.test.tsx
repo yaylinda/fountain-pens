@@ -83,15 +83,13 @@ globalThis.fetch = async (input: string, init?: RequestInit) => {
     }
     throw new Error(`Unexpected request in isolated UI test: ${input}`);
 };
-const { render, screen, within, waitFor, cleanup } = await import(
-    '@testing-library/react'
-);
+const { render, screen, within, waitFor, cleanup, fireEvent } =
+    await import('@testing-library/react');
 const userEvent = (await import('@testing-library/user-event')).default;
 const { MemoryRouter } = await import('react-router-dom');
 const { default: App } = await import('../src/App');
-const { LocalNetworkProvider } = await import(
-    '../src/context/LocalNetworkContext'
-);
+const { LocalNetworkProvider } =
+    await import('../src/context/LocalNetworkContext');
 const { DirtyStateProvider } = await import('../src/context/DirtyStateContext');
 
 const latestWrite = (filename: string) =>
@@ -522,6 +520,346 @@ test('collection workflows work against isolated API fixtures without touching r
         },
     );
     await t.test(
+        'empty pens can be queued independently, with saved flags in both layouts and archive exclusion',
+        async () => {
+            await user.click(
+                screen.getByRole('link', { name: /Fountain pens/ }),
+            );
+            await user.click(
+                screen.getByRole('button', {
+                    name: /Edit New maker Pocket writer/,
+                }),
+            );
+            assert.equal(
+                screen.getByRole('checkbox', { name: 'Needs refill' }).checked,
+                false,
+            );
+            const before = writes.length;
+            await user.click(
+                screen.getByRole('checkbox', { name: 'Needs refill' }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Cancel', exact: true }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Discard changes' }),
+            );
+            assert.equal(writes.length, before);
+            await user.click(
+                screen.getByRole('button', {
+                    name: /Edit New maker Pocket writer/,
+                }),
+            );
+            await user.click(
+                screen.getByRole('checkbox', { name: 'Needs refill' }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Save changes' }),
+            );
+            assert.equal(
+                latestWrite('pens').data.find(
+                    (pen) => pen.brand === 'New maker',
+                )?.needsRefill,
+                true,
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Empty', exact: true }),
+            );
+            assert.equal(document.querySelectorAll('.pen-card').length, 1);
+            assert.match(
+                document.querySelector('.pen-card')!.textContent!,
+                /Needs refill/,
+            );
+            await user.click(
+                screen.getByRole('button', {
+                    name: 'Needs refill',
+                    exact: true,
+                }),
+            );
+            await user.click(screen.getByRole('button', { name: 'List view' }));
+            const table = screen.getByRole('table', { name: 'Pen inventory' });
+            assert.equal(table.querySelectorAll('tbody tr').length, 1);
+            assert.match(table.textContent!, /Pocket writer.*Needs refill/);
+            await user.click(
+                screen.getByRole('button', {
+                    name: /Edit New maker Pocket writer/,
+                }),
+            );
+            assert.equal(
+                screen.getByRole('checkbox', { name: 'Needs refill' }).checked,
+                true,
+            );
+            await user.click(screen.getByText('Manage this pen'));
+            await user.click(
+                screen.getByRole('button', { name: 'Archive pen' }),
+            );
+            assert.equal(
+                screen.queryByRole('table', { name: 'Pen inventory' }),
+                null,
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Archived', exact: true }),
+            );
+            await user.click(
+                screen.getByRole('button', {
+                    name: /Edit New maker Pocket writer/,
+                }),
+            );
+            await user.click(screen.getByText('Manage this pen'));
+            await user.click(
+                screen.getByRole('button', { name: 'Restore to collection' }),
+            );
+            await user.click(
+                screen.getByRole('button', {
+                    name: 'Needs refill',
+                    exact: true,
+                }),
+            );
+            assert.ok(
+                screen.getByRole('button', {
+                    name: /Edit New maker Pocket writer/,
+                }),
+            );
+            await user.click(screen.getByRole('button', { name: 'Grid view' }));
+        },
+    );
+    await t.test(
+        'inked pens can be queued and historical journal changes do not clear their flags',
+        async () => {
+            await user.click(
+                screen.getByRole('button', { name: 'Inked', exact: true }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: /Edit Pilot Falcon/ }),
+            );
+            await user.click(
+                screen.getByRole('checkbox', { name: 'Needs refill' }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Save changes' }),
+            );
+            assert.equal(document.querySelectorAll('.pen-card').length, 1);
+            await user.click(
+                screen.getByRole('button', {
+                    name: 'Needs refill',
+                    exact: true,
+                }),
+            );
+            assert.equal(document.querySelectorAll('.pen-card').length, 2);
+            const penWrites = writes.filter(
+                (write) => write.filename === 'pens',
+            ).length;
+            await user.click(
+                screen.getByRole('link', { name: 'Refill journal' }),
+            );
+            await user.type(
+                screen.getByRole('searchbox', {
+                    name: 'Search pens, inks, or notes…',
+                }),
+                'Revised original',
+            );
+            await user.click(
+                within(document.querySelector('.journal')!).getByRole(
+                    'button',
+                    { name: /Edit Pilot Falcon entry/ },
+                ),
+            );
+            await user.type(screen.getByLabelText('NotesOptional'), ' again');
+            await user.click(
+                screen.getByRole('button', { name: 'Save changes' }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Clear filters' }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Log a refill' }),
+            );
+            await user.click(
+                screen.getByRole('radio', { name: /Pilot Falcon/ }),
+            );
+            fireEvent.change(screen.getByLabelText('Date'), {
+                target: { value: '2024-01-01' },
+            });
+            await user.click(
+                screen.getByRole('checkbox', { name: /Happy Holidays/ }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Log refill', exact: true }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Log a refill' }),
+            );
+            await user.click(
+                screen.getByRole('radio', { name: /Pilot Falcon/ }),
+            );
+            await user.click(
+                screen.getByRole('radio', { name: 'Cleaned & empty' }),
+            );
+            fireEvent.change(screen.getByLabelText('Date'), {
+                target: { value: '2024-01-02' },
+            });
+            assert.equal(
+                screen.queryByRole('checkbox', { name: 'Needs refill' }),
+                null,
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Log cleaning' }),
+            );
+            assert.equal(
+                writes.filter((write) => write.filename === 'pens').length,
+                penWrites,
+            );
+            assert.equal(
+                latestWrite('pens').data.find((pen) => pen.id === 'pen-a')
+                    ?.needsRefill,
+                true,
+            );
+        },
+    );
+    await t.test(
+        'current cleanings can leave a pen empty or queue it and a same-day refill clears only that pen',
+        async () => {
+            await user.click(
+                screen.getByRole('button', { name: 'Log a refill' }),
+            );
+            await user.click(
+                screen.getByRole('radio', { name: 'Cleaned & empty' }),
+            );
+            await user.click(
+                screen.getByRole('radio', { name: /Pilot Falcon/ }),
+            );
+            assert.equal(
+                screen.getByRole('checkbox', { name: 'Needs refill' }).checked,
+                true,
+            );
+            await user.click(
+                screen.getByRole('checkbox', { name: 'Needs refill' }),
+            );
+            await user.click(
+                screen.getByRole('radio', { name: /New maker Pocket writer/ }),
+            );
+            assert.equal(
+                screen.getByRole('checkbox', { name: 'Needs refill' }).checked,
+                true,
+            );
+            await user.click(
+                screen.getByRole('radio', { name: /Pilot Falcon/ }),
+            );
+            assert.equal(
+                screen.getByRole('checkbox', { name: 'Needs refill' }).checked,
+                true,
+            );
+            await user.click(
+                screen.getByRole('checkbox', { name: 'Needs refill' }),
+            );
+            await user.click(screen.getByRole('button', { name: 'New pen' }));
+            await user.click(
+                screen.getByRole('button', { name: 'Cancel', exact: true }),
+            );
+            assert.equal(
+                screen.getByRole('checkbox', { name: 'Needs refill' }).checked,
+                false,
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Log cleaning' }),
+            );
+            assert.equal(
+                latestWrite('pens').data.find((pen) => pen.id === 'pen-a')
+                    ?.needsRefill,
+                false,
+            );
+            await user.click(
+                screen.getByRole('link', { name: /Fountain pens/ }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Empty', exact: true }),
+            );
+            assert.equal(document.querySelectorAll('.pen-card').length, 2);
+            await user.click(
+                screen.getByRole('button', {
+                    name: 'Needs refill',
+                    exact: true,
+                }),
+            );
+            assert.equal(document.querySelectorAll('.pen-card').length, 1);
+            assert.ok(
+                screen.getByRole('button', {
+                    name: /Edit New maker Pocket writer/,
+                }),
+            );
+            await user.click(
+                screen.getByRole('link', { name: 'Refill journal' }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Log a refill' }),
+            );
+            await user.click(
+                screen.getByRole('radio', { name: 'Cleaned & empty' }),
+            );
+            await user.click(
+                screen.getByRole('radio', { name: /Pilot Falcon/ }),
+            );
+            assert.equal(
+                screen.getByRole('checkbox', { name: 'Needs refill' }).checked,
+                false,
+            );
+            await user.click(
+                screen.getByRole('checkbox', { name: 'Needs refill' }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Log cleaning' }),
+            );
+            assert.equal(
+                latestWrite('pens').data.find((pen) => pen.id === 'pen-a')
+                    ?.needsRefill,
+                true,
+            );
+            assert.deepEqual(
+                Object.keys(latestWrite('refillLog').data.at(-1)!).sort(),
+                ['date', 'inkIds', 'notes', 'penId'],
+            );
+            await user.click(
+                screen.getByRole('link', { name: /Fountain pens/ }),
+            );
+            await user.click(
+                screen.getByRole('button', {
+                    name: 'Needs refill',
+                    exact: true,
+                }),
+            );
+            const card = screen
+                .getByRole('button', { name: /Edit Pilot Falcon/ })
+                .closest('article')!;
+            await user.click(
+                within(card).getByRole('button', {
+                    name: 'Refill',
+                    exact: true,
+                }),
+            );
+            await user.click(
+                screen.getByRole('checkbox', { name: /Happy Holidays/ }),
+            );
+            await user.click(
+                screen.getByRole('button', { name: 'Log refill', exact: true }),
+            );
+            assert.equal(
+                latestWrite('pens').data.find((pen) => pen.id === 'pen-a')
+                    ?.needsRefill,
+                false,
+            );
+            assert.equal(
+                latestWrite('pens').data.find(
+                    (pen) => pen.brand === 'New maker',
+                )?.needsRefill,
+                true,
+            );
+            assert.equal(document.querySelectorAll('.pen-card').length, 1);
+            await user.click(
+                screen.getByRole('button', { name: 'Clear filters' }),
+            );
+        },
+    );
+    await t.test(
         'each inventory remembers its layout after the app remounts',
         async () => {
             cleanup();
@@ -580,6 +918,11 @@ test('collection workflows work against isolated API fixtures without touching r
             );
             assert.ok(
                 screen.getByLabelText('Brand').closest('fieldset')?.disabled,
+            );
+            assert.ok(
+                screen
+                    .getByRole('checkbox', { name: 'Needs refill' })
+                    .closest('fieldset')?.disabled,
             );
             assert.equal(
                 screen.queryByRole('button', { name: 'Save changes' }),

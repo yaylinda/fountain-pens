@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import type { Ink, Pen } from '../../models/types';
 import type {
     Collection,
@@ -46,6 +46,34 @@ export function ErrorMessage({ message }: { message: string }) {
             {message}
         </div>
     ) : null;
+}
+export function RefillIntentField({
+    checked,
+    onChange,
+    description = 'Keep this pen in your refill queue until its next fill.',
+}: {
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+    description?: string;
+}) {
+    const id = useId();
+    return (
+        <label className="refill-intent-field">
+            <input
+                type="checkbox"
+                checked={checked}
+                onChange={(event) => onChange(event.target.checked)}
+                aria-labelledby={`${id}-label`}
+                aria-describedby={`${id}-description`}
+            />
+            <span>
+                <strong id={`${id}-label`}>Needs refill</strong>
+                <span id={`${id}-description`} className="small muted block">
+                    {description}
+                </span>
+            </span>
+        </label>
+    );
 }
 export function EditorHeading({
     label,

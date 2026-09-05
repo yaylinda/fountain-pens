@@ -80,8 +80,14 @@ export default function PenInventory({
                     >
                         <div className="pen-card-heading">
                             <span className="overline">{pen.brand}</span>
-                            {pen.archived && (
+                            {pen.archived ? (
                                 <span className="badge neutral">Archived</span>
+                            ) : (
+                                pen.needsRefill && (
+                                    <span className="badge refill-badge">
+                                        Needs refill
+                                    </span>
+                                )
                             )}
                         </div>
                         <h2 id={`pen-card-${pen.id}`}>
@@ -173,6 +179,17 @@ export default function PenInventory({
                                         {pen.color || 'No finish recorded'}
                                     </span>
                                 </button>
+                                {pen.archived ? (
+                                    <span className="badge neutral pen-list-badge">
+                                        Archived
+                                    </span>
+                                ) : (
+                                    pen.needsRefill && (
+                                        <span className="badge refill-badge pen-list-badge">
+                                            Needs refill
+                                        </span>
+                                    )
+                                )}
                             </td>
                             <td data-label="Nib">
                                 <span>{pen.nibSize || '—'}</span>

@@ -628,6 +628,7 @@
 }
 .pen-card-heading {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     gap: 8px;
@@ -937,6 +938,34 @@
 .badge.neutral {
     background: var(--sidebar);
     color: var(--muted);
+}
+.badge.refill-badge {
+    color: oklch(43% 0.07 75);
+    background: oklch(94% 0.04 85);
+}
+.pen-list-badge {
+    display: inline-block;
+    margin-top: 8px;
+}
+.inventory-status-note {
+    margin: 16px 0 0;
+    max-width: 65ch;
+}
+.refill-intent-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    cursor: pointer;
+}
+.refill-intent-field input {
+    margin: 2px 0 0;
+}
+.refill-intent-field strong {
+    display: block;
+    font-size: 0.875rem;
+    margin-bottom: 4px;
 }
 .journal-notes {
     margin-top: 12px;

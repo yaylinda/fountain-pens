@@ -11,6 +11,8 @@ export interface Collection {
 export interface RefillDraft extends RefillLog {
     index?: number;
     hasUnsavedChanges?: boolean;
+    // A current cleaning can update the pen's queue flag; never saved on the event.
+    needsRefill?: boolean;
 }
 export type EditorState =
     | { kind: 'pen'; item?: Pen; returnTo?: RefillDraft }

@@ -15,6 +15,7 @@ export interface Pen {
     nibSize: string;
     nibType: string;
     archived?: boolean;
+    needsRefill?: boolean;
 }
 
 export interface RefillLog {

@@ -3,6 +3,7 @@ import {
     addRefillLog,
     deleteRefillLog,
     updateRefillLog,
+    updatePen,
 } from '../../services/dataService';
 import {
     EMPTY_INK_ID,
@@ -24,6 +25,7 @@ import {
     Field,
     ErrorMessage,
     EditorHeading,
+    RefillIntentField,
     type EditorProps as SharedProps,
 } from './EditorFields';
 import { useDraft } from '../../hooks/useDraft';
@@ -44,6 +46,7 @@ export function RefillEditor({
         penId: editor.draft?.penId || '',
         inkIds: editor.draft?.inkIds || [],
         notes: editor.draft?.notes || '',
+        needsRefill: editor.draft?.needsRefill,
         ...(editor.draft?.index !== undefined
             ? { index: editor.draft.index }
             : {}),
@@ -57,6 +60,13 @@ export function RefillEditor({
     const editing = draft.index !== undefined;
     const cleaning = draft.inkIds.includes(EMPTY_INK_ID);
     const selectedPen = model.penById.get(draft.penId);
+    // Queue intent belongs to the pen today, not to historical journal edits.
+    // New entries win same-day ties because they are appended to the source array.
+    const updatesRefillQueue =
+        !editing &&
+        !!selectedPen &&
+        draft.date <= today() &&
+        draft.date >= (model.latest.get(draft.penId)?.date || '');
     const selectedInks = draft.inkIds
         .filter((id) => id !== EMPTY_INK_ID)
         .map((id) => model.inkById.get(id));
@@ -112,6 +122,13 @@ export function RefillEditor({
         const payload = refillPayload(draft);
         if (draft.index !== undefined) updateRefillLog(payload, draft.index);
         else addRefillLog(payload);
+        if (updatesRefillQueue && selectedPen) {
+            const needsRefill = cleaning
+                ? (draft.needsRefill ?? selectedPen.needsRefill ?? false)
+                : false;
+            if (needsRefill !== !!selectedPen.needsRefill)
+                updatePen({ ...selectedPen, needsRefill });
+        }
         onSaved(
             editing
                 ? 'Journal entry updated.'
@@ -247,6 +264,7 @@ export function RefillEditor({
                                                 setDraft((previous) => ({
                                                     ...previous,
                                                     penId: pen.id,
+                                                    needsRefill: undefined,
                                                 }))
                                             }
                                         />
@@ -270,6 +288,30 @@ export function RefillEditor({
                                 )}
                             </div>
                         </section>
+                        {cleaning && updatesRefillQueue && (
+                            <RefillIntentField
+                                checked={
+                                    draft.needsRefill ??
+                                    selectedPen?.needsRefill ??
+                                    false
+                                }
+                                onChange={(needsRefill) =>
+                                    setDraft((previous) => ({
+                                        ...previous,
+                                        needsRefill,
+                                    }))
+                                }
+                                description="Check if you plan to refill this pen. Leave unchecked to store it empty."
+                            />
+                        )}
+                        {!cleaning &&
+                            updatesRefillQueue &&
+                            selectedPen?.needsRefill && (
+                                <p className="small muted">
+                                    Logging this fill will take the pen off your
+                                    refill queue.
+                                </p>
+                            )}
                         {!cleaning && (
                             <section
                                 className="picker-section"
