@@ -11,6 +11,8 @@ import {
 import { useEffect, useState } from 'react';
 import { useDirtyState } from '../context/DirtyStateContext';
 
+import { captureSaveOrigin, celebrateSave } from '../lib/saveCelebration';
+
 interface SaveDialogProps {
     open: boolean;
     onClose: () => void;
@@ -58,13 +60,15 @@ export default function SaveDialog({ open, onClose, onSuccess }: SaveDialogProps
     }, [open]);
 
     const handlePush = async () => {
+        const origin = captureSaveOrigin();
         setPushing(true);
         setError(null);
         setIsTransient(false);
         try {
             const res = await fetch('/api/git/push', { method: 'POST' });
             const data: PushResponse = await res.json();
-            if (data.success) {
+            if (res.ok && data.success) {
+                celebrateSave(origin);
                 setDirty(false);
                 onClose();
                 onSuccess?.();

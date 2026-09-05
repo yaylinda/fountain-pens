@@ -17,6 +17,7 @@ import {
     type IconName,
 } from './components/collection/Primitives';
 import './App.css';
+import { SAVE_CELEBRATION, type SaveOrigin } from './lib/saveCelebration';
 
 const SaveDialog = lazy(() => import('./components/SaveDialog'));
 const navItems: { to: string; label: string; icon: IconName }[] = [
@@ -43,6 +44,26 @@ export default function App() {
         keepEditing,
         discard,
     } = useEditorNavigation(model);
+    useEffect(() => {
+        let disposed = false;
+        let generation = 0;
+        let stop: (() => void) | undefined;
+        const saved = (event: Event) => {
+            const current = ++generation;
+            const origin = (event as CustomEvent<SaveOrigin>).detail;
+            void import('./lib/inkCeremony').then(({ playInkCeremony }) => {
+                if (disposed || current !== generation) return;
+                stop?.();
+                stop = playInkCeremony(origin);
+            }).catch(() => { /* Decoration must never change persistence results. */ });
+        };
+        window.addEventListener(SAVE_CELEBRATION, saved);
+        return () => {
+            disposed = true;
+            stop?.();
+            window.removeEventListener(SAVE_CELEBRATION, saved);
+        };
+    }, []);
     const [message, setMessage] = useState('');
     const [syncOpen, setSyncOpen] = useState(false);
     const location = useLocation();
