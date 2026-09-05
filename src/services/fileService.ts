@@ -28,21 +28,39 @@ export const showNotification = (message: string, isError = false): void => {
  * @param filename The name of the file to write to (without path or extension)
  * @param data The data to write to the file
  */
+const pendingWrites = new Map<string, Promise<boolean>>();
+
 export const writeJsonFile = async <T>(
     filename: string,
     data: T,
 ): Promise<boolean> => {
+    // Capture the initiating control before a queued write waits or the editor closes.
     const origin = captureSaveOrigin();
+    // Snapshot at invocation time; later edits must not change queued payloads.
+    const body = JSON.stringify({ filename, data });
+    const previous = pendingWrites.get(filename);
+    const send = () => sendJsonFile(filename, body, origin);
+    const write = previous ? previous.then(send, send) : send();
+    pendingWrites.set(filename, write);
+    const cleanup = () => {
+        if (pendingWrites.get(filename) === write) pendingWrites.delete(filename);
+    };
+    void write.then(cleanup, cleanup);
+    return write;
+};
+
+const sendJsonFile = async (
+    filename: string,
+    body: string,
+    origin: ReturnType<typeof captureSaveOrigin>,
+): Promise<boolean> => {
     try {
         const response = await fetch(`/api/save-json`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                filename,
-                data,
-            }),
+            body,
         });
 
         if (!response.ok) {
