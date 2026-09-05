@@ -39,6 +39,7 @@ COPY --from=builder /app/dist ./dist
 
 # Copy server
 COPY server.js ./
+COPY server/ ./server/
 
 # Create data directory
 RUN mkdir -p /app/data && chown -R appuser:appgroup /app
