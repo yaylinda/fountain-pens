@@ -51,11 +51,11 @@ export const loadData = async (): Promise<void> => {
         );
     } catch (error) {
         console.error('Failed to load data from API:', error);
-        // Initialize with empty arrays if API fails
         inks = [];
         pens = [];
         refillLogs = [];
-        isInitialized = true;
+        isInitialized = false;
+        throw error;
     }
 };
 
