@@ -16,6 +16,7 @@ import {
     readDeskState,
 } from '../../lib/writingDesk';
 import { EmptyState, Icon, InkNames, Swatch } from './Primitives';
+import RefillQueue from './RefillQueue';
 
 interface Props {
     model: CollectionModel;
@@ -98,6 +99,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     </button>
                 )}
             </header>
+            <RefillQueue model={model} onOpen={onOpen} canEdit={canEdit} />
             <div className="desk-presets" aria-label="Quick views">
                 {[
                     'All pens',

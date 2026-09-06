@@ -2122,6 +2122,18 @@
 }
 
 /* The desk keeps color selection above an open, grouped pen list. */
+.desk-refill-queue { margin-bottom: 24px; border-block: 1px solid var(--line); }
+.desk-refill-queue summary { padding: 16px 0; cursor: pointer; font-weight: 600; }
+.desk-refill-queue summary::marker { color: var(--accent); }
+.desk-refill-queue ul { list-style: none; padding: 0; margin: 0; }
+.desk-refill-queue li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: center; gap: 12px 24px; padding: 12px 0; border-top: 1px solid var(--line); }
+.desk-refill-pen { display: grid; gap: 4px; text-align: left; min-width: 0; overflow-wrap: anywhere; }
+.desk-refill-ink { min-width: 0; font-size: .8125rem; overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+    .desk-refill-queue li { grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; }
+    .desk-refill-ink { grid-column: 1; grid-row: 2; }
+    .desk-refill-queue li > .button { grid-column: 2; grid-row: 1 / 3; }
+}
 .desk-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
 .desk-presets button[aria-pressed='true'] { background: var(--accent); color: var(--paper, #faf6f0); }
 .desk-controls { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 24px; padding: 20px 0; border-block: 1px solid var(--line); }

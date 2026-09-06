@@ -114,6 +114,44 @@ const latestWrite = (filename: string) =>
 
 test('collection workflows work against isolated API fixtures without touching real inventory', async (t) => {
     const user = userEvent.setup({ document: dom.window.document });
+    await t.test('desk refill queue includes empty pens and opens usable refill drafts', async () => {
+        const { default: RefillQueue } = await import('../src/components/collection/RefillQueue');
+        const { deriveCollection } = await import('../src/lib/collection');
+        const pens = ['inked', 'empty', 'new', 'archived', 'unmarked'].map((id) => ({
+            ...source.pens[0], id, model: id,
+            needsRefill: id !== 'unmarked', archived: id === 'archived',
+        }));
+        const model = deriveCollection({ pens, inks: source.inks, entries: [
+            { ...source.refillLog[0], penId: 'inked', inkIds: ['ink-a', 'ink-b'] },
+            { ...source.refillLog[0], penId: 'empty', inkIds: ['NONE'] },
+        ] });
+        const opened: import('../src/lib/collection').EditorState[] = [];
+        const onOpen = (editor: import('../src/lib/collection').EditorState) => opened.push(editor);
+        const view = render(<RefillQueue model={model} onOpen={onOpen} canEdit />);
+        assert.equal(screen.getAllByRole('listitem').length, 3);
+        assert.ok(screen.getByText('Cleaned & empty'));
+        assert.ok(screen.getByText('No ink recorded'));
+        assert.ok(screen.getByText('Happy Holidays'));
+        assert.ok(screen.getByText('Népal Test'));
+        for (const id of ['inked', 'empty', 'new']) {
+            await user.click(screen.getByRole('button', { name: new RegExp(`^Refill Pilot ${id},`) }));
+            const editor = opened.at(-1)!;
+            assert.equal(editor.kind, 'refill');
+            if (editor.kind === 'refill') {
+                assert.equal(editor.draft?.penId, id);
+                assert.deepEqual(editor.draft?.inkIds, id === 'inked' ? ['ink-a', 'ink-b'] : []);
+            }
+        }
+        await user.click(screen.getByRole('button', { name: 'View Diamine Happy Holidays' }));
+        assert.equal(opened.at(-1)?.kind, 'ink');
+        view.rerender(<RefillQueue model={model} onOpen={onOpen} canEdit={false} />);
+        assert.equal(screen.queryAllByRole('button', { name: /^Refill / }).length, 0);
+        view.rerender(<RefillQueue model={deriveCollection({
+            pens: pens.map((pen) => ({ ...pen, needsRefill: false })), inks: [], entries: [],
+        })} onOpen={onOpen} canEdit />);
+        assert.equal(view.container.textContent, '');
+        cleanup();
+    });
     mountApp();
     await t.test('failed initial data load can be retried', async () => {
         await screen.findByRole('heading', {
