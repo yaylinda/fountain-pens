@@ -155,14 +155,48 @@ export function playInkCeremony(origin: SaveOrigin): () => void {
         if (t >= CEREMONY.goldEnd) {
             const crumble = clamp((t - CEREMONY.goldEnd) / 200);
             const swirl = clamp((t - CEREMONY.crumbleEnd) / 600);
+            const pull = ease(swirl);
+            // One rising vortex carries smoke and embers into the same button.
+            const centerX = cx + (target.x - cx) * pull + Math.sin(swirl * Math.PI * 2) * 65 * (1 - swirl);
+            const centerY = cy + (target.y - cy) * pull - Math.sin(swirl * Math.PI) * 120 * scale;
+            const position = (p: typeof particles[number], phase: number) => {
+                const angle = phase * Math.PI * 3 + Math.sin(p.seed * 31) * Math.sin(phase * Math.PI) * 1.4;
+                const shrink = 1 - phase;
+                const spread = 1 + Math.sin(phase * Math.PI) * .3;
+                return {
+                    x: centerX + (p.x * Math.cos(angle) - p.y * Math.sin(angle)) * scale * shrink * spread,
+                    y: centerY + (p.x * Math.sin(angle) + p.y * Math.cos(angle)) * scale * shrink * spread,
+                };
+            };
+            // Soft overlapping charcoal curls sit behind the hot fragments.
+            // Sample the existing particles to keep the smoke bounded and deterministic.
+            for (let i = 0; i < particles.length; i += 28) {
+                const p = particles[i];
+                const point = position(p, swirl);
+                const size = (22 + p.seed * 26) * scale * (1 - swirl);
+                if (size < .5) continue;
+                const sy = point.y - (8 + p.seed * 20) * (1 - swirl);
+                const smoke = ctx.createRadialGradient(point.x, sy, 0, point.x, sy, size);
+                smoke.addColorStop(0, '#51453e70');
+                smoke.addColorStop(.45, '#7e71654a');
+                smoke.addColorStop(1, '#9c8d7b00');
+                ctx.globalAlpha = crumble * (1 - swirl);
+                ctx.fillStyle = smoke;
+                ctx.fillRect(point.x - size, sy - size, size * 2, size * 2);
+            }
             for (const p of particles) {
-                const angle = p.seed * Math.PI * 2 + swirl * Math.PI * 2.5;
-                const radius = Math.sin(swirl * Math.PI) * (100 + p.seed * Math.min(w, h) * .42);
-                const pull = Math.pow(swirl, 3);
-                const x = (cx + p.x * scale * (1 - swirl) + Math.cos(angle) * radius) * (1 - pull) + target.x * pull;
-                const y = (cy + p.y * scale * (1 - swirl) + Math.sin(angle) * radius * .65) * (1 - pull) + target.y * pull;
-                ctx.globalAlpha = crumble * (1 - Math.pow(swirl, 7)); ctx.fillStyle = p.seed > .5 ? '#b8862f' : '#e3bc62';
-                ctx.fillRect(x, y, 1.5 + p.seed * 2, 1.5 + p.seed * 2);
+                const { x, y } = position(p, swirl);
+                const heat = .65 + .35 * Math.sin(t * .016 + p.seed * 30);
+                const size = (1.4 + p.seed * 2.2) * (1 - swirl * .8);
+                ctx.globalAlpha = crumble * (1 - Math.pow(swirl, 7));
+                if (p.seed > .65) {
+                    // An orange halo and pale core distinguish embers from confetti.
+                    ctx.fillStyle = `rgba(238, 95, 24, ${heat * .2})`;
+                    ctx.beginPath(); ctx.arc(x, y, size * 3, 0, Math.PI * 2); ctx.fill();
+                }
+                ctx.fillStyle = p.seed > .65 ? '#ffe5a1' : p.seed > .3 ? '#e99332' : '#70412b';
+                ctx.save(); ctx.translate(x, y); ctx.rotate(p.seed * 6 + swirl * 9);
+                ctx.fillRect(-size / 2, -size / 2, size, size * .6); ctx.restore();
             }
             ctx.globalAlpha = 1;
         }
