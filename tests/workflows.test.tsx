@@ -148,6 +148,15 @@ test('collection workflows work against isolated API fixtures without touching r
         assert.equal(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }).getAttribute('aria-pressed'), 'true');
         await user.click(screen.getByRole('button', { name: 'Reset', exact: true }));
         assert.equal(screen.queryByRole('button', { name: 'Show all colors' }), null);
+        await user.click(screen.getByRole('button', { name: 'Lamy', exact: true }));
+        await user.click(screen.getByRole('button', { name: 'Gold nibs', exact: true }));
+        await act(async () => { await appRouter.navigate(-1); });
+        assert.equal(screen.getByRole('button', { name: 'Lamy', exact: true }).getAttribute('aria-pressed'), 'true');
+        assert.ok(screen.getByText('No pens match this selection'));
+        await act(async () => { await appRouter.navigate(1); });
+        assert.equal(screen.getByRole('button', { name: 'Gold nibs', exact: true }).getAttribute('aria-pressed'), 'true');
+        assert.ok(screen.getByText('Diamine · Inkvent'));
+        await user.click(screen.getByRole('button', { name: 'Reset', exact: true }));
         assert.equal(writes.length, before);
     });
     await t.test(

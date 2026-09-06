@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
     byName,
     inkLabel,
@@ -13,6 +13,7 @@ import {
     type DeskGroup,
     type DeskOrder,
     type DeskState,
+    readDeskState,
 } from '../../lib/writingDesk';
 import { EmptyState, Icon, InkNames, Swatch } from './Primitives';
 
@@ -20,24 +21,19 @@ interface Props {
     model: CollectionModel;
     onOpen: (editor: EditorState) => void;
     canEdit: boolean;
-    state: DeskState;
-    setState: Dispatch<SetStateAction<DeskState>>;
 }
-export default function Overview({
-    model,
-    onOpen,
-    canEdit,
-    state,
-    setState,
-}: Props) {
+export default function Overview({ model, onOpen, canEdit }: Props) {
+    const [params, setParams] = useSearchParams();
+    const state = readDeskState(params.get('desk'));
     const { filters, group, order, selectedInk, view, filtersOpen } = state;
-    const update = <K extends keyof DeskState>(key: K, value: DeskState[K]) =>
-        setState((previous) => ({ ...previous, [key]: value }));
-    const setFilters = (value: DeskFilters) => update('filters', value);
-    const setGroup = (value: DeskGroup) => update('group', value);
-    const setOrder = (value: DeskOrder) => update('order', value);
-    const setSelectedInk = (value: string) => update('selectedInk', value);
-    const setView = (value: string) => update('view', value);
+    const update = (patch: Partial<DeskState>, replace = false) => {
+        const next = { ...state, ...patch };
+        if (JSON.stringify(next) === JSON.stringify(state)) return;
+        const nextParams = new URLSearchParams(params);
+        nextParams.set('desk', JSON.stringify(next));
+        setParams(nextParams, { replace });
+    };
+    const setSelectedInk = (value: string) => update({ selectedInk: value });
     const base = deskRows(model, filters, order, group);
     const groups = deskRows(model, filters, order, group, selectedInk);
     const count = groups.reduce((n, [, rows]) => n + rows.length, 0);
@@ -61,29 +57,27 @@ export default function Overview({
                 .filter((b): b is string => !!b),
         ),
     ].sort(byName);
-    const changeFilters = (next: DeskFilters) => {
-        setFilters(next);
-        setSelectedInk('');
-        setView('');
-    };
-    const preset = (name: string) => {
-        setView(name);
-        setSelectedInk('');
-        setGroup(name === 'By color' ? 'color' : 'none');
-        setOrder('color');
-        setFilters({
-            brands:
-                name === 'Lamy'
-                    ? { Lamy: 'include' }
-                    : name === 'TWSBI'
-                      ? { TWSBI: 'include' }
-                      : name === 'Non-TWSBI'
-                        ? { TWSBI: 'exclude' }
-                        : {},
-            nib: name === 'Gold nibs' ? 'Gold' : '',
-            inkBrand: '',
+    const changeFilters = (next: DeskFilters) =>
+        update({ filters: next, selectedInk: '', view: '' });
+    const preset = (name: string) =>
+        update({
+            view: name,
+            selectedInk: '',
+            group: name === 'By color' ? 'color' : 'none',
+            order: 'color',
+            filters: {
+                brands:
+                    name === 'Lamy'
+                        ? { Lamy: 'include' }
+                        : name === 'TWSBI'
+                          ? { TWSBI: 'include' }
+                          : name === 'Non-TWSBI'
+                            ? { TWSBI: 'exclude' }
+                            : {},
+                nib: name === 'Gold nibs' ? 'Gold' : '',
+                inkBrand: '',
+            },
         });
-    };
     return (
         <>
             <header className="page-header">
@@ -128,7 +122,7 @@ export default function Overview({
                     className="desk-filter-toggle"
                     aria-expanded={filtersOpen}
                     aria-controls="desk-filters"
-                    onClick={() => update('filtersOpen', !filtersOpen)}
+                    onClick={() => update({ filtersOpen: !filtersOpen }, true)}
                 >
                     {filtersOpen ? 'Hide filters' : 'Filter pens'}
                     {Object.keys(filters.brands).length +
@@ -143,8 +137,10 @@ export default function Overview({
                     <select
                         value={group}
                         onChange={(e) => {
-                            setGroup(e.target.value as DeskGroup);
-                            setView('');
+                            update({
+                                group: e.target.value as DeskGroup,
+                                view: '',
+                            });
                         }}
                     >
                         <option value="none">No grouping</option>
@@ -159,8 +155,10 @@ export default function Overview({
                     <select
                         value={order}
                         onChange={(e) => {
-                            setOrder(e.target.value as DeskOrder);
-                            setView('');
+                            update({
+                                order: e.target.value as DeskOrder,
+                                view: '',
+                            });
                         }}
                     >
                         <option value="color">Ink color · rainbow</option>
@@ -263,7 +261,9 @@ export default function Overview({
                     {palette.map((ink) => (
                         <button
                             key={ink.id}
-                            title={inkLabel(ink)}
+                            title={[ink.brand, ink.collection, ink.name]
+                                .filter(Boolean)
+                                .join(' · ')}
                             aria-label={`Filter to ${inkLabel(ink)}`}
                             aria-pressed={selectedInk === ink.id}
                             onClick={() =>
@@ -351,7 +351,25 @@ export default function Overview({
                                     <span className="small muted">
                                         {pen.nibSize} · {pen.nibType}
                                     </span>
-                                    <InkNames entry={entry} model={model} />
+                                    {inks.length ? (
+                                        <div className="desk-ink-details">
+                                            {inks.map((ink) => (
+                                                <div key={ink.id}>
+                                                    <span>{ink.name}</span>
+                                                    <span className="small muted">
+                                                        {[
+                                                            ink.brand,
+                                                            ink.collection,
+                                                        ]
+                                                            .filter(Boolean)
+                                                            .join(' · ')}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <InkNames entry={entry} model={model} />
+                                    )}
                                 </div>
                                 {canEdit && (
                                     <button

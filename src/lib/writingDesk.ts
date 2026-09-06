@@ -146,7 +146,7 @@ export function deskRows(
     );
 }
 
-// Owned by the app shell so opening details does not discard a desk session.
+// Stored in the URL so Back, Forward, and detail navigation retain each arrangement.
 export interface DeskState {
     filters: DeskFilters;
     group: DeskGroup;
@@ -163,3 +163,40 @@ export const initialDeskState: DeskState = {
     view: 'All pens',
     filtersOpen: false,
 };
+
+export function readDeskState(raw: string | null): DeskState {
+    try {
+        const value = JSON.parse(raw || 'null');
+        if (!value || typeof value !== 'object') return initialDeskState;
+        const brands = Object.fromEntries(
+            Object.entries(value.filters?.brands || {}).filter(
+                ([, mode]) => mode === 'include' || mode === 'exclude',
+            ),
+        ) as DeskFilters['brands'];
+        return {
+            filters: {
+                brands,
+                nib:
+                    typeof value.filters?.nib === 'string'
+                        ? value.filters.nib
+                        : '',
+                inkBrand:
+                    typeof value.filters?.inkBrand === 'string'
+                        ? value.filters.inkBrand
+                        : '',
+            },
+            group: ['none', 'pen', 'nib', 'ink', 'color'].includes(value.group)
+                ? value.group
+                : 'none',
+            order: ['color', 'pen', 'ink', 'recent'].includes(value.order)
+                ? value.order
+                : 'color',
+            selectedInk:
+                typeof value.selectedInk === 'string' ? value.selectedInk : '',
+            view: typeof value.view === 'string' ? value.view : 'All pens',
+            filtersOpen: value.filtersOpen === true,
+        };
+    } catch {
+        return initialDeskState;
+    }
+}

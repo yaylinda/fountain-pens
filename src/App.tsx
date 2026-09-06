@@ -6,7 +6,6 @@ import { useCollection } from './hooks/useCollection';
 import { useEditorNavigation } from './hooks/useEditorNavigation';
 import { useLocalNetwork } from './context/LocalNetworkContext';
 import { useDirtyState } from './context/DirtyStateContext';
-import { initialDeskState } from './lib/writingDesk';
 import Overview from './components/collection/Overview';
 import Inventory from './components/collection/Inventory';
 import Journal from './components/collection/Journal';
@@ -29,7 +28,6 @@ const navItems: { to: string; label: string; icon: IconName }[] = [
 ];
 
 export default function App() {
-    const [deskState, setDeskState] = useState(initialDeskState);
     const { collection, model, loading, error, refresh, retry } =
         useCollection();
     const { isLocal, isLoading: networkLoading } = useLocalNetwork();
@@ -282,8 +280,6 @@ export default function App() {
                                 path="/"
                                 element={
                                     <Overview
-                                        state={deskState}
-                                        setState={setDeskState}
                                         model={model}
                                         onOpen={onOpen}
                                         canEdit={canEdit}

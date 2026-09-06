@@ -2170,3 +2170,5 @@
     .desk-filter-content fieldset label { display: grid; grid-template-columns: minmax(60px, 1fr) 100px; gap: 8px; }
 }
 .desk-filter-toggle { justify-self: start; align-self: end; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--ink); font: inherit; cursor: pointer; text-align: left; }
+.desk-ink-details, .desk-ink-details > div { display: grid; gap: 4px; }
+.desk-ink-details { gap: 12px; margin-top: 4px; }
