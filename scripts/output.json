@@ -718,5 +718,29 @@
         "url": "https://inkswatch.com/ink.html?inkId=36",
         "hex": "#fc8343",
         "note": null
+    },
+    "[Day 01] Celestial Skies": {
+        "name": "[Day 01] Celestial Skies",
+        "url": "https://www.penchalet.com/ink_refills/fountain_pen_ink/diamine_teal_edition_50ml_fountain_pen_ink.html",
+        "hex": "#155365",
+        "note": "Image-based approximation, not a manufacturer-published hex. Median RGB of base-color swatch area; crop (left, top, right-exclusive, bottom-exclusive)=(150, 250, 300, 380) in 500x500 image. Shimmer and shading are not represented by one hex. Source image: https://images.penchalet.com/products/swatches/enlarge/15314-CelestialSkies.jpg (2026-09-06)."
+    },
+    "[Day 23] Let it Snow": {
+        "name": "[Day 23] Let it Snow",
+        "url": "https://www.penchalet.com/ink_refills/fountain_pen_ink/diamine_teal_edition_50ml_fountain_pen_ink.html",
+        "hex": "#00C3D2",
+        "note": "Image-based approximation, not a manufacturer-published hex. Median RGB of base-color swatch area; crop (left, top, right-exclusive, bottom-exclusive)=(150, 150, 350, 350) in 500x500 image. Shimmer and shading are not represented by one hex. Source image: https://images.penchalet.com/products/swatches/enlarge/15314-LetItSnow.jpg (2026-09-06)."
+    },
+    "[Day 07] LGM": {
+        "name": "[Day 07] LGM",
+        "url": "https://www.gentlemanstationer.com/blog/2025/12/13/colorventinkvent-recap-days-6-10",
+        "hex": "#D6E50E",
+        "note": "Image-based approximation, not a manufacturer-published hex. Median RGB of base-color swatch area; crop (left, top, right-exclusive, bottom-exclusive)=(395, 545, 510, 610) in 1280x1280 image. Shimmer and shading are not represented by one hex. Source image: https://images.squarespace-cdn.com/content/v1/5349ba13e4b095a3fb0ba65c/b31f6692-baff-4ab4-b967-59d1e6f9ec8d/Colorverse%2BColorvent%2Band%2BDiamine%2BInkvent%2BDay%2B7.jpeg (2026-09-06)."
+    },
+    "[Day 11] Blue Hole": {
+        "name": "[Day 11] Blue Hole",
+        "url": "https://bennyslittlethings.pagecord.com/colorverse-colorvent-and-enigma-inkvent",
+        "hex": "#4EADAF",
+        "note": "Image-based approximation, not a manufacturer-published hex. Median RGB of base-color swatch area; crop (left, top, right-exclusive, bottom-exclusive)=(250, 1030, 550, 1220) in 1600x1490 image. Shimmer and shading are not represented by one hex. Source image: https://pagecord.com/cdn-cgi/image/width%3D1600%2Cheight%3D1600%2Cformat%3Dwebp%2Cquality%3D90/https%3A//storage.pagecord.com/liv129lpbw8s54ltha1unsmmfsgj (2026-09-06)."
     }
 }
