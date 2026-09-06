@@ -60,6 +60,30 @@ export const referenceHex = (reference: InkReference) =>
         ? `#${reference.color.rgb.map((value) => value.toString(16).padStart(2, '0')).join('')}`
         : undefined;
 
+// Normalize brand terminology for display without changing the sourced catalog.
+// An unlisted effect is unknown, not an assertion that the ink lacks it.
+export function inkPropertyValues(reference: InkReference): { label: string; value: string }[] {
+    const { writing, properties, glitterColors } = reference;
+    if (writing) {
+        return [
+            { label: 'Flow', value: writing.flow },
+            { label: 'Shading', value: writing.shading },
+            { label: 'Sheen', value: writing.sheen },
+            { label: 'Shimmer', value: writing.shimmer ? glitterColors.join(' + ') || 'Yes' : 'No' },
+            { label: 'Dry time', value: `About ${writing.dryTimeSeconds} seconds` },
+            { label: 'Water resistance', value: writing.waterResistance },
+        ];
+    }
+    const values = properties.map((property) => ({
+        label: property === 'Glistening' ? 'Shimmer' : property,
+        value: property === 'Glistening' ? glitterColors.join(' + ') || 'Present' : 'Present',
+    }));
+    if (glitterColors.length && !properties.includes('Glistening')) {
+        values.push({ label: 'Shimmer', value: glitterColors.join(' + ') });
+    }
+    return values;
+}
+
 export function inkReferenceSearchText(ink: Ink): string {
     const reference = getInkReference(ink);
     if (!reference) return '';

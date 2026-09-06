@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import type { Ink } from '../../models/types';
 import type { InventoryLayout } from '../../hooks/useInventoryLayout';
 import {
@@ -51,104 +52,112 @@ export default function InkInventory({
                             const current = model.currentPens(ink.id);
                             const latest = model.inkHistory.get(ink.id)?.[0];
                             return (
-                                <tr key={ink.id}>
-                                    <td>
-                                        <button
-                                            type="button"
-                                            className="inventory-name ink-list-name"
-                                            data-focus-key={`ink-${ink.id}`}
-                                            onClick={() =>
-                                                onOpen({
-                                                    kind: 'ink',
-                                                    item: ink,
-                                                })
-                                            }
-                                        >
-                                            <Swatch ink={ink} />
-                                            <span>
-                                                <span className="overline">
-                                                    {ink.brand}
-                                                </span>
-                                                <strong>{ink.name}</strong>
-                                                {reference && (
-                                                    <span className="small muted">
-                                                        {referenceByline(reference)}
+                                <Fragment key={ink.id}>
+                                    <tr className={reference ? 'ink-row-with-story' : undefined}>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                className="inventory-name ink-list-name"
+                                                data-focus-key={`ink-${ink.id}`}
+                                                onClick={() =>
+                                                    onOpen({
+                                                        kind: 'ink',
+                                                        item: ink,
+                                                    })
+                                                }
+                                            >
+                                                <Swatch ink={ink} />
+                                                <span>
+                                                    <span className="overline">
+                                                        {ink.brand}
                                                     </span>
-                                                )}
-                                                {ink.archived && (
-                                                    <span className="small muted">
-                                                        Archived
-                                                    </span>
-                                                )}
-                                            </span>
-                                        </button>
-                                        <InkStory ink={ink} />
-                                    </td>
-                                    <td data-label="Collection">
-                                        {ink.collection || reference?.inspiration.series || (
-                                            <span className="muted">
-                                                Standard collection
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td data-label="Current pens">
-                                        <span className="mobile-field-label">
-                                            Current pens
-                                        </span>
-                                        <span className="ink-current-pens">
-                                            {current.length ? (
-                                                current.map((pen) => (
-                                                    <span key={pen.id}>
-                                                        {penLabel(pen)}
-                                                        <span className="small muted block">
-                                                            {[
-                                                                pen.color,
-                                                                pen.nibSize,
-                                                            ]
-                                                                .filter(Boolean)
-                                                                .join(' · ')}
+                                                    <strong>{ink.name}</strong>
+                                                    {reference && (
+                                                        <span className="small muted">
+                                                            {referenceByline(reference)}
                                                         </span>
-                                                    </span>
-                                                ))
-                                            ) : (
+                                                    )}
+                                                    {ink.archived && (
+                                                        <span className="small muted">
+                                                            Archived
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </button>
+                                        </td>
+                                        <td data-label="Collection">
+                                            {ink.collection || reference?.inspiration.series || (
                                                 <span className="muted">
-                                                    Not in a pen
+                                                    Standard collection
                                                 </span>
                                             )}
-                                        </span>
-                                        <span className="small muted block">
-                                            {latest
-                                                ? `Last used ${formatDate(latest.date)}`
-                                                : 'Not tried yet'}
-                                        </span>
-                                    </td>
-                                    <td
-                                        data-label="Refills"
-                                        className="tabular"
-                                    >
-                                        {model.inkCount(ink.id)}
-                                    </td>
-                                    <td className="row-actions">
-                                        <button
-                                            type="button"
-                                            className="icon-button"
-                                            data-focus-key={`ink-${ink.id}`}
-                                            aria-label={`${canEdit ? 'Edit' : 'View'} ${inkLabel(ink)}`}
-                                            onClick={() =>
-                                                onOpen({
-                                                    kind: 'ink',
-                                                    item: ink,
-                                                })
-                                            }
+                                        </td>
+                                        <td data-label="Current pens">
+                                            <span className="mobile-field-label">
+                                                Current pens
+                                            </span>
+                                            <span className="ink-current-pens">
+                                                {current.length ? (
+                                                    current.map((pen) => (
+                                                        <span key={pen.id}>
+                                                            {penLabel(pen)}
+                                                            <span className="small muted block">
+                                                                {[
+                                                                    pen.color,
+                                                                    pen.nibSize,
+                                                                ]
+                                                                    .filter(Boolean)
+                                                                    .join(' · ')}
+                                                            </span>
+                                                        </span>
+                                                    ))
+                                                ) : (
+                                                    <span className="muted">
+                                                        Not in a pen
+                                                    </span>
+                                                )}
+                                            </span>
+                                            <span className="small muted block">
+                                                {latest
+                                                    ? `Last used ${formatDate(latest.date)}`
+                                                    : 'Not tried yet'}
+                                            </span>
+                                        </td>
+                                        <td
+                                            data-label="Refills"
+                                            className="tabular"
                                         >
-                                            <Icon
-                                                name={
-                                                    canEdit ? 'edit' : 'arrow'
+                                            {model.inkCount(ink.id)}
+                                        </td>
+                                        <td className="row-actions">
+                                            <button
+                                                type="button"
+                                                className="icon-button"
+                                                data-focus-key={`ink-${ink.id}`}
+                                                aria-label={`${canEdit ? 'Edit' : 'View'} ${inkLabel(ink)}`}
+                                                onClick={() =>
+                                                    onOpen({
+                                                        kind: 'ink',
+                                                        item: ink,
+                                                    })
                                                 }
-                                            />
-                                        </button>
-                                    </td>
-                                </tr>
+                                            >
+                                                <Icon
+                                                    name={
+                                                        canEdit ? 'edit' : 'arrow'
+                                                    }
+                                                />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {reference && (
+                                        <tr className="ink-story-row">
+                                            <td colSpan={5}>
+                                                <InkStory ink={ink} />
+                                            </td>
+                                        </tr>
+                                    )}
+                                </Fragment>
                             );
                         })}
                     </tbody>
