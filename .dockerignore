@@ -22,7 +22,10 @@ scripts/*
 
 # Local data (production uses mounted volume)
 data/
-src/data/
+# Live inventory is mounted at runtime; reference catalogs are build inputs.
+src/data/inks.json
+src/data/pens.json
+src/data/refillLog.json
 
 # Environment files
 .env*
