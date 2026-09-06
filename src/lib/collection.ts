@@ -1,5 +1,6 @@
 import type { Ink, Pen, RefillLog } from '../models/types';
 import swatches from '../../scripts/output.json';
+import { getInkReference, referenceHex } from './inkReference';
 
 export const EMPTY_INK_ID = 'NONE';
 export type JournalEntry = RefillLog & { index: number };
@@ -77,6 +78,14 @@ export function getSwatch(
     if (!ink) return undefined;
     if (ink.colorHex && /^#[\da-f]{6}$/i.test(ink.colorHex))
         return { hex: ink.colorHex, source: 'Your color' };
+    const manufacturer = getInkReference(ink);
+    const manufacturerHex = manufacturer && referenceHex(manufacturer);
+    if (manufacturerHex)
+        return {
+            hex: manufacturerHex,
+            source: 'Wearingeul RGB reference',
+            url: manufacturer.sources[0].url,
+        };
     const reference = (
         swatches as Record<string, { hex: string | null; url: string }>
     )[ink.name];

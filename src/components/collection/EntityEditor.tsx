@@ -24,6 +24,7 @@ import {
     type EditorProps as SharedProps,
 } from './EditorFields';
 import { useDraft } from '../../hooks/useDraft';
+import { InkStory } from './InkStory';
 type EntityEditorState = Extract<EditorState, { kind: 'pen' | 'ink' }>;
 
 export function EntityEditor({
@@ -530,6 +531,7 @@ export function EntityEditor({
                             )}
                         </section>
                     )}
+                    {ink && <InkStory ink={ink} expanded />}
                     {item && (
                         <section className="history-section">
                             <div className="section-heading">

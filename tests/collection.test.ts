@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { getInkReference, inkReferenceSearchText, wearingeulReferences } from '../src/lib/inkReference';
 import {
     deriveCollection,
     formatDate,
@@ -267,4 +268,44 @@ test('collection loading shares requests, rejects malformed responses, and retri
     } finally {
         globalThis.fetch = originalFetch;
     }
+});
+
+test('Wearingeul references cover the owned collection with traceable, valid colors', () => {
+    const owned = JSON.parse(readFileSync('src/data/inks.json', 'utf8'))
+        .filter((item: { brand: string }) => item.brand === 'Wearingeul');
+    assert.equal(wearingeulReferences.length, 21);
+    assert.equal(new Set(wearingeulReferences.map((item) => item.inkId)).size, 21);
+    const validProperties = new Set(['Shading', 'Color Shading', 'Glistening', 'Sheen', 'Color Change']);
+    for (const item of owned) {
+        const reference = getInkReference(item);
+        assert.ok(reference, `Missing reference for ${item.name}`);
+        assert.ok(reference.description && reference.inspiration.series);
+        assert.ok(reference.sources.every(({ url }) => new URL(url).protocol === 'https:'));
+        assert.ok(reference.properties.every((property) => validProperties.has(property)));
+        if (reference.color.rgb) {
+            assert.equal(reference.color.rgb.length, 3);
+            assert.ok(reference.color.rgb.every((value) => Number.isInteger(value) && value >= 0 && value <= 255));
+            assert.ok(reference.color.p);
+        } else {
+            assert.equal(reference.name, 'Twelfth Night');
+            assert.equal(reference.color.p, null);
+        }
+    }
+});
+
+test('manufacturer swatches keep custom colors, brand boundaries, and inventory identity', () => {
+    const mermaid = {
+        id: '5400c69c-d66a-4e64-8d53-9f1b05124a15', brand: 'Wearingeul',
+        name: 'The Little Mermaid', collection: '',
+    };
+    assert.equal(getSwatch(mermaid)?.hex, '#64b1bf');
+    assert.equal(getSwatch({ ...mermaid, colorHex: '#123456' })?.source, 'Your color');
+    assert.equal(getSwatch({ ...mermaid, colorHex: '#123456' })?.hex, '#123456');
+    assert.equal(getSwatch({ ...mermaid, name: 'Corrected inventory label' })?.hex, '#64b1bf');
+    assert.equal(getInkReference({ ...mermaid, brand: 'Other brand' }), undefined);
+    assert.equal(getInkReference({ ...mermaid, id: 'new-unresearched-ink' }), undefined);
+    assert.match(inkReferenceSearchText(mermaid), /Hans Christian Andersen/);
+    assert.match(inkReferenceSearchText(mermaid), /shimmer/);
+    assert.ok(getInkReference({ ...mermaid, id: 'ink_57' })?.properties.includes('Color Change'));
+    assert.ok(getInkReference({ ...mermaid, id: 'ink_57' })?.colorGuideProperties?.includes('Color Shading'));
 });

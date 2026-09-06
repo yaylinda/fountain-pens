@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
+import { inkReferenceSearchText } from '../../lib/inkReference';
 import {
     byName,
     inkLabel,
@@ -106,7 +107,13 @@ export default function Inventory({
                 (!brand || ink.brand === brand) &&
                 (status !== 'in-use' || model.currentPens(ink.id).length > 0) &&
                 (status !== 'untried' || model.inkCount(ink.id) === 0) &&
-                matches(query, ink.brand, ink.name, ink.collection),
+                matches(
+                    query,
+                    ink.brand,
+                    ink.name,
+                    ink.collection,
+                    inkReferenceSearchText(ink),
+                ),
         )
         .sort(
             (a, b) =>
@@ -170,7 +177,7 @@ export default function Inventory({
                     placeholder={
                         isPens
                             ? 'Search pens, nibs, or current ink…'
-                            : 'Search inks, brands, or collections…'
+                            : 'Search inks, authors, or properties…'
                     }
                 />
                 <label className="select-label">

@@ -396,7 +396,7 @@ test('collection workflows work against isolated API fixtures without touching r
             await user.click(screen.getByRole('link', { name: /Ink cabinet/ }));
             await user.type(
                 screen.getByRole('searchbox', {
-                    name: 'Search inks, brands, or collections…',
+                    name: 'Search inks, authors, or properties…',
                 }),
                 'nepal',
             );
@@ -503,7 +503,7 @@ test('collection workflows work against isolated API fixtures without touching r
             assert.ok(usedInk.querySelector('.swatch:not(.swatch-unknown)'));
             await user.type(
                 screen.getByRole('searchbox', {
-                    name: 'Search inks, brands, or collections…',
+                    name: 'Search inks, authors, or properties…',
                 }),
                 'nepal',
             );
@@ -517,7 +517,7 @@ test('collection workflows work against isolated API fixtures without touching r
             assert.ok(screen.getByRole('table', { name: 'Ink inventory' }));
             assert.equal(
                 screen.getByRole('searchbox', {
-                    name: 'Search inks, brands, or collections…',
+                    name: 'Search inks, authors, or properties…',
                 }).value,
                 'nepal',
             );

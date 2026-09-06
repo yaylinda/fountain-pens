@@ -1,0 +1,865 @@
+{
+  "schemaVersion": 1,
+  "brand": "Wearingeul",
+  "retrievedAt": "2026-09-06",
+  "descriptionFormat": "summary",
+  "propertyPolicy": "Properties reproduce the individual product sheet labels where available; differences from the color guide are retained separately. Missing values are null, never estimated.",
+  "inks": [
+    {
+      "inkId": "ink_61",
+      "name": "20000 Leagues Under the Sea",
+      "productCode": "148WGBU",
+      "inspiration": {
+        "author": "Jules Verne",
+        "work": "20000 Leagues Under the Sea",
+        "series": "World Literature"
+      },
+      "description": "The Nautilus’s voyages through the Antarctic, Atlantic, Indian, and Pacific inspire this vivid blue. Gold sparkle suggests coral reefs and the richness of life beneath the sea.",
+      "color": {
+        "rgb": [
+          0,
+          47,
+          122
+        ],
+        "p": "2145U"
+      },
+      "properties": [
+        "Shading",
+        "Glistening"
+      ],
+      "glitterColors": [
+        "Gold"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=1021"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/b5d5405c9a3b7.jpg?w=1920"
+        }
+      ]
+    },
+    {
+      "inkId": "238416a6-2d22-4766-8105-e4199f52a5c0",
+      "name": "7 Colored Ocean",
+      "productCode": "102KSBU",
+      "inspiration": {
+        "author": "Lee Yuk sa",
+        "work": "Speckled Cat",
+        "series": "Korean Literature"
+      },
+      "description": "Shifting blue, navy, violet, and red suggest a changing deep sea. Bright red sheen gathers at the edges of the ocean-blue ink.",
+      "color": {
+        "rgb": [
+          0,
+          53,
+          124
+        ],
+        "p": "301U"
+      },
+      "properties": [
+        "Sheen"
+      ],
+      "glitterColors": [],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=423"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/ed15eff6e6a13.jpg?w=1920"
+        },
+        {
+          "label": "Wearingeul color guide",
+          "url": "https://www.wearingeul.com/Colors"
+        }
+      ],
+      "colorGuideProperties": [
+        "Shading",
+        "Sheen"
+      ],
+      "notes": [
+        "The product sheet and color guide list different effects; the displayed properties follow the product sheet."
+      ]
+    },
+    {
+      "inkId": "a1c5596c-2fce-4993-8d99-4bd09dabc7bf",
+      "name": "A Dream Within a Dream",
+      "productCode": "190WGVI",
+      "inspiration": {
+        "author": "Edgar Allan Poe",
+        "work": "A Dream Within a Dream",
+        "series": "World Literature"
+      },
+      "description": "Pink-violet and blue separate like pieces of a dream. Gold sparkle recalls sand slipping through one’s fingers, expressing a beautiful moment that cannot be held.",
+      "color": {
+        "rgb": [
+          170,
+          156,
+          198
+        ],
+        "p": "2645U"
+      },
+      "properties": [
+        "Color Shading",
+        "Shading",
+        "Glistening"
+      ],
+      "glitterColors": [
+        "Gold"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=1351"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/38a286bc4804a.jpg?w=1920"
+        }
+      ]
+    },
+    {
+      "inkId": "ink_59",
+      "name": "A Little Princess",
+      "productCode": "169WGVI",
+      "inspiration": {
+        "author": "Frances Hodgson Burnett",
+        "work": "A Little Princess",
+        "series": "World Literature"
+      },
+      "description": "Lavender with silver and gold sparkle reflects Sara Crewe’s dignity and persistent hope. The warm shimmer expresses her quiet strength and grace.",
+      "color": {
+        "rgb": [
+          207,
+          137,
+          244
+        ],
+        "p": "0631U"
+      },
+      "properties": [
+        "Shading",
+        "Glistening"
+      ],
+      "glitterColors": [
+        "Silver",
+        "Gold"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=1182"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/557a44732410b.jpg?w=1920"
+        }
+      ]
+    },
+    {
+      "inkId": "dc812d3b-1a22-4dd4-89aa-1864e5761dda",
+      "name": "A Watery Star",
+      "productCode": "014KGBU",
+      "inspiration": {
+        "author": "Jung Ji Yong",
+        "work": "Windowpane",
+        "series": "Korean Literature"
+      },
+      "description": "Soft violet settles into periwinkle, with silver and blue sparkle recalling stars seen through tear-filled eyes.",
+      "color": {
+        "rgb": [
+          106,
+          132,
+          188
+        ],
+        "p": "660U"
+      },
+      "properties": [
+        "Glistening",
+        "Shading"
+      ],
+      "glitterColors": [
+        "Silver",
+        "Blue"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=225"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/c8dbf020c3d68.jpg?w=1920"
+        }
+      ],
+      "edition": "Glistening",
+      "notes": [
+        "Glistening edition confirmed by the owner. Wearingeul also lists a discontinued standard version."
+      ]
+    },
+    {
+      "inkId": "ink_65",
+      "name": "Alice",
+      "productCode": "067WGBU",
+      "inspiration": {
+        "author": "Lewis Carroll",
+        "work": "Alice in Wonderland",
+        "series": "World Literature"
+      },
+      "description": "Bright gold sparkle over a light blue with yellow shading conveys Alice’s lively spirit.",
+      "color": {
+        "rgb": [
+          10,
+          152,
+          196
+        ],
+        "p": "7703U"
+      },
+      "properties": [
+        "Glistening"
+      ],
+      "glitterColors": [
+        "Gold"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=343"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/7ea2e94f40177.jpg?w=1920"
+        },
+        {
+          "label": "Wearingeul color guide",
+          "url": "https://www.wearingeul.com/Colors"
+        }
+      ],
+      "colorGuideProperties": [
+        "Shading",
+        "Color Shading",
+        "Glistening"
+      ],
+      "notes": [
+        "The product sheet and color guide list different effects; the displayed properties follow the product sheet."
+      ]
+    },
+    {
+      "inkId": "439839ff-1c03-43c5-b9f0-14bc99d97b8c",
+      "name": "Atlas",
+      "productCode": null,
+      "inspiration": {
+        "author": null,
+        "work": null,
+        "series": "World Myth — Greek and Roman"
+      },
+      "exclusiveTo": "Atlas Stationers",
+      "description": "Inspired by the Titan who carries the heavens, the blue suggests water while green shimmer represents land and earth. Created in collaboration with Atlas Stationers.",
+      "color": {
+        "rgb": [
+          24,
+          123,
+          178
+        ],
+        "p": "2183 U"
+      },
+      "properties": [
+        "Glistening"
+      ],
+      "glitterColors": [
+        "Green"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul color guide",
+          "url": "https://www.wearingeul.com/Colors"
+        },
+        {
+          "label": "Atlas Stationers product page",
+          "url": "https://www.atlasstationers.com/products/wearingeul-atlas-30ml-bottled-ink-atlas-exclusive"
+        },
+        {
+          "label": "Manufacturer packaging via Atlas Stationers",
+          "url": "https://www.atlasstationers.com/cdn/shop/files/Wearingeul_Atlas_E.jpg?v=1716403382&width=1500"
+        }
+      ],
+      "notes": [
+        "Wearingeul’s color guide directs this exclusive to Atlas Stationers. RGB and P are transcribed from the packaging photo; a manufacturer product code was not found."
+      ]
+    },
+    {
+      "inkId": "651db7fc-c629-48f4-bc87-897f8c437286",
+      "name": "Dewy Starlight",
+      "productCode": "100KGBU",
+      "inspiration": {
+        "author": "Lee Yuk sa",
+        "work": "Solar Eclipse",
+        "series": "Korean Literature"
+      },
+      "description": "Golden sparkle over a clear mint-blue pastel evokes stars reflected in dew and an imagined, dreamlike sky.",
+      "color": {
+        "rgb": [
+          103,
+          192,
+          196
+        ],
+        "p": "629U"
+      },
+      "properties": [
+        "Glistening",
+        "Shading"
+      ],
+      "glitterColors": [
+        "Gold"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=421"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/c851501429eb8.jpg?w=1920"
+        }
+      ]
+    },
+    {
+      "inkId": "ink_56",
+      "name": "Dracula",
+      "productCode": "121WGRE",
+      "inspiration": {
+        "author": "Bram Stoker",
+        "work": "Dracula",
+        "series": "World Literature"
+      },
+      "description": "A velvety crimson evokes a vampire’s bite in the dark. Blue shimmer gives the rich red an icy contrast, reflecting the novel’s mystery and the feeling of a heart slowly growing cold.",
+      "color": {
+        "rgb": [
+          117,
+          0,
+          28
+        ],
+        "p": "207 U"
+      },
+      "properties": [
+        "Glistening",
+        "Sheen"
+      ],
+      "glitterColors": [
+        "Blue"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=599"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/2343de190620a.jpg?w=1920"
+        },
+        {
+          "label": "Wearingeul color guide",
+          "url": "https://www.wearingeul.com/Colors"
+        }
+      ],
+      "colorGuideProperties": [
+        "Shading",
+        "Glistening",
+        "Sheen"
+      ],
+      "notes": [
+        "The product sheet and color guide list different effects; the displayed properties follow the product sheet."
+      ]
+    },
+    {
+      "inkId": "ink_57",
+      "name": "Enki",
+      "productCode": "129WGBU",
+      "inspiration": {
+        "author": null,
+        "work": null,
+        "series": "World Myth — Sumerian"
+      },
+      "description": "Inspired by the Sumerian deity of water and wisdom, this blue ink separates into violet tones. Golden sparkle recalls sunlight moving across flowing water.",
+      "color": {
+        "rgb": [
+          61,
+          133,
+          193
+        ],
+        "p": "2122U"
+      },
+      "properties": [
+        "Glistening",
+        "Color Change"
+      ],
+      "glitterColors": [
+        "Gold"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=725"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/8b8cbd1969737.jpg?w=1920"
+        },
+        {
+          "label": "Wearingeul color guide",
+          "url": "https://www.wearingeul.com/Colors"
+        }
+      ],
+      "colorGuideProperties": [
+        "Shading",
+        "Color Shading",
+        "Glistening"
+      ],
+      "notes": [
+        "The product sheet and color guide list different effects; the displayed properties follow the product sheet."
+      ]
+    },
+    {
+      "inkId": "ink_62",
+      "name": "Hades",
+      "productCode": "152WSBR",
+      "inspiration": {
+        "author": null,
+        "work": null,
+        "series": "World Myth — Greek and Roman"
+      },
+      "description": "An underworld black represents Hades, ruler of the dead. Cold blue sparkle adds a restrained, otherworldly beauty to the dark base.",
+      "color": {
+        "rgb": [
+          53,
+          54,
+          58
+        ],
+        "p": "4280U"
+      },
+      "properties": [
+        "Shading",
+        "Glistening"
+      ],
+      "glitterColors": [
+        "Frozen blue"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=1054"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/49cac6e208e9b.jpg?w=1920"
+        },
+        {
+          "label": "Wearingeul color guide",
+          "url": "https://www.wearingeul.com/Colors"
+        }
+      ],
+      "colorGuideProperties": [
+        "Glistening"
+      ],
+      "notes": [
+        "The product sheet and color guide list different effects; the displayed properties follow the product sheet."
+      ]
+    },
+    {
+      "inkId": "36b696cf-eaac-442e-af68-66ad21e4fffb",
+      "name": "Little Lord Fauntleroy",
+      "productCode": "178WGBU",
+      "inspiration": {
+        "author": "Frances Hodgson Burnett",
+        "work": "Little Lord Fauntleroy",
+        "series": "World Literature"
+      },
+      "description": "Clear periwinkle and warm gold sparkle reflect Cedric’s kind heart and noble bearing, echoing the idea of making the world better through one’s life.",
+      "color": {
+        "rgb": [
+          106,
+          135,
+          216
+        ],
+        "p": "2718U"
+      },
+      "properties": [
+        "Shading",
+        "Glistening"
+      ],
+      "glitterColors": [
+        "Gold"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=1211"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/6aad79ea6c3a7.jpg?w=1920"
+        }
+      ]
+    },
+    {
+      "inkId": "ink_64",
+      "name": "Paradiso",
+      "productCode": "173WGGY",
+      "inspiration": {
+        "author": "Dante Alighieri",
+        "work": "La Divina Commedia",
+        "series": "World Literature"
+      },
+      "description": "Transparent pale blue opens into pink, with blue and silver sparkle suggesting heavenly light. The ink reflects Dante’s paradise, its luminous rivers, and the love that gives the cosmos motion.",
+      "color": {
+        "rgb": [
+          128,
+          195,
+          224
+        ],
+        "p": "291U"
+      },
+      "properties": [
+        "Color Shading",
+        "Shading",
+        "Glistening"
+      ],
+      "glitterColors": [
+        "Blue",
+        "Silver"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=1203"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/51a6929e7600b.jpg?w=1920"
+        }
+      ]
+    },
+    {
+      "inkId": "ink_60",
+      "name": "Pinocchio",
+      "productCode": "151WGGN",
+      "inspiration": {
+        "author": "Carlo Collodi",
+        "work": "The Adventures of Pinocchio",
+        "series": "World Literature"
+      },
+      "description": "Lively emerald and mint tones, hints of yellow, and gold sparkle capture Pinocchio’s curiosity, mischief, and restless energy.",
+      "color": {
+        "rgb": [
+          0,
+          156,
+          116
+        ],
+        "p": "338U"
+      },
+      "properties": [
+        "Shading",
+        "Glistening",
+        "Color Shading"
+      ],
+      "glitterColors": [
+        "Gold"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=1067"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/1a8e599357d6e.jpg?w=1920"
+        }
+      ],
+      "notes": [
+        "The product sheet spells the author “Carlo Cillodi”; the author name is normalized to Carlo Collodi."
+      ]
+    },
+    {
+      "inkId": "ink_67",
+      "name": "Robinson Crusoe",
+      "productCode": "136WSBU",
+      "inspiration": {
+        "author": "Daniel Defoe",
+        "work": "Robinson Crusoe",
+        "series": "World Literature"
+      },
+      "description": "Separating ocean blue and island green create a distinct boundary, evoking the isolated shore encountered by the castaway Robinson Crusoe.",
+      "color": {
+        "rgb": [
+          0,
+          145,
+          167
+        ],
+        "p": "2229U"
+      },
+      "properties": [
+        "Shading"
+      ],
+      "glitterColors": [],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=722"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/1af962feb69fa.jpg?w=1920"
+        },
+        {
+          "label": "Wearingeul color guide",
+          "url": "https://www.wearingeul.com/Colors"
+        }
+      ],
+      "colorGuideProperties": [
+        "Shading",
+        "Color Shading"
+      ],
+      "notes": [
+        "The product sheet and color guide list different effects; the displayed properties follow the product sheet."
+      ]
+    },
+    {
+      "inkId": "ink_66",
+      "name": "The Count of Monte Cristo",
+      "productCode": "176WGBU",
+      "inspiration": {
+        "author": "Alexandre Dumas",
+        "work": "The Count of Monte Cristo",
+        "series": "World Literature"
+      },
+      "description": "A dark navy recalls the sea’s cold depths. Violet sparkle represents a persistent flame of vengeance, set against the novel’s themes of patience and hope.",
+      "color": {
+        "rgb": [
+          39,
+          54,
+          145
+        ],
+        "p": "Blue 072U"
+      },
+      "properties": [
+        "Glistening",
+        "Shading",
+        "Sheen"
+      ],
+      "glitterColors": [
+        "Violet"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=1206"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/db8eb522541f2.jpg?w=1920"
+        }
+      ]
+    },
+    {
+      "inkId": "ink_63",
+      "name": "The Glass Bead Game",
+      "productCode": "174WGPK",
+      "inspiration": {
+        "author": "Hermann Hesse",
+        "work": "The Glass Bead Game",
+        "series": "World Literature"
+      },
+      "description": "Pink and green separate as the ink dries beneath silver and blue sparkle. The interplay reflects Hesse’s imagined synthesis of music, mathematics, philosophy, and art into a harmonious whole.",
+      "color": {
+        "rgb": [
+          200,
+          156,
+          182
+        ],
+        "p": "530U"
+      },
+      "properties": [
+        "Glistening",
+        "Color Shading",
+        "Shading"
+      ],
+      "glitterColors": [
+        "Silver",
+        "Blue"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=1192"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/d0d69b04530a4.jpg?w=1920"
+        }
+      ]
+    },
+    {
+      "inkId": "5400c69c-d66a-4e64-8d53-9f1b05124a15",
+      "name": "The Little Mermaid",
+      "productCode": "195WGBU",
+      "inspiration": {
+        "author": "Hans Christian Andersen",
+        "work": "The Little Mermaid",
+        "series": "World Literature"
+      },
+      "description": "Sea-aquamarine and silver sparkle evoke the mermaid’s scales. The dreamy color expresses the tenderness and lingering sadness of love left unspoken.",
+      "color": {
+        "rgb": [
+          100,
+          177,
+          191
+        ],
+        "p": "7709U"
+      },
+      "properties": [
+        "Glistening",
+        "Color Shading",
+        "Shading"
+      ],
+      "glitterColors": [
+        "Silver"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=1376"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/b7a57351b282b.jpg?w=1920"
+        }
+      ]
+    },
+    {
+      "inkId": "29e98327-ff17-4f74-a17b-4cf86d7cb160",
+      "name": "Twelfth Night",
+      "productCode": "098WGPK",
+      "inspiration": {
+        "author": "William Shakespeare",
+        "work": "Twelfth Night",
+        "series": "World Literature"
+      },
+      "exclusiveTo": "Atlas Stationers",
+      "description": "A glistening ink in Wearingeul’s William Shakespeare collection, named for Twelfth Night and made exclusively for Atlas Stationers.",
+      "color": {
+        "rgb": null,
+        "p": null
+      },
+      "properties": [
+        "Glistening"
+      ],
+      "glitterColors": [],
+      "sources": [
+        {
+          "label": "Wearingeul color guide",
+          "url": "https://www.wearingeul.com/Colors"
+        },
+        {
+          "label": "Atlas Stationers product page",
+          "url": "https://www.atlasstationers.com/products/wearingeul-twelfth-night-30ml-bottled-ink-atlas-exclusive"
+        },
+        {
+          "label": "Manufacturer bottle via Atlas Stationers",
+          "url": "https://www.atlasstationers.com/cdn/shop/products/TwelfthNight00.jpg?v=1694722600&width=1500"
+        }
+      ],
+      "notes": [
+        "Wearingeul’s color guide links to Atlas Stationers. The linked product page has no ink-specific story or verified RGB/P values; its SKU supplies the product code."
+      ]
+    },
+    {
+      "inkId": "0bba4e52-8916-4ab0-8499-5b88449df5e4",
+      "name": "Wayfarer",
+      "productCode": "085WGGN",
+      "inspiration": {
+        "author": "Natsume Soseki",
+        "work": "Wayfarer",
+        "series": "World Literature"
+      },
+      "description": "An aqua-green base with strong shading, red sheen, and violet sparkle represents growing suspicion and an unsettled view of human nature.",
+      "color": {
+        "rgb": [
+          0,
+          100,
+          102
+        ],
+        "p": "2231U"
+      },
+      "properties": [
+        "Glistening",
+        "Shading",
+        "Sheen"
+      ],
+      "glitterColors": [
+        "Violet"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=359"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/b77dc970bdf6a.jpg?w=1920"
+        }
+      ]
+    },
+    {
+      "inkId": "ink_58",
+      "name": "Wendy Darling",
+      "productCode": "145WGBU",
+      "inspiration": {
+        "author": "James M. Barrie",
+        "work": "Peter and Wendy",
+        "series": "World Literature"
+      },
+      "description": "A pale sky blue develops distinct baby-pink areas as it dries. Silver and blue sparkle bring to mind Wendy’s adventures in Neverland.",
+      "color": {
+        "rgb": [
+          164,
+          200,
+          234
+        ],
+        "p": "278U"
+      },
+      "properties": [
+        "Glistening",
+        "Shading"
+      ],
+      "glitterColors": [
+        "Silver",
+        "Blue"
+      ],
+      "sources": [
+        {
+          "label": "Wearingeul product page",
+          "url": "https://www.wearingeul.com/all/?idx=888"
+        },
+        {
+          "label": "Wearingeul product sheet",
+          "url": "https://cdn-optimized.imweb.me/upload/S201904175cb6a3e9e9ca9/119eb1ae5e73b.jpg?w=1920"
+        },
+        {
+          "label": "Wearingeul color guide",
+          "url": "https://www.wearingeul.com/Colors"
+        }
+      ],
+      "colorGuideProperties": [
+        "Shading",
+        "Color Shading",
+        "Glistening"
+      ],
+      "notes": [
+        "The product sheet and color guide list different effects; the displayed properties follow the product sheet."
+      ]
+    }
+  ]
+}

@@ -10,6 +10,8 @@ import {
 } from '../../lib/collection';
 import { Icon, Swatch } from './Primitives';
 import { HoverDetails } from './HoverDetails';
+import { InkStory } from './InkStory';
+import { getInkReference, referenceByline } from '../../lib/inkReference';
 
 interface Props {
     inks: Ink[];
@@ -45,6 +47,7 @@ export default function InkInventory({
                     </thead>
                     <tbody>
                         {inks.map((ink) => {
+                            const reference = getInkReference(ink);
                             const current = model.currentPens(ink.id);
                             const latest = model.inkHistory.get(ink.id)?.[0];
                             return (
@@ -67,6 +70,11 @@ export default function InkInventory({
                                                     {ink.brand}
                                                 </span>
                                                 <strong>{ink.name}</strong>
+                                                {reference && (
+                                                    <span className="small muted">
+                                                        {referenceByline(reference)}
+                                                    </span>
+                                                )}
                                                 {ink.archived && (
                                                     <span className="small muted">
                                                         Archived
@@ -74,9 +82,10 @@ export default function InkInventory({
                                                 )}
                                             </span>
                                         </button>
+                                        <InkStory ink={ink} />
                                     </td>
                                     <td data-label="Collection">
-                                        {ink.collection || (
+                                        {ink.collection || reference?.inspiration.series || (
                                             <span className="muted">
                                                 Standard collection
                                             </span>
@@ -149,6 +158,7 @@ export default function InkInventory({
     return (
         <div className="ink-grid">
             {inks.map((ink) => {
+                const reference = getInkReference(ink);
                 const current = model.currentPens(ink.id);
                 return (
                     <article
@@ -177,9 +187,12 @@ export default function InkInventory({
                                 {ink.name}
                             </span>
                             <span className="ink-collection">
-                                {ink.collection || 'Standard collection'}
+                                {ink.collection ||
+                                    (reference && referenceByline(reference)) ||
+                                    'Standard collection'}
                             </span>
                         </button>
+                        <InkStory ink={ink} />
                         <span className="ink-card-footer">
                             <span>
                                 {model.inkCount(ink.id)
