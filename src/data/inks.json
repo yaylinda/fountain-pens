@@ -802,7 +802,8 @@
     "brand": "Birmingham Pen Company",
     "collection": "",
     "name": "Dart Frog",
-    "id": "b4c5d6e9-8e0f-4b1d-5a4b-6c7d8e9f0a1b"
+    "id": "b4c5d6e9-8e0f-4b1d-5a4b-6c7d8e9f0a1b",
+    "colorHex": "#009FE3"
   },
   {
     "brand": "Birmingham Pen Company",
