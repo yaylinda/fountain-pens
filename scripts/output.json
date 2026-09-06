@@ -325,9 +325,9 @@
     },
     "Golden Lapis": {
         "name": "Golden Lapis",
-        "url": "https://inkswatch.com/ink.html?inkId=874",
-        "hex": "#215b6b",
-        "note": null
+        "url": "https://www.thewritersarmory.com/blog/pelikan-edelstein-golden-lapis",
+        "hex": "#1d62bc",
+        "note": "Approximate median RGB sampled from the central swatch in The Writer's Armory Golden Lapis scan (20-80% width, 27-90% height), verified 2026-09-06. Represents the blue base; gold shimmer is not represented by a single hex. Previous reference incorrectly matched Noodler's Legal Lapis."
     },
     "Bram Stoker Dracula": {
         "name": "Bram Stoker Dracula",
