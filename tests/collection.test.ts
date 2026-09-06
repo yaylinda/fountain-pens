@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { getInkReference, inkReferenceSearchText, wearingeulReferences } from '../src/lib/inkReference';
+import { getInkReference, inkReferenceSearchText, pilotReferences, referenceHex, wearingeulReferences } from '../src/lib/inkReference';
 import {
     deriveCollection,
     formatDate,
@@ -280,6 +280,7 @@ test('Wearingeul references cover the owned collection with traceable, valid col
         const reference = getInkReference(item);
         assert.ok(reference, `Missing reference for ${item.name}`);
         assert.ok(reference.description && reference.inspiration.series);
+        assert.ok(reference.color);
         assert.ok(reference.sources.every(({ url }) => new URL(url).protocol === 'https:'));
         assert.ok(reference.properties.every((property) => validProperties.has(property)));
         if (reference.color.rgb) {
@@ -308,4 +309,34 @@ test('manufacturer swatches keep custom colors, brand boundaries, and inventory 
     assert.match(inkReferenceSearchText(mermaid), /shimmer/);
     assert.ok(getInkReference({ ...mermaid, id: 'ink_57' })?.properties.includes('Color Change'));
     assert.ok(getInkReference({ ...mermaid, id: 'ink_57' })?.colorGuideProperties?.includes('Color Shading'));
+});
+
+test('Pilot references cover every owned ink with sourced observations and no invented swatches', () => {
+    const owned = JSON.parse(readFileSync('src/data/inks.json', 'utf8'))
+        .filter((item: { brand: string }) => item.brand === 'Pilot');
+    assert.equal(pilotReferences.length, 15);
+    assert.deepEqual(new Set(pilotReferences.map((item) => item.inkId)), new Set(owned.map((item: { id: string }) => item.id)));
+    for (const item of owned) {
+        const reference = getInkReference(item)!;
+        assert.equal(reference.name, item.name);
+        assert.ok(reference.description);
+        assert.equal(referenceHex(reference), undefined);
+        assert.ok(reference.sources.every(({ url }) => new URL(url).protocol === 'https:'));
+        assert.ok(reference.writing);
+        assert.ok(reference.sources.some(({ url }) => url === reference.writing?.sourceUrl));
+        assert.equal(new URL(reference.writing.sourceUrl).hostname, 'vanness1938.com');
+        assert.ok(reference.writing.dryTimeSeconds > 0);
+        assert.equal(reference.writing.testPaper, 'Rhodia');
+        assert.match(reference.writing.testPen, /medium nib/);
+        assert.equal(reference.writing.shimmer, false);
+        assert.equal(reference.nameOrigin?.meaning !== undefined, item.collection === 'Iroshizuku');
+        assert.equal(getInkReference({ ...item, brand: 'Wearingeul' }), undefined);
+        assert.equal(getInkReference({ ...item, brand: 'Other' }), undefined);
+        assert.equal(getInkReference({ ...item, name: 'Renamed ink' }), reference);
+        assert.equal(getSwatch({ ...item, colorHex: '#123456' })?.hex, '#123456');
+    }
+    const firefly = owned.find((item: { name: string }) => item.name === 'Hotaru-Bi');
+    assert.match(inkReferenceSearchText(firefly), /蛍火/);
+    assert.match(inkReferenceSearchText(firefly), /Firefly glow/);
+    assert.equal(getInkReference({ ...firefly, id: 'unresearched-pilot' }), undefined);
 });

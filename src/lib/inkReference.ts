@@ -1,4 +1,5 @@
 import catalogData from '../data/wearingeul-inks.json';
+import pilotCatalogData from '../data/pilot-inks.json';
 import type { Ink } from '../models/types';
 
 export interface InkReference {
@@ -7,10 +8,31 @@ export interface InkReference {
     productCode: string | null;
     inspiration: { author: string | null; work: string | null; series: string };
     description: string;
-    color: { rgb: number[] | null; p: string | null };
+    color?: { rgb: number[] | null; p: string | null };
     properties: string[];
     glitterColors: string[];
-    sources: { label: string; url: string }[];
+    sources: { label: string; url: string; supports?: string[] }[];
+    nameOrigin?: {
+        japanese: string;
+        reading: string;
+        meaning: string;
+        aliases: string[];
+    } | null;
+    countryOfOrigin?: string;
+    limitedEdition?: boolean;
+    writing?: {
+        sourceUrl: string;
+        dryTimeSeconds: number;
+        testPen: string;
+        testPaper: string;
+        flow: string;
+        shading: string;
+        sheen: string;
+        shimmer: boolean;
+        waterResistance: string;
+        ironGall: boolean;
+        pigment: boolean;
+    };
     colorGuideProperties?: string[];
     notes?: string[];
     edition?: string;
@@ -18,21 +40,23 @@ export interface InkReference {
 }
 
 export const wearingeulReferences: InkReference[] = catalogData.inks;
-const byId = new Map(wearingeulReferences.map((item) => [item.inkId, item]));
+export const pilotReferences: InkReference[] = pilotCatalogData.inks;
+const byBrand = new Map([
+    ['wearingeul', new Map(wearingeulReferences.map((item) => [item.inkId, item]))],
+    ['pilot', new Map(pilotReferences.map((item) => [item.inkId, item]))],
+]);
 
-// Manufacturer reference data is bundled separately from mutable inventory.
+// Sourced reference data is bundled separately from mutable inventory.
 // Stable IDs preserve the association through name corrections and API saves.
 export function getInkReference(ink?: Ink): InkReference | undefined {
-    return ink?.brand.trim().toLowerCase() === 'wearingeul'
-        ? byId.get(ink.id)
-        : undefined;
+    return ink ? byBrand.get(ink.brand.trim().toLowerCase())?.get(ink.id) : undefined;
 }
 
 export const referenceByline = (reference: InkReference) =>
-    reference.inspiration.author || reference.inspiration.series;
+    reference.nameOrigin?.meaning || reference.inspiration.author || reference.inspiration.series;
 
 export const referenceHex = (reference: InkReference) =>
-    reference.color.rgb
+    reference.color?.rgb
         ? `#${reference.color.rgb.map((value) => value.toString(16).padStart(2, '0')).join('')}`
         : undefined;
 
@@ -43,6 +67,11 @@ export function inkReferenceSearchText(ink: Ink): string {
         ...Object.values(reference.inspiration),
         ...reference.properties,
         ...reference.glitterColors,
+        reference.nameOrigin?.japanese,
+        reference.nameOrigin?.reading,
+        reference.nameOrigin?.meaning,
+        ...(reference.nameOrigin?.aliases || []),
+        reference.description,
         reference.exclusiveTo,
         reference.properties.includes('Glistening') ? 'shimmer' : '',
     ].filter(Boolean).join(' ');

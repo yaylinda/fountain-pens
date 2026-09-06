@@ -45,6 +45,18 @@
 .ink-story-origin cite {
     color: var(--muted);
 }
+.ink-name-japanese {
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+}
+.ink-writing {
+    display: grid;
+    gap: var(--space-sm);
+}
+.ink-value-label {
+    text-transform: capitalize;
+}
 .ink-story-description {
     line-height: 1.7;
 }

@@ -187,7 +187,7 @@ export default function InkInventory({
                                 {ink.name}
                             </span>
                             <span className="ink-collection">
-                                {ink.collection ||
+                                {reference?.nameOrigin?.meaning || ink.collection ||
                                     (reference && referenceByline(reference)) ||
                                     'Standard collection'}
                             </span>

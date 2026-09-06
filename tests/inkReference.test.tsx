@@ -19,6 +19,55 @@ const mermaid = {
     brand: 'Wearingeul', name: 'The Little Mermaid', collection: '',
 };
 
+test('Pilot meanings, Japanese names, and qualified observations appear in both layouts and search', async () => {
+    const user = userEvent.setup({ document: dom.window.document });
+    const rikka = { id: '0ef1725f-3c1c-4d13-a10b-f474d63e9feb', brand: 'Pilot', name: 'Rikka', collection: 'Iroshizuku' };
+    const blue = { id: '21ebe10b-60e8-4a1a-931d-a4c9beacf17b', brand: 'Pilot', name: 'Blue', collection: '' };
+    const inks = [rikka, blue, mermaid];
+    const model = deriveCollection({ inks, pens: [], entries: [] });
+    let opens = 0;
+    try {
+        for (const layout of ['grid', 'list'] as const) {
+            render(<InkInventory inks={[rikka]} layout={layout} model={model} canEdit={false} onOpen={() => opens++} />);
+            const summary = screen.getByText('Story & details', { selector: 'summary' });
+            await user.click(summary);
+            const details = summary.closest('details')!;
+            assert.equal(details.open, true);
+            assert.equal(opens, 0);
+            assert.equal(within(details).getByText('六花').getAttribute('lang'), 'ja');
+            assert.ok(within(details).getByText('Snow crystal'));
+            assert.ok(within(details).getByText('Vanness observations'));
+            assert.ok(within(details).getByText('About 20 seconds'));
+            assert.ok(within(details).getByText(/medium nib on Rhodia/));
+            assert.ok(within(details).getByText('Low pink sheen on Tomoe River paper'));
+            assert.equal(within(details).queryByText('RGB'), null);
+            assert.equal(within(details).queryByText('P value'), null);
+            await user.click(within(details).getByText('Sources & notes'));
+            assert.equal(within(details).getByRole('link', { name: 'Vanness product page ↗' }).getAttribute('href'), 'https://vanness1938.com/products/pilot-iroshizuku-rikka-ink');
+            cleanup();
+        }
+        render(<InkStory ink={blue} expanded />);
+        assert.ok(screen.getByRole('region', { name: 'Behind the ink' }));
+        assert.ok(screen.getByText('Pilot standard ink'));
+        assert.equal(document.querySelector('[lang="ja"]'), null);
+        cleanup();
+        render(
+            <MemoryRouter>
+                <Inventory kind="inks" collection={{ inks, pens: [], entries: [] }} model={model} canEdit={false} onOpen={() => opens++} />
+            </MemoryRouter>,
+        );
+        const search = screen.getByRole('searchbox');
+        for (const term of ['snow crystal', '六花']) {
+            await user.clear(search);
+            await user.type(search, term);
+            assert.ok(screen.getByText('1 inks found'));
+            assert.ok(screen.getByRole('button', { name: 'View Pilot Rikka' }));
+        }
+    } finally {
+        cleanup();
+    }
+});
+
 test('ink stories open independently of editing in both inventory layouts', async () => {
     const user = userEvent.setup({ document: dom.window.document });
     let opens = 0;
