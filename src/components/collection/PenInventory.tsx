@@ -122,6 +122,7 @@ export default function PenInventory({
                                         entry={model.latest.get(pen.id)}
                                         model={model}
                                         details
+                                        onOpenInk={(ink) => onOpen({ kind: 'ink', item: ink })}
                                     />
                                     <span className="small muted block">
                                         {formatDate(
@@ -205,6 +206,7 @@ export default function PenInventory({
                                     entry={model.latest.get(pen.id)}
                                     model={model}
                                     details
+                                    onOpenInk={(ink) => onOpen({ kind: 'ink', item: ink })}
                                 />
                                 <span className="small muted block">
                                     {formatDate(model.latest.get(pen.id)?.date)}

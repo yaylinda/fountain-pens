@@ -32,17 +32,19 @@ export default function Inventory({
 }: Props) {
     const [params, setParams] = useSearchParams();
     const [layout, setLayout] = useInventoryLayout(kind);
+    const isPens = kind === 'pens';
+    const defaultStatus = isPens ? 'inked' : 'all';
     const query = params.get('q') || '';
     const brand = params.get('brand') || '';
-    const status = params.get('status') || 'all';
+    const status = params.get('status') || defaultStatus;
     const sort = params.get('sort') || 'name';
     const nib = params.get('nib') || '';
-    const isPens = kind === 'pens';
     const update = (key: string, value: string) =>
         setParams(
             (previous) => {
                 const next = new URLSearchParams(previous);
-                if (value && value !== 'all') next.set(key, value);
+                if (value && (key !== 'status' || value !== defaultStatus))
+                    next.set(key, value);
                 else next.delete(key);
                 return next;
             },
@@ -54,8 +56,8 @@ export default function Inventory({
     const brands = [...new Set(items.map((item) => item.brand))].sort(byName);
     const statuses = isPens
         ? [
-              ['all', 'All pens'],
               ['inked', 'Inked'],
+              ['all', 'All pens'],
               ['empty', 'Empty'],
               ['needs-refill', 'Needs refill'],
               ['archived', 'Archived'],
@@ -239,7 +241,7 @@ export default function Inventory({
                     {filtered && (
                         <button
                             className="text-link"
-                            onClick={() => setParams({})}
+                            onClick={() => setParams(isPens ? { status: 'all' } : {})}
                         >
                             Clear filters <Icon name="close" />
                         </button>

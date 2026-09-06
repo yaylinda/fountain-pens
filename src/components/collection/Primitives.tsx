@@ -132,10 +132,12 @@ export function InkNames({
     entry,
     model,
     details = false,
+    onOpenInk,
 }: {
     entry?: JournalEntry;
     model: CollectionModel;
     details?: boolean;
+    onOpenInk?: (ink: Ink) => void;
 }) {
     if (!entry) return <span className="muted">No ink recorded</span>;
     if (isCleaning(entry))
@@ -147,7 +149,10 @@ export function InkNames({
                 return details && ink ? (
                     <HoverDetails
                         key={id}
-                        label={`Ink details for ${ink.brand} ${ink.name}`}
+                        label={onOpenInk
+                            ? `View ${ink.brand} ${ink.name}`
+                            : `Ink details for ${ink.brand} ${ink.name}`}
+                        onActivate={onOpenInk ? () => onOpenInk(ink) : undefined}
                         details={
                             <>
                                 <span className="overline">{ink.brand}</span>

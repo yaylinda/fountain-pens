@@ -15,11 +15,13 @@ export function HoverDetails({
     children,
     details,
     className = '',
+    onActivate,
 }: {
     label: string;
     children: ReactNode;
     details: ReactNode;
     className?: string;
+    onActivate?: () => void;
 }) {
     const id = useId();
     const trigger = useRef<HTMLButtonElement>(null);
@@ -112,6 +114,11 @@ export function HoverDetails({
                 onFocus={show}
                 onBlur={closeSoon}
                 onClick={() => {
+                    if (onActivate) {
+                        hide();
+                        onActivate();
+                        return;
+                    }
                     if (pinned.current) hide();
                     else {
                         pinned.current = true;
