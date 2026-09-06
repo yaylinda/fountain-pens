@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { inkReferenceSearchText } from '../../lib/inkReference';
 import {
     byName,
+    byPenName,
     inkLabel,
     isCleaning,
     matches,
@@ -98,8 +99,7 @@ export default function Inventory({
                             model.latest.get(a.id)?.date || '',
                         )
                       : 0) ||
-                byName(penLabel(a), penLabel(b)) ||
-                byName(penDescription(a), penDescription(b)),
+                byPenName(a, b),
         );
     const inks = collection.inks
         .filter(

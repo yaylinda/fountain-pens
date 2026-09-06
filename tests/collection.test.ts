@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { getInkReference, inkReferenceSearchText, pilotReferences, referenceHex, wearingeulReferences } from '../src/lib/inkReference';
 import {
+    byNibSize,
+    byPenName,
     deriveCollection,
     formatDate,
     getSwatch,
@@ -20,6 +22,28 @@ const pen = (id: string) => ({
     color: 'Black',
     nibSize: 'Fine',
     nibType: 'Gold, 14k',
+});
+
+test('matching pen models sort by nib width before color', () => {
+    const falcons = [
+        { ...pen('broad'), color: 'Black', nibSize: 'Broad' },
+        { ...pen('medium'), color: 'Brown', nibSize: 'Medium' },
+        { ...pen('fine-v2'), color: 'Sapphire (v2)', nibSize: 'Fine' },
+        { ...pen('extra-fine'), color: 'Burgundy', nibSize: 'Extra Fine' },
+        { ...pen('fine'), color: 'Sapphire', nibSize: 'Fine' },
+    ];
+    assert.deepEqual(falcons.sort(byPenName).map((item) => [item.nibSize, item.color]), [
+        ['Extra Fine', 'Burgundy'],
+        ['Fine', 'Sapphire'],
+        ['Fine', 'Sapphire (v2)'],
+        ['Medium', 'Brown'],
+        ['Broad', 'Black'],
+    ]);
+    assert.deepEqual(['Medium', 'Broad', 'Fine', 'Medium Fine', 'Extra Fine'].sort(byNibSize),
+        ['Extra Fine', 'Fine', 'Medium Fine', 'Medium', 'Broad']);
+    assert.ok(byPenName({ ...pen('a'), model: 'Custom', nibSize: 'Broad' }, pen('b')) < 0);
+    assert.ok(byNibSize('Broad', 'Stub 1.1mm') < 0);
+    assert.ok(byNibSize('Stub 1.1mm', 'Stub 1.5mm') < 0);
 });
 const ink = (id: string) => ({
     id,

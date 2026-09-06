@@ -49,6 +49,18 @@ export const matches = (query: string, ...values: (string | undefined)[]) => {
 };
 export const byName = (a: string, b: string) =>
     a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+const nibSizeOrder = ['extra fine', 'fine', 'medium fine', 'medium', 'broad', 'double broad'];
+export const byNibSize = (a: string, b: string) => {
+    const rank = (value: string) => {
+        const index = nibSizeOrder.indexOf(normalize(value));
+        return index === -1 ? nibSizeOrder.length : index;
+    };
+    return rank(a) - rank(b) || byName(a, b);
+};
+export const byPenName = (a: Pen, b: Pen) =>
+    byName(penLabel(a), penLabel(b)) ||
+    byNibSize(a.nibSize, b.nibSize) ||
+    byName(penDescription(a), penDescription(b));
 export const newestFirst = (a: JournalEntry, b: JournalEntry) =>
     b.date.localeCompare(a.date) || b.index - a.index;
 export const formatDate = (value?: string, short = false) => {
