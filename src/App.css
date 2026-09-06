@@ -2160,3 +2160,13 @@
     .desk-pairing { flex-wrap: wrap; gap: 12px; }
     .desk-pairing > .button { margin-left: 60px; }
 }
+
+/* Keep the toolbar anchored while the compact desktop filters expand below it. */
+@media (min-width: 900px) {
+    .desk-controls { display: grid; grid-template-columns: minmax(160px, 1fr) 200px 220px auto; align-items: end; }
+    .desk-controls > .text-link { align-self: end; min-height: 44px; margin-left: 0; }
+    .desk-filter-content { grid-column: 1 / -1; grid-template-columns: minmax(320px, 2fr) minmax(160px, 1fr) minmax(220px, 1fr); align-items: start; gap: 24px; padding: 20px 0 4px; border-top: 1px solid var(--line); }
+    .desk-filter-content fieldset { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
+    .desk-filter-content fieldset label { display: grid; grid-template-columns: minmax(60px, 1fr) 100px; gap: 8px; }
+}
+.desk-filter-toggle { justify-self: start; align-self: end; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--ink); font: inherit; cursor: pointer; text-align: left; }

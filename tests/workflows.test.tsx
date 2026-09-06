@@ -136,6 +136,16 @@ test('collection workflows work against isolated API fixtures without touching r
         assert.ok(screen.getByRole('heading', { name: 'Diamine 1' }));
         await user.click(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }));
         assert.ok(screen.getByRole('button', { name: 'Show all colors' }));
+        await user.click(screen.getByRole('button', { name: 'Filter pens · active', exact: true }));
+        await user.selectOptions(screen.getByLabelText('Order by'), 'recent');
+        await user.click(screen.getByRole('button', { name: 'Falcon · Sapphire', exact: true }));
+        await user.click(screen.getByRole('button', { name: 'Cancel', exact: true }));
+        await screen.findByRole('heading', { name: 'The writing desk' });
+        assert.equal((screen.getByLabelText('Group by') as HTMLSelectElement).value, 'ink');
+        assert.equal((screen.getByLabelText('Order by') as HTMLSelectElement).value, 'recent');
+        assert.equal((screen.getByLabelText('Nib material') as HTMLSelectElement).value, 'Gold');
+        assert.equal(screen.getByRole('button', { name: 'Hide filters · active', exact: true }).getAttribute('aria-expanded'), 'true');
+        assert.equal(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }).getAttribute('aria-pressed'), 'true');
         await user.click(screen.getByRole('button', { name: 'Reset', exact: true }));
         assert.equal(screen.queryByRole('button', { name: 'Show all colors' }), null);
         assert.equal(writes.length, before);

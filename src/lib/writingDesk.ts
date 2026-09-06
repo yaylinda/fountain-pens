@@ -145,3 +145,21 @@ export function deskRows(
             : byName(a, b),
     );
 }
+
+// Owned by the app shell so opening details does not discard a desk session.
+export interface DeskState {
+    filters: DeskFilters;
+    group: DeskGroup;
+    order: DeskOrder;
+    selectedInk: string;
+    view: string;
+    filtersOpen: boolean;
+}
+export const initialDeskState: DeskState = {
+    filters: { brands: {}, nib: '', inkBrand: '' },
+    group: 'none',
+    order: 'color',
+    selectedInk: '',
+    view: 'All pens',
+    filtersOpen: false,
+};

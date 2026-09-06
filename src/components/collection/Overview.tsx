@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import {
     byName,
     inkLabel,
@@ -12,6 +12,7 @@ import {
     type DeskFilters,
     type DeskGroup,
     type DeskOrder,
+    type DeskState,
 } from '../../lib/writingDesk';
 import { EmptyState, Icon, InkNames, Swatch } from './Primitives';
 
@@ -19,14 +20,24 @@ interface Props {
     model: CollectionModel;
     onOpen: (editor: EditorState) => void;
     canEdit: boolean;
+    state: DeskState;
+    setState: Dispatch<SetStateAction<DeskState>>;
 }
-const emptyFilters: DeskFilters = { brands: {}, nib: '', inkBrand: '' };
-export default function Overview({ model, onOpen, canEdit }: Props) {
-    const [filters, setFilters] = useState<DeskFilters>(emptyFilters);
-    const [group, setGroup] = useState<DeskGroup>('none');
-    const [order, setOrder] = useState<DeskOrder>('color');
-    const [selectedInk, setSelectedInk] = useState('');
-    const [view, setView] = useState('All pens');
+export default function Overview({
+    model,
+    onOpen,
+    canEdit,
+    state,
+    setState,
+}: Props) {
+    const { filters, group, order, selectedInk, view, filtersOpen } = state;
+    const update = <K extends keyof DeskState>(key: K, value: DeskState[K]) =>
+        setState((previous) => ({ ...previous, [key]: value }));
+    const setFilters = (value: DeskFilters) => update('filters', value);
+    const setGroup = (value: DeskGroup) => update('group', value);
+    const setOrder = (value: DeskOrder) => update('order', value);
+    const setSelectedInk = (value: string) => update('selectedInk', value);
+    const setView = (value: string) => update('view', value);
     const base = deskRows(model, filters, order, group);
     const groups = deskRows(model, filters, order, group, selectedInk);
     const count = groups.reduce((n, [, rows]) => n + rows.length, 0);
@@ -113,16 +124,59 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                 ))}
             </div>
             <div className="desk-controls">
-                <details className="desk-filter-panel">
-                    <summary>
-                        Filter pens
-                        {Object.keys(filters.brands).length +
-                        Number(!!filters.nib) +
-                        Number(!!filters.inkBrand)
-                            ? ' · active'
-                            : ''}
-                    </summary>
-                    <div className="desk-filter-content">
+                <button
+                    className="desk-filter-toggle"
+                    aria-expanded={filtersOpen}
+                    aria-controls="desk-filters"
+                    onClick={() => update('filtersOpen', !filtersOpen)}
+                >
+                    {filtersOpen ? 'Hide filters' : 'Filter pens'}
+                    {Object.keys(filters.brands).length +
+                    Number(!!filters.nib) +
+                    Number(!!filters.inkBrand)
+                        ? ' · active'
+                        : ''}
+                </button>
+
+                <label>
+                    Group by
+                    <select
+                        value={group}
+                        onChange={(e) => {
+                            setGroup(e.target.value as DeskGroup);
+                            setView('');
+                        }}
+                    >
+                        <option value="none">No grouping</option>
+                        <option value="pen">Pen brand</option>
+                        <option value="nib">Nib material</option>
+                        <option value="ink">Ink brand</option>
+                        <option value="color">Ink color family</option>
+                    </select>
+                </label>
+                <label>
+                    Order by
+                    <select
+                        value={order}
+                        onChange={(e) => {
+                            setOrder(e.target.value as DeskOrder);
+                            setView('');
+                        }}
+                    >
+                        <option value="color">Ink color · rainbow</option>
+                        <option value="pen">Pen name</option>
+                        <option value="ink">Ink name</option>
+                        <option value="recent">Recently filled</option>
+                    </select>
+                </label>
+                <button
+                    className="text-link"
+                    onClick={() => preset('All pens')}
+                >
+                    Reset
+                </button>
+                {filtersOpen && (
+                    <div className="desk-filter-content" id="desk-filters">
                         <fieldset>
                             <legend>Pen brands</legend>
                             {brands.map((brand) => (
@@ -188,44 +242,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                             </select>
                         </label>
                     </div>
-                </details>
-                <label>
-                    Group by
-                    <select
-                        value={group}
-                        onChange={(e) => {
-                            setGroup(e.target.value as DeskGroup);
-                            setView('');
-                        }}
-                    >
-                        <option value="none">No grouping</option>
-                        <option value="pen">Pen brand</option>
-                        <option value="nib">Nib material</option>
-                        <option value="ink">Ink brand</option>
-                        <option value="color">Ink color family</option>
-                    </select>
-                </label>
-                <label>
-                    Order by
-                    <select
-                        value={order}
-                        onChange={(e) => {
-                            setOrder(e.target.value as DeskOrder);
-                            setView('');
-                        }}
-                    >
-                        <option value="color">Ink color · rainbow</option>
-                        <option value="pen">Pen name</option>
-                        <option value="ink">Ink name</option>
-                        <option value="recent">Recently filled</option>
-                    </select>
-                </label>
-                <button
-                    className="text-link"
-                    onClick={() => preset('All pens')}
-                >
-                    Reset
-                </button>
+                )}
             </div>
             <section className="desk-palette" aria-label="Current ink palette">
                 <div className="section-heading">
@@ -324,6 +341,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                                     </span>
                                     <button
                                         className="name-link"
+                                        data-focus-key={`desk-pen-${pen.id}`}
                                         onClick={() =>
                                             onOpen({ kind: 'pen', item: pen })
                                         }
