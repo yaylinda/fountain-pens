@@ -655,9 +655,9 @@
     },
     "Dart Frog": {
         "name": "Dart Frog",
-        "url": "https://inkswatch.com/ink.html?inkId=1339",
-        "hex": "#532931",
-        "note": null
+        "url": "https://www.birminghampens.com/products/dart-frog",
+        "hex": "#00A2CB",
+        "note": "Image-based approximation, not a manufacturer-published hex. Median RGB of the main blue swatch area (x=550..749, y=150..849) in the official 1000x1000 image, excluding the bottle, paper, and dark pooled edge. Source: https://www.birminghampens.com/cdn/shop/files/Dart_Frog_29925c73-a486-4608-8e0b-ae15905ae0f0.jpg?v=1754070357&width=1000 (2026-09-06)."
     },
     "Suncatcher": {
         "name": "Suncatcher",
