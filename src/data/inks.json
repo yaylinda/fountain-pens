@@ -339,7 +339,8 @@
     "id": "ink_57",
     "brand": "Wearingeul",
     "collection": "",
-    "name": "Enki"
+    "name": "Enki",
+    "colorHex": "#9AB2CA"
   },
   {
     "id": "ink_58",
@@ -700,13 +701,15 @@
     "brand": "Pilot",
     "collection": "Iroshizuku",
     "name": "Asa-Gao",
-    "id": "072680d2-3159-41f8-abfd-ab4405173390"
+    "id": "072680d2-3159-41f8-abfd-ab4405173390",
+    "colorHex": "#354DA1"
   },
   {
     "brand": "Pilot",
     "collection": "Iroshizuku",
     "name": "Rikka",
-    "id": "0ef1725f-3c1c-4d13-a10b-f474d63e9feb"
+    "id": "0ef1725f-3c1c-4d13-a10b-f474d63e9feb",
+    "colorHex": "#26758A"
   },
   {
     "brand": "Vinta Inks",
@@ -809,7 +812,8 @@
     "brand": "Birmingham Pen Company",
     "collection": "",
     "name": "Suncatcher",
-    "id": "a3b4c5d7-7d9e-4a0c-4a3b-5c6d7e8f9a0b"
+    "id": "a3b4c5d7-7d9e-4a0c-4a3b-5c6d7e8f9a0b",
+    "colorHex": "#2864A3"
   },
   {
     "brand": "Birmingham Pen Company",
@@ -845,7 +849,8 @@
     "brand": "Pilot",
     "collection": "Iroshizuku",
     "name": "Syo-Ro",
-    "id": "890a5fc1-8c68-49d9-a8be-0be6461bd13a"
+    "id": "890a5fc1-8c68-49d9-a8be-0be6461bd13a",
+    "colorHex": "#326E68"
   },
   {
     "brand": "Wearingeul",
