@@ -33,7 +33,7 @@ export default function Inventory({
     const [params, setParams] = useSearchParams();
     const [layout, setLayout] = useInventoryLayout(kind);
     const isPens = kind === 'pens';
-    const defaultStatus = isPens ? 'inked' : 'all';
+    const defaultStatus = isPens ? 'inked' : 'in-use';
     const query = params.get('q') || '';
     const brand = params.get('brand') || '';
     const status = params.get('status') || defaultStatus;
@@ -63,8 +63,8 @@ export default function Inventory({
               ['archived', 'Archived'],
           ]
         : [
-              ['all', 'All inks'],
               ['in-use', 'In use'],
+              ['all', 'All inks'],
               ['untried', 'Untried'],
               ['archived', 'Archived'],
           ];
@@ -241,7 +241,7 @@ export default function Inventory({
                     {filtered && (
                         <button
                             className="text-link"
-                            onClick={() => setParams(isPens ? { status: 'all' } : {})}
+                            onClick={() => setParams({ status: 'all' })}
                         >
                             Clear filters <Icon name="close" />
                         </button>

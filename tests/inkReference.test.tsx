@@ -52,7 +52,7 @@ test('Pilot meanings, Japanese names, and qualified observations appear in both 
         assert.equal(document.querySelector('[lang="ja"]'), null);
         cleanup();
         render(
-            <MemoryRouter>
+            <MemoryRouter initialEntries={['/inks?status=all']}>
                 <Inventory kind="inks" collection={{ inks, pens: [], entries: [] }} model={model} canEdit={false} onOpen={() => opens++} />
             </MemoryRouter>,
         );
@@ -104,7 +104,7 @@ test('ink stories open independently of editing in both inventory layouts', asyn
         assert.ok(screen.getByText('William Shakespeare'));
         cleanup();
         render(
-            <MemoryRouter>
+            <MemoryRouter initialEntries={['/inks?status=all']}>
                 <Inventory kind="inks" collection={{ inks, pens: [], entries: [] }} model={model} canEdit={false} onOpen={() => opens++} />
             </MemoryRouter>,
         );

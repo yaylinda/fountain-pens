@@ -151,7 +151,7 @@ test('collection workflows work against isolated API fixtures without touching r
             );
         },
     );
-    await t.test('pens default to inked and explicit All pens survives filtering and navigation', async () => {
+    await t.test('inventories default to current use and explicit All selections survive filtering', async () => {
         assert.equal(screen.getByRole('button', { name: 'Inked', exact: true }).getAttribute('aria-pressed'), 'true');
         assert.equal(screen.queryByRole('button', { name: /Edit New maker Pocket pen/ }), null);
         await user.click(screen.getByRole('button', { name: 'All pens', exact: true }));
@@ -162,6 +162,13 @@ test('collection workflows work against isolated API fixtures without touching r
         await user.click(screen.getByRole('button', { name: 'Clear filters' }));
         assert.equal(screen.getByRole('button', { name: 'All pens', exact: true }).getAttribute('aria-pressed'), 'true');
         await user.click(screen.getByRole('link', { name: /Ink cabinet/ }));
+        assert.equal(screen.getByRole('button', { name: 'In use', exact: true }).getAttribute('aria-pressed'), 'true');
+        assert.equal(screen.queryByRole('button', { name: 'Edit Sailor Népal Test' }), null);
+        await user.click(screen.getByRole('button', { name: 'All inks', exact: true }));
+        assert.equal(new URLSearchParams(appRouter.state.location.search).get('status'), 'all');
+        await user.selectOptions(screen.getByRole('combobox', { name: 'Brand' }), 'Sailor');
+        assert.ok(screen.getByRole('button', { name: 'Edit Sailor Népal Test' }));
+        await user.click(screen.getByRole('button', { name: 'Clear filters' }));
         assert.equal(screen.getByRole('button', { name: 'All inks', exact: true }).getAttribute('aria-pressed'), 'true');
         await user.click(screen.getByRole('link', { name: /Fountain pens/ }));
         assert.equal(screen.getByRole('button', { name: 'Inked', exact: true }).getAttribute('aria-pressed'), 'true');
@@ -410,6 +417,7 @@ test('collection workflows work against isolated API fixtures without touching r
         'ink search ignores accents and unknown colors stay explicitly unrecorded',
         async () => {
             await user.click(screen.getByRole('link', { name: /Ink cabinet/ }));
+            await user.click(screen.getByRole('button', { name: 'All inks', exact: true }));
             await user.type(
                 screen.getByRole('searchbox', {
                     name: 'Search inks, authors, or properties…',
@@ -504,6 +512,7 @@ test('collection workflows work against isolated API fixtures without touching r
         'ink list retains swatches and opens the correct editable ink',
         async () => {
             await user.click(screen.getByRole('link', { name: /Ink cabinet/ }));
+            await user.click(screen.getByRole('button', { name: 'All inks', exact: true }));
             assert.equal(
                 screen
                     .getByRole('button', { name: 'Grid view' })
@@ -609,6 +618,7 @@ test('collection workflows work against isolated API fixtures without touching r
                 screen.getByRole('button', { name: 'Clear filters' }),
             );
             await user.click(screen.getByRole('link', { name: /Ink cabinet/ }));
+            await user.click(screen.getByRole('button', { name: 'All inks', exact: true }));
             await user.click(
                 screen.getByRole('button', { name: 'Edit Sailor Népal Test' }),
             );
