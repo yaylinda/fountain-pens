@@ -123,8 +123,22 @@ test('collection workflows work against isolated API fixtures without touching r
         await user.click(screen.getByRole('button', { name: 'Try again' }));
         await screen.findByRole('heading', { name: 'The writing desk' });
         assert.ok(
-            screen.getByText('2', { selector: '.collection-strip strong' }),
+            screen.getByText('1 of 1 inked pens'),
         );
+    });
+    await t.test('desk presets, grouping, and palette selection combine without writes', async () => {
+        const before = writes.length;
+        await user.click(screen.getByRole('button', { name: 'Lamy', exact: true }));
+        assert.ok(screen.getByText('No pens match this selection'));
+        await user.click(screen.getByRole('button', { name: 'Gold nibs', exact: true }));
+        assert.ok(screen.getByText('1 of 1 inked pens'));
+        await user.selectOptions(screen.getByLabelText('Group by'), 'ink');
+        assert.ok(screen.getByRole('heading', { name: 'Diamine 1' }));
+        await user.click(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }));
+        assert.ok(screen.getByRole('button', { name: 'Show all colors' }));
+        await user.click(screen.getByRole('button', { name: 'Reset', exact: true }));
+        assert.equal(screen.queryByRole('button', { name: 'Show all colors' }), null);
+        assert.equal(writes.length, before);
     });
     await t.test(
         'custom brand input saves without requiring a dropdown selection',
@@ -363,13 +377,13 @@ test('collection workflows work against isolated API fixtures without touching r
                 }),
             );
             await user.click(screen.getByRole('link', { name: 'The desk' }));
-            assert.equal(document.querySelectorAll('.pairing').length, 1);
+            assert.equal(document.querySelectorAll('.desk-pairing').length, 1);
             assert.match(
-                document.querySelector('.pairing')!.textContent!,
+                document.querySelector('.desk-pairing')!.textContent!,
                 /Lilac/,
             );
             assert.match(
-                document.querySelector('.pairing')!.textContent!,
+                document.querySelector('.desk-pairing')!.textContent!,
                 /Happy Holidays/,
             );
         },

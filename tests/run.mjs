@@ -10,6 +10,7 @@ try {
     await build({
         entryPoints: [
             'tests/collection.test.ts',
+            'tests/writingDesk.test.ts',
             'tests/workflows.test.tsx',
             'tests/save-celebration.test.ts',
             'tests/http-delivery.test.mjs',
@@ -28,6 +29,7 @@ try {
         [
             '--test',
             join(output, 'collection.test.mjs'),
+            join(output, 'writingDesk.test.mjs'),
             join(output, 'workflows.test.mjs'),
             join(output, 'save-celebration.test.mjs'),
             join(output, 'http-delivery.test.mjs'),

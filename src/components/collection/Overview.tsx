@@ -1,40 +1,86 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import {
-    formatDate,
+    byName,
     inkLabel,
-    penDescription,
     type CollectionModel,
     type EditorState,
 } from '../../lib/collection';
-import { EmptyState, EntryRows, Icon, InkNames, Swatch } from './Primitives';
+import {
+    deskRows,
+    inkColor,
+    nibMaterial,
+    type DeskFilters,
+    type DeskGroup,
+    type DeskOrder,
+} from '../../lib/writingDesk';
+import { EmptyState, Icon, InkNames, Swatch } from './Primitives';
 
 interface Props {
     model: CollectionModel;
     onOpen: (editor: EditorState) => void;
     canEdit: boolean;
 }
+const emptyFilters: DeskFilters = { brands: {}, nib: '', inkBrand: '' };
 export default function Overview({ model, onOpen, canEdit }: Props) {
-    const inked = [...model.inked].sort((a, b) =>
-        (model.latest.get(b.id)?.date || '').localeCompare(
-            model.latest.get(a.id)?.date || '',
-        ),
-    );
+    const [filters, setFilters] = useState<DeskFilters>(emptyFilters);
+    const [group, setGroup] = useState<DeskGroup>('none');
+    const [order, setOrder] = useState<DeskOrder>('color');
+    const [selectedInk, setSelectedInk] = useState('');
+    const [view, setView] = useState('All pens');
+    const base = deskRows(model, filters, order, group);
+    const groups = deskRows(model, filters, order, group, selectedInk);
+    const count = groups.reduce((n, [, rows]) => n + rows.length, 0);
     const palette = [
+        ...new Map(
+            base.flatMap(([, rows]) =>
+                rows.flatMap((r) => r.inks.map((i) => [i.id, i] as const)),
+            ),
+        ).values(),
+    ].sort(
+        (a, b) =>
+            inkColor(a).hue - inkColor(b).hue ||
+            byName(inkLabel(a), inkLabel(b)),
+    );
+    const brands = [...new Set(model.inked.map((p) => p.brand))].sort(byName);
+    const inkBrands = [
         ...new Set(
-            inked.flatMap((pen) => model.latest.get(pen.id)?.inkIds || []),
+            model.inked
+                .flatMap((p) => model.latest.get(p.id)?.inkIds || [])
+                .map((id) => model.inkById.get(id)?.brand)
+                .filter((b): b is string => !!b),
         ),
-    ]
-        .map((id) => model.inkById.get(id))
-        .filter((ink) => !!ink)
-        .slice(0, 9);
+    ].sort(byName);
+    const changeFilters = (next: DeskFilters) => {
+        setFilters(next);
+        setSelectedInk('');
+        setView('');
+    };
+    const preset = (name: string) => {
+        setView(name);
+        setSelectedInk('');
+        setGroup(name === 'By color' ? 'color' : 'none');
+        setOrder('color');
+        setFilters({
+            brands:
+                name === 'Lamy'
+                    ? { Lamy: 'include' }
+                    : name === 'TWSBI'
+                      ? { TWSBI: 'include' }
+                      : name === 'Non-TWSBI'
+                        ? { TWSBI: 'exclude' }
+                        : {},
+            nib: name === 'Gold nibs' ? 'Gold' : '',
+            inkBrand: '',
+        });
+    };
     return (
         <>
             <header className="page-header">
                 <div>
-                    <p className="eyebrow">Your personal collection</p>
+                    <p className="eyebrow">Ready to write</p>
                     <h1>The writing desk</h1>
                     <p className="page-intro">
-                        Good pens. Beautiful inks. A little record of it all.
+                        Arrange your pens for a little time on paper.
                     </p>
                 </div>
                 {canEdit && (
@@ -47,177 +93,272 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     </button>
                 )}
             </header>
-            <div className="collection-strip" aria-label="Collection overview">
-                <Link to="/pens">
-                    <strong>{model.activePens.length}</strong>
-                    <span>fountain pens</span>
-                    <Icon name="arrow" />
-                </Link>
-                <Link to="/inks">
-                    <strong>{model.activeInks.length}</strong>
-                    <span>inks in the collection</span>
-                    <Icon name="arrow" />
-                </Link>
-                <Link to="/journal?type=refill">
-                    <strong>{model.refills.length}</strong>
-                    <span>refills recorded</span>
-                    <Icon name="arrow" />
-                </Link>
+            <div className="desk-presets" aria-label="Quick views">
+                {[
+                    'All pens',
+                    'Lamy',
+                    'TWSBI',
+                    'Non-TWSBI',
+                    'Gold nibs',
+                    'By color',
+                ].map((name) => (
+                    <button
+                        key={name}
+                        className="button subtle small-button"
+                        aria-pressed={view === name}
+                        onClick={() => preset(name)}
+                    >
+                        {name}
+                    </button>
+                ))}
             </div>
-            <div className="desk-layout">
-                <section className="desk-main">
-                    <div className="section-heading">
-                        <div>
-                            <p className="eyebrow">Ready to write</p>
-                            <h2>
-                                Currently inked{' '}
-                                <span className="count">{inked.length}</span>
-                            </h2>
-                        </div>
-                        <Link className="text-link" to="/pens?status=inked">
-                            View all pens <Icon name="arrow" />
-                        </Link>
-                    </div>
-                    <p className="section-caption">
-                        Based on the latest entry for each pen.
-                    </p>
-                    {inked.length === 0 ? (
-                        <EmptyState title="A fresh page awaits">
-                            Log a refill to see your pen and ink pairings here.
-                        </EmptyState>
-                    ) : (
-                        <div className="pairing-list">
-                            {inked.slice(0, 6).map((pen) => {
-                                const entry = model.latest.get(pen.id)!;
-                                const ink = model.inkById.get(entry.inkIds[0]);
-                                return (
-                                    <article className="pairing" key={pen.id}>
-                                        <Swatch ink={ink} large />
-                                        <div className="pairing-info">
-                                            <span className="overline">
-                                                {pen.brand}
-                                            </span>
-                                            <button
-                                                className="name-link"
-                                                onClick={() =>
-                                                    onOpen({
-                                                        kind: 'pen',
-                                                        item: pen,
-                                                    })
-                                                }
-                                            >
-                                                {pen.model}
-                                            </button>
-                                            <span className="small muted">
-                                                {penDescription(pen)}
-                                            </span>
-                                            <InkNames
-                                                entry={entry}
-                                                model={model}
-                                            />
-                                            <time
-                                                className="small muted"
-                                                dateTime={entry.date}
-                                            >
-                                                Inked {formatDate(entry.date)}
-                                            </time>
-                                        </div>
-                                        {canEdit && (
-                                            <button
-                                                className="button subtle small-button"
-                                                onClick={() =>
-                                                    onOpen({
-                                                        kind: 'refill',
-                                                        draft: {
-                                                            penId: pen.id,
-                                                            inkIds: entry.inkIds,
-                                                            date: '',
-                                                            notes: '',
-                                                        },
-                                                    })
-                                                }
-                                            >
-                                                Refill <Icon name="plus" />
-                                            </button>
-                                        )}
-                                    </article>
-                                );
-                            })}
-                        </div>
-                    )}
-                    {inked.length > 6 && (
-                        <Link className="all-pens-link" to="/pens?status=inked">
-                            See all {inked.length} inked pens{' '}
-                            <Icon name="arrow" />
-                        </Link>
-                    )}
-                </section>
-                <aside className="desk-aside">
-                    <section className="palette-section">
-                        <p className="eyebrow">On your desk</p>
-                        <h2>A palette in progress</h2>
-                        <div className="palette-swatches">
-                            {palette.map((ink) => (
-                                <button
-                                    key={ink.id}
-                                    aria-label={`View ${inkLabel(ink)}`}
-                                    onClick={() =>
-                                        onOpen({ kind: 'ink', item: ink })
-                                    }
-                                >
-                                    <Swatch ink={ink} large />
-                                </button>
+            <div className="desk-controls">
+                <details className="desk-filter-panel">
+                    <summary>
+                        Filter pens
+                        {Object.keys(filters.brands).length +
+                        Number(!!filters.nib) +
+                        Number(!!filters.inkBrand)
+                            ? ' · active'
+                            : ''}
+                    </summary>
+                    <div className="desk-filter-content">
+                        <fieldset>
+                            <legend>Pen brands</legend>
+                            {brands.map((brand) => (
+                                <label key={brand}>
+                                    {brand}
+                                    <select
+                                        aria-label={`${brand} filter`}
+                                        value={filters.brands[brand] || ''}
+                                        onChange={(e) => {
+                                            const next = { ...filters.brands };
+                                            if (e.target.value)
+                                                next[brand] = e.target.value as
+                                                    | 'include'
+                                                    | 'exclude';
+                                            else delete next[brand];
+                                            changeFilters({
+                                                ...filters,
+                                                brands: next,
+                                            });
+                                        }}
+                                    >
+                                        <option value="">Any</option>
+                                        <option value="include">Include</option>
+                                        <option value="exclude">Exclude</option>
+                                    </select>
+                                </label>
                             ))}
-                            {!palette.length && (
-                                <p className="muted">
-                                    Your latest ink colors will appear here.
-                                </p>
-                            )}
-                        </div>
-                        <p className="small muted">
-                            A glimpse of the inks in your pens. Swatches are
-                            approximate.
-                        </p>
-                    </section>
-                    <section className="untried-section">
-                        <span className="overline">Something to discover</span>
-                        <h2>{model.untried.length} inks, still unwritten.</h2>
-                        <p>
-                            Find a new favorite in the colors you haven’t tried
-                            yet.
-                        </p>
-                        <Link className="text-link" to="/inks?status=untried">
-                            Explore unused inks <Icon name="arrow" />
-                        </Link>
-                    </section>
-                    <section>
-                        <div className="section-heading">
-                            <h2>Recent entries</h2>
-                            <Link
-                                className="text-link"
-                                to="/journal"
-                                aria-label="View full refill journal"
-                            >
-                                <Icon name="arrow" />
-                            </Link>
-                        </div>
-                        {model.journal.length ? (
-                            <EntryRows
-                                entries={model.journal}
-                                model={model}
-                                limit={4}
-                                onEdit={(entry) =>
-                                    onOpen({ kind: 'refill', draft: entry })
+                        </fieldset>
+                        <label>
+                            Nib material
+                            <select
+                                value={filters.nib}
+                                onChange={(e) =>
+                                    changeFilters({
+                                        ...filters,
+                                        nib: e.target.value,
+                                    })
                                 }
-                            />
-                        ) : (
-                            <p className="muted">
-                                Your first refill starts the story.
-                            </p>
-                        )}
-                    </section>
-                </aside>
+                            >
+                                <option value="">All materials</option>
+                                {[...new Set(model.inked.map(nibMaterial))]
+                                    .sort(byName)
+                                    .map((n) => (
+                                        <option key={n}>{n}</option>
+                                    ))}
+                            </select>
+                        </label>
+                        <label>
+                            Ink brand
+                            <select
+                                value={filters.inkBrand}
+                                onChange={(e) =>
+                                    changeFilters({
+                                        ...filters,
+                                        inkBrand: e.target.value,
+                                    })
+                                }
+                            >
+                                <option value="">All ink brands</option>
+                                {inkBrands.map((b) => (
+                                    <option key={b}>{b}</option>
+                                ))}
+                            </select>
+                        </label>
+                    </div>
+                </details>
+                <label>
+                    Group by
+                    <select
+                        value={group}
+                        onChange={(e) => {
+                            setGroup(e.target.value as DeskGroup);
+                            setView('');
+                        }}
+                    >
+                        <option value="none">No grouping</option>
+                        <option value="pen">Pen brand</option>
+                        <option value="nib">Nib material</option>
+                        <option value="ink">Ink brand</option>
+                        <option value="color">Ink color family</option>
+                    </select>
+                </label>
+                <label>
+                    Order by
+                    <select
+                        value={order}
+                        onChange={(e) => {
+                            setOrder(e.target.value as DeskOrder);
+                            setView('');
+                        }}
+                    >
+                        <option value="color">Ink color · rainbow</option>
+                        <option value="pen">Pen name</option>
+                        <option value="ink">Ink name</option>
+                        <option value="recent">Recently filled</option>
+                    </select>
+                </label>
+                <button
+                    className="text-link"
+                    onClick={() => preset('All pens')}
+                >
+                    Reset
+                </button>
             </div>
+            <section className="desk-palette" aria-label="Current ink palette">
+                <div className="section-heading">
+                    <h2>
+                        Your palette{' '}
+                        <span className="count">{palette.length}</span>
+                    </h2>
+                    {selectedInk && (
+                        <button
+                            className="text-link"
+                            onClick={() => setSelectedInk('')}
+                        >
+                            Show all colors
+                        </button>
+                    )}
+                </div>
+                <div className="desk-color-list">
+                    {palette.map((ink) => (
+                        <button
+                            key={ink.id}
+                            title={inkLabel(ink)}
+                            aria-label={`Filter to ${inkLabel(ink)}`}
+                            aria-pressed={selectedInk === ink.id}
+                            onClick={() =>
+                                setSelectedInk(
+                                    selectedInk === ink.id ? '' : ink.id,
+                                )
+                            }
+                        >
+                            <Swatch ink={ink} large />
+                            <span>{ink.name}</span>
+                        </button>
+                    ))}
+                </div>
+                <p className="small muted">
+                    Select a color to see its pens. Colors and color families
+                    are approximate.
+                </p>
+            </section>
+            <div className="desk-results-summary" aria-live="polite">
+                <span>
+                    {count} of {model.inked.length} inked pens
+                    {selectedInk && model.inkById.get(selectedInk)
+                        ? ` · ${inkLabel(model.inkById.get(selectedInk))}`
+                        : ''}
+                </span>
+                <span>
+                    {Object.entries(filters.brands)
+                        .map(
+                            ([b, mode]) =>
+                                `${mode === 'exclude' ? 'Without' : 'Only'} ${b}`,
+                        )
+                        .concat(
+                            filters.nib ? [`${filters.nib} nibs`] : [],
+                            filters.inkBrand ? [filters.inkBrand] : [],
+                        )
+                        .join(' · ')}
+                </span>
+            </div>
+            {!count && (
+                <EmptyState
+                    title={
+                        model.inked.length
+                            ? 'No pens match this selection'
+                            : 'A fresh page awaits'
+                    }
+                >
+                    {model.inked.length ? (
+                        <button
+                            className="text-link"
+                            onClick={() => preset('All pens')}
+                        >
+                            Show all inked pens
+                        </button>
+                    ) : (
+                        'Log a refill to bring your pens and colors to the desk.'
+                    )}
+                </EmptyState>
+            )}
+            {groups.map(([name, rows]) => (
+                <section className="desk-group" key={name}>
+                    <h2>
+                        {name} <span className="count">{rows.length}</span>
+                    </h2>
+                    <div className="desk-pairings">
+                        {rows.map(({ pen, entry, inks }) => (
+                            <article className="desk-pairing" key={pen.id}>
+                                <div className="desk-pairing-swatches">
+                                    {inks.map((ink) => (
+                                        <Swatch key={ink.id} ink={ink} large />
+                                    ))}
+                                </div>
+                                <div className="pairing-info">
+                                    <span className="overline">
+                                        {pen.brand}
+                                    </span>
+                                    <button
+                                        className="name-link"
+                                        onClick={() =>
+                                            onOpen({ kind: 'pen', item: pen })
+                                        }
+                                    >
+                                        {pen.model} · {pen.color}
+                                    </button>
+                                    <span className="small muted">
+                                        {pen.nibSize} · {pen.nibType}
+                                    </span>
+                                    <InkNames entry={entry} model={model} />
+                                </div>
+                                {canEdit && (
+                                    <button
+                                        className="button subtle small-button"
+                                        aria-label={`Refill ${pen.brand} ${pen.model} ${pen.color}`}
+                                        onClick={() =>
+                                            onOpen({
+                                                kind: 'refill',
+                                                draft: {
+                                                    penId: pen.id,
+                                                    inkIds: entry.inkIds,
+                                                    date: '',
+                                                    notes: '',
+                                                },
+                                            })
+                                        }
+                                    >
+                                        Refill
+                                    </button>
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                </section>
+            ))}
         </>
     );
 }
