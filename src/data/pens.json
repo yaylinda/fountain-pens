@@ -70,7 +70,8 @@
     "model": "Studio",
     "color": "Palladium (M)",
     "nibSize": "Medium",
-    "nibType": "Gold, 14k"
+    "nibType": "Gold, 14k",
+    "needsRefill": true
   },
   {
     "id": "pen_10",
@@ -78,7 +79,8 @@
     "model": "Studio",
     "color": "Palladium (F)",
     "nibSize": "Fine",
-    "nibType": "Gold, 14k"
+    "nibType": "Gold, 14k",
+    "needsRefill": true
   },
   {
     "id": "pen_11",
