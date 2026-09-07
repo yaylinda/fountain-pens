@@ -130,7 +130,8 @@
     "model": "ECO",
     "color": "Glow Green",
     "nibSize": "Fine",
-    "nibType": "Steel"
+    "nibType": "Steel",
+    "archived": true
   },
   {
     "id": "pen_17",
@@ -250,7 +251,8 @@
     "model": "Diamond Mini",
     "color": "Black",
     "nibSize": "Stub 1.1mm",
-    "nibType": "Steel"
+    "nibType": "Steel",
+    "needsRefill": true
   },
   {
     "id": "pen_32",
@@ -258,7 +260,8 @@
     "model": "Diamond Mini",
     "color": "Clear",
     "nibSize": "Stub 1.1mm",
-    "nibType": "Steel"
+    "nibType": "Steel",
+    "needsRefill": true
   },
   {
     "id": "pen_33",
