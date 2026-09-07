@@ -184,6 +184,14 @@ test('collection workflows work against isolated API fixtures without touching r
         assert.equal((screen.getByLabelText('Nib material') as HTMLSelectElement).value, 'Gold');
         assert.equal(screen.getByRole('button', { name: 'Hide filters · active', exact: true }).getAttribute('aria-expanded'), 'true');
         assert.equal(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }).getAttribute('aria-pressed'), 'true');
+        const deskUrl = appRouter.state.location.search;
+        await user.click(screen.getByRole('button', { name: 'View Diamine Happy Holidays' }));
+        assert.equal(screen.getByLabelText('Ink name').value, 'Happy Holidays');
+        assert.equal(new URLSearchParams(appRouter.state.location.search).get('id'), 'ink-a');
+        await act(async () => { await appRouter.navigate(-1); });
+        await screen.findByRole('heading', { name: 'The writing desk' });
+        assert.equal(appRouter.state.location.search, deskUrl);
+        assert.equal(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }).getAttribute('aria-pressed'), 'true');
         await user.click(screen.getByRole('button', { name: 'Reset', exact: true }));
         assert.equal(screen.queryByRole('button', { name: 'Show all colors' }), null);
         await user.click(screen.getByRole('button', { name: 'Lamy', exact: true }));

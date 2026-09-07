@@ -357,7 +357,16 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                                         <div className="desk-ink-details">
                                             {inks.map((ink) => (
                                                 <div key={ink.id}>
-                                                    <span>{ink.name}</span>
+                                                    <button
+                                                        className="name-link"
+                                                        aria-label={`View ${inkLabel(ink)}`}
+                                                        data-focus-key={`desk-ink-${pen.id}-${ink.id}`}
+                                                        onClick={() =>
+                                                            onOpen({ kind: 'ink', item: ink })
+                                                        }
+                                                    >
+                                                        {ink.name}
+                                                    </button>
                                                     <span className="small muted">
                                                         {[
                                                             ink.brand,
