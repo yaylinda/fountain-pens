@@ -112,7 +112,8 @@
     "model": "AL-Star",
     "color": "Autumn Pink",
     "nibSize": "Medium",
-    "nibType": "Steel"
+    "nibType": "Steel",
+    "needsRefill": true
   },
   {
     "id": "pen_15",
