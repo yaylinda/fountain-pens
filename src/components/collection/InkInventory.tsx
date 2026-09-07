@@ -1,3 +1,4 @@
+import { FavoriteButton } from './FavoriteButton';
 import { Fragment } from 'react';
 import type { Ink } from '../../models/types';
 import type { InventoryLayout } from '../../hooks/useInventoryLayout';
@@ -9,7 +10,7 @@ import {
     type CollectionModel,
     type EditorState,
 } from '../../lib/collection';
-import { Icon, Swatch } from './Primitives';
+import { FavoriteMark, Icon, Swatch } from './Primitives';
 import { HoverDetails } from './HoverDetails';
 import { InkStory } from './InkStory';
 import { getInkReference, referenceByline } from '../../lib/inkReference';
@@ -55,6 +56,8 @@ export default function InkInventory({
                                 <Fragment key={ink.id}>
                                     <tr className={reference ? 'ink-row-with-story' : undefined}>
                                         <td>
+                                            <div className="favorite-name">
+                                            <FavoriteButton kind="ink" item={ink} />
                                             <button
                                                 type="button"
                                                 className="inventory-name ink-list-name"
@@ -84,6 +87,7 @@ export default function InkInventory({
                                                     )}
                                                 </span>
                                             </button>
+                                            </div>
                                         </td>
                                         <td data-label="Collection">
                                             {ink.collection || reference?.inspiration.series || (
@@ -100,7 +104,7 @@ export default function InkInventory({
                                                 {current.length ? (
                                                     current.map((pen) => (
                                                         <span key={pen.id}>
-                                                            {penLabel(pen)}
+                                                            {penLabel(pen)}<FavoriteMark item={pen} />
                                                             <span className="small muted block">
                                                                 {[
                                                                     pen.color,
@@ -203,6 +207,7 @@ export default function InkInventory({
                         </button>
                         <InkStory ink={ink} />
                         <span className="ink-card-footer">
+                            <FavoriteButton kind="ink" item={ink} />
                             <span>
                                 {model.inkCount(ink.id)
                                     ? `${model.inkCount(ink.id)} refills`
@@ -221,7 +226,7 @@ export default function InkInventory({
                                                 {current.map((pen) => (
                                                     <li key={pen.id}>
                                                         <strong>
-                                                            {penLabel(pen)}
+                                                            {penLabel(pen)}<FavoriteMark item={pen} />
                                                         </strong>
                                                         <span className="small muted block">
                                                             {penDescription(

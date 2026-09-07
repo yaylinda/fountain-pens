@@ -15,7 +15,7 @@ import {
     type DeskState,
     readDeskState,
 } from '../../lib/writingDesk';
-import { EmptyState, Icon, InkNames, Swatch } from './Primitives';
+import { FavoriteMark, EmptyState, Icon, InkNames, Swatch } from './Primitives';
 import RefillQueue from './RefillQueue';
 
 interface Props {
@@ -275,7 +275,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                             }
                         >
                             <Swatch ink={ink} large />
-                            <span>{ink.name}</span>
+                            <span>{ink.name}<FavoriteMark item={ink} /></span>
                         </button>
                     ))}
                 </div>
@@ -348,7 +348,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                                             onOpen({ kind: 'pen', item: pen })
                                         }
                                     >
-                                        {pen.model} · {pen.color}
+                                        {pen.model} · {pen.color}<FavoriteMark item={pen} />
                                     </button>
                                     <span className="small muted">
                                         {pen.nibSize} · {pen.nibType}
@@ -365,7 +365,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                                                             onOpen({ kind: 'ink', item: ink })
                                                         }
                                                     >
-                                                        {ink.name}
+                                                        {ink.name}<FavoriteMark item={ink} />
                                                     </button>
                                                     <span className="small muted">
                                                         {[

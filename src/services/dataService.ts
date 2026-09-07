@@ -230,3 +230,22 @@ export const deleteRefillLog = (index: number): void => {
         notifyMutation();
     }
 };
+
+// Read the current entity so a star never overwrites unrelated fields.
+export const setFavorite = async (kind: 'pen' | 'ink', id: string, favorite: boolean): Promise<boolean> => {
+    if (kind === 'ink' && id === 'NONE') return false;
+    const item = kind === 'pen' ? getPenById(id) : getInkById(id);
+    if (!item) return false;
+    const previous = item.favorite;
+    const updated = { ...item, favorite };
+    if (kind === 'pen') pens = pens.map((pen) => pen.id === id ? updated as Pen : pen);
+    else inks = inks.map((ink) => ink.id === id ? updated as Ink : ink);
+    const saved = await (kind === 'pen' ? savePensToFile(pens) : saveInksToFile(inks));
+    if (saved) notifyMutation();
+    else {
+        // Preserve any other fields edited while the request was in flight.
+        if (kind === 'pen') pens = pens.map((pen) => pen.id === id ? { ...pen, favorite: previous } : pen);
+        else inks = inks.map((ink) => ink.id === id ? { ...ink, favorite: previous } : ink);
+    }
+    return saved;
+};

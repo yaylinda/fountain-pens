@@ -71,6 +71,7 @@ const source = {
 };
 let failLoad = true;
 let localNetwork = true;
+let failFavoriteSave = false;
 globalThis.fetch = async (input: string, init?: RequestInit) => {
     if (input === '/api/data') {
         if (failLoad) return new Response('Unavailable', { status: 503 });
@@ -79,6 +80,7 @@ globalThis.fetch = async (input: string, init?: RequestInit) => {
     if (input === '/api/is-local')
         return Response.json({ isLocal: localNetwork });
     if (input === '/api/save-json') {
+        if (failFavoriteSave) return new Response('Unavailable', { status: 503 });
         writes.push(JSON.parse(String(init?.body)));
         return Response.json({ success: true });
     }
@@ -164,6 +166,58 @@ test('collection workflows work against isolated API fixtures without touching r
             screen.getByText('1 of 1 inked pens'),
         );
     });
+    await t.test('favorites persist, follow names across pages, preserve drafts, and recover from failed saves', async () => {
+        cleanup();
+        mountApp(['/pens?status=all']);
+        await user.click(await screen.findByRole('button', { name: 'Add Pilot Falcon to favorites' }));
+        await waitFor(() => assert.equal(latestWrite('pens').data.find((item) => item.id === 'pen-a')?.favorite, true));
+        assert.equal(screen.getByRole('button', { name: 'Remove Pilot Falcon from favorites' }).getAttribute('aria-pressed'), 'true');
+        await user.click(screen.getByRole('button', { name: 'Favorites', exact: true }));
+        assert.ok(screen.getByText('Falcon'));
+        assert.equal(appRouter.state.location.search, '?status=favorites');
+        await user.click(screen.getByRole('button', { name: /Edit Pilot Falcon/ }));
+        await user.type(screen.getByLabelText('Color / finishOptional'), ' draft');
+        await user.click(screen.getByRole('button', { name: 'Remove Pilot Falcon from favorites' }));
+        await waitFor(() => assert.equal(latestWrite('pens').data.find((item) => item.id === 'pen-a')?.favorite, false));
+        assert.equal(screen.getByLabelText('Color / finishOptional').value, 'Sapphire draft');
+        await user.click(screen.getByRole('button', { name: 'Save changes' }));
+        await waitFor(() => assert.equal(latestWrite('pens').data.find((item) => item.id === 'pen-a')?.favorite, false));
+        // Restore the fixture finish without altering the favorite state.
+        const service = await import('../src/services/dataService');
+        service.updatePen({ ...service.getPenById('pen-a')!, color: 'Sapphire' });
+        cleanup();
+        mountApp(['/inks?status=all']);
+        await user.click(await screen.findByRole('button', { name: 'Add Diamine Happy Holidays to favorites' }));
+        await waitFor(() => assert.equal(latestWrite('inks').data.find((item) => item.id === 'ink-a')?.favorite, true));
+        await user.click(screen.getByRole('button', { name: 'Favorites', exact: true }));
+        assert.ok(screen.getByText('Happy Holidays'));
+        assert.equal(screen.queryByText('Népal Test'), null);
+        // Saved favorites are visible after remounting, including in view-only mode.
+        cleanup();
+        localNetwork = false;
+        mountApp(['/journal']);
+        await screen.findByRole('heading', { name: 'The refill journal' });
+        assert.ok(screen.getByRole('img', { name: 'Favorite' }));
+        assert.equal(screen.queryByRole('button', { name: /to favorites|from favorites/ }), null);
+        cleanup();
+        localNetwork = true;
+        mountApp(['/inks?status=all']);
+        failFavoriteSave = true;
+        await user.click(await screen.findByRole('button', { name: 'Remove Diamine Happy Holidays from favorites' }));
+        await screen.findByText('Favorite could not be saved. Please try again.');
+        assert.equal(screen.getByRole('button', { name: 'Remove Diamine Happy Holidays from favorites' }).getAttribute('aria-pressed'), 'true');
+        failFavoriteSave = false;
+        await user.click(screen.getByRole('button', { name: 'Remove Diamine Happy Holidays from favorites' }));
+        await waitFor(() => assert.equal(latestWrite('inks').data.find((item) => item.id === 'ink-a')?.favorite, false));
+        await user.click(screen.getByRole('button', { name: 'Favorites', exact: true }));
+        assert.ok(screen.getByRole('heading', { name: 'Your favorites belong here' }));
+        assert.equal(await service.setFavorite('ink', 'NONE', true), false);
+        document.querySelectorAll('.save-notification').forEach((notice) => notice.remove());
+        cleanup();
+        mountApp();
+        await screen.findByRole('heading', { name: 'The writing desk' });
+    });
+
     await t.test('desk presets, grouping, and palette selection combine without writes', async () => {
         const before = writes.length;
         await user.click(screen.getByRole('button', { name: 'Lamy', exact: true }));

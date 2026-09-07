@@ -20,7 +20,7 @@ import {
     type EditorState,
     type RefillDraft,
 } from '../../lib/collection';
-import { EmptyState, Icon, SearchField, Swatch } from './Primitives';
+import { FavoriteMark, EmptyState, Icon, SearchField, Swatch } from './Primitives';
 import {
     Field,
     ErrorMessage,
@@ -236,7 +236,7 @@ export function RefillEditor({
                                 <div className="selected-pen">
                                     <Icon name="pen" />
                                     <span>
-                                        <strong>{penLabel(selectedPen)}</strong>
+                                        <strong>{penLabel(selectedPen)}<FavoriteMark item={selectedPen} /></strong>
                                         <span className="small muted block">
                                             {penDescription(selectedPen)}
                                         </span>
@@ -273,7 +273,7 @@ export function RefillEditor({
                                             }
                                         />
                                         <span>
-                                            <strong>{penLabel(pen)}</strong>
+                                            <strong>{penLabel(pen)}<FavoriteMark item={pen} /></strong>
                                             <span className="small muted block">
                                                 {penDescription(pen)}
                                                 {pen.archived
@@ -397,6 +397,7 @@ export function RefillEditor({
                                                     />
                                                     {model.inkById.get(id)
                                                         ?.name || 'Missing ink'}
+                                                    <FavoriteMark item={model.inkById.get(id)} />
                                                     <Icon name="close" />
                                                 </button>
                                             ))}
@@ -428,7 +429,7 @@ export function RefillEditor({
                                             />
                                             <Swatch ink={ink} />
                                             <span>
-                                                <strong>{ink.name}</strong>
+                                                <strong>{ink.name}<FavoriteMark item={ink} /></strong>
                                                 <span className="small muted block">
                                                     {ink.brand}
                                                     {ink.collection

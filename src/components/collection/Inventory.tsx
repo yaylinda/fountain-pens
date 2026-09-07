@@ -59,6 +59,7 @@ export default function Inventory({
         ? [
               ['inked', 'Inked'],
               ['all', 'All pens'],
+              ['favorites', 'Favorites'],
               ['empty', 'Empty'],
               ['needs-refill', 'Needs refill'],
               ['archived', 'Archived'],
@@ -66,6 +67,7 @@ export default function Inventory({
         : [
               ['in-use', 'In use'],
               ['all', 'All inks'],
+              ['favorites', 'Favorites'],
               ['untried', 'Untried'],
               ['archived', 'Archived'],
           ];
@@ -75,6 +77,7 @@ export default function Inventory({
             const inked = !!entry && !isCleaning(entry);
             return (
                 (status === 'archived' ? pen.archived : !pen.archived) &&
+                (status !== 'favorites' || pen.favorite) &&
                 (!brand || pen.brand === brand) &&
                 (!nib || pen.nibSize === nib) &&
                 (status !== 'inked' || inked) &&
@@ -106,6 +109,7 @@ export default function Inventory({
             (ink) =>
                 ink.id !== 'NONE' &&
                 (status === 'archived' ? ink.archived : !ink.archived) &&
+                (status !== 'favorites' || ink.favorite) &&
                 (!brand || ink.brand === brand) &&
                 (status !== 'in-use' || model.currentPens(ink.id).length > 0) &&
                 (status !== 'untried' || model.inkCount(ink.id) === 0) &&
@@ -161,6 +165,7 @@ export default function Inventory({
                         className={status === value ? 'active' : ''}
                         onClick={() => update('status', value)}
                     >
+                        {value === 'favorites' && <Icon name="star" />}
                         {label}
                     </button>
                 ))}
@@ -275,12 +280,16 @@ export default function Inventory({
             {!count ? (
                 <EmptyState
                     title={
-                        filtered
+                        status === 'favorites' && !query && !brand && !nib
+                            ? 'Your favorites belong here'
+                            : filtered
                             ? 'No matches on this shelf'
                             : `Room for your first ${isPens ? 'pen' : 'ink'}`
                     }
                 >
-                    {filtered
+                    {status === 'favorites' && !query && !brand && !nib
+                        ? `Star a ${isPens ? 'pen' : 'ink'} in your collection to find it here. Archived favorites stay in Archived.`
+                        : filtered
                         ? 'Try a different search or clear your filters.'
                         : 'Add a few details to begin your collection.'}
                 </EmptyState>

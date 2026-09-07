@@ -12,6 +12,7 @@ import {
 } from '../../lib/collection';
 
 export type IconName =
+    | 'star'
     | 'desk'
     | 'list'
     | 'pen'
@@ -26,6 +27,7 @@ export type IconName =
     | 'edit'
     | 'archive';
 const paths: Record<IconName, ReactNode> = {
+    star: <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" />,
     list: <path d="M8 5h13M8 12h13M8 19h13M3 5h.01M3 12h.01M3 19h.01" />,
     desk: (
         <>
@@ -97,6 +99,13 @@ export function Icon({
         </svg>
     );
 }
+export function FavoriteMark({ item }: { item?: { favorite?: boolean } }) {
+    return item?.favorite ? (
+        <span className="favorite-mark" role="img" aria-label="Favorite" title="Favorite">
+            <Icon name="star" />
+        </span>
+    ) : null;
+}
 export function Swatch({
     ink,
     large = false,
@@ -166,12 +175,12 @@ export function InkNames({
                         }
                     >
                         <Swatch ink={ink} showTitle={false} />
-                        <span>{ink.name}</span>
+                        <span>{ink.name}<FavoriteMark item={ink} /></span>
                     </HoverDetails>
                 ) : (
                     <span key={id}>
                         <Swatch ink={ink} />
-                        {ink?.name || 'Ink no longer in inventory'}
+                        {ink?.name || 'Ink no longer in inventory'}<FavoriteMark item={ink} />
                     </span>
                 );
             })}
@@ -257,7 +266,7 @@ export function EntryRows({
                     </time>
                     <span className="entry-description">
                         <strong>
-                            {penLabel(model.penById.get(entry.penId))}
+                            {penLabel(model.penById.get(entry.penId))}<FavoriteMark item={model.penById.get(entry.penId)} />
                         </strong>
                         <InkNames entry={entry} model={model} />
                         {entry.notes && (

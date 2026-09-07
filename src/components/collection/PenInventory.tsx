@@ -1,3 +1,4 @@
+import { FavoriteButton } from './FavoriteButton';
 import type { Pen } from '../../models/types';
 import type { InventoryLayout } from '../../hooks/useInventoryLayout';
 import {
@@ -80,6 +81,7 @@ export default function PenInventory({
                     >
                         <div className="pen-card-heading">
                             <span className="overline">{pen.brand}</span>
+                            <FavoriteButton kind="pen" item={pen} />
                             {pen.archived ? (
                                 <span className="badge neutral">Archived</span>
                             ) : (
@@ -165,6 +167,8 @@ export default function PenInventory({
                     {pens.map((pen) => (
                         <tr key={pen.id}>
                             <td>
+                                <div className="favorite-name">
+                                <FavoriteButton kind="pen" item={pen} />
                                 <button
                                     type="button"
                                     className="inventory-name"
@@ -194,6 +198,7 @@ export default function PenInventory({
                                         {pen.color || 'No finish recorded'}
                                     </span>
                                 </button>
+                                </div>
                             </td>
                             <td data-label="Nib">
                                 <span>{pen.nibSize || '—'}</span>

@@ -12,7 +12,7 @@ import {
     type EditorState,
     type JournalEntry,
 } from '../../lib/collection';
-import { EmptyState, Icon, InkNames, SearchField } from './Primitives';
+import { FavoriteMark, EmptyState, Icon, InkNames, SearchField } from './Primitives';
 
 interface Props {
     model: CollectionModel;
@@ -219,7 +219,7 @@ export default function Journal({ model, onOpen, canEdit }: Props) {
                                                         })
                                                     }
                                                 >
-                                                    {penLabel(pen)}
+                                                    {penLabel(pen)}<FavoriteMark item={pen} />
                                                 </button>
                                                 <span
                                                     className={`badge ${isCleaning(entry) ? 'neutral' : ''}`}

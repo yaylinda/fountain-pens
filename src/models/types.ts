@@ -5,6 +5,7 @@ export interface Ink {
     name: string;
     colorHex?: string;
     archived?: boolean;
+    favorite?: boolean;
 }
 
 export interface Pen {
@@ -15,6 +16,7 @@ export interface Pen {
     nibSize: string;
     nibType: string;
     archived?: boolean;
+    favorite?: boolean;
     needsRefill?: boolean;
 }
 

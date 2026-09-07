@@ -2184,3 +2184,43 @@
 .desk-filter-toggle { justify-self: start; align-self: end; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--ink); font: inherit; cursor: pointer; text-align: left; }
 .desk-ink-details, .desk-ink-details > div { display: grid; gap: 4px; }
 .desk-ink-details { gap: 12px; margin-top: 4px; }
+
+/* Brass stars stay legible without competing with the ink swatches. */
+.favorite-mark {
+    display: inline-flex;
+    vertical-align: -0.12em;
+    margin-inline-start: 0.35em;
+    color: oklch(49% 0.105 78);
+}
+.favorite-mark .icon { width: 0.9em; height: 0.9em; fill: currentColor; }
+.favorite-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
+}
+.favorite-button .icon { width: 19px; height: 19px; }
+.favorite-button:hover { background: oklch(93% 0.035 83); color: oklch(49% 0.105 78); }
+.favorite-button[aria-pressed='true'] { color: oklch(49% 0.105 78); background: oklch(95% 0.035 83); }
+.favorite-button[aria-pressed='true'] .icon { fill: currentColor; }
+.favorite-button:disabled { cursor: wait; }
+.favorite-name { display: flex; align-items: center; gap: 8px; }
+.favorite-name .inventory-name { min-width: 0; }
+.form-section-heading > .favorite-button { float: right; }
+.filter-tabs button { display: inline-flex; align-items: center; gap: 6px; }
+.filter-tabs .icon { width: 15px; height: 15px; }
+.filter-tabs button.active .icon { fill: currentColor; }
+@media (pointer: coarse) {
+    .favorite-button { width: 44px; height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .favorite-button { transition: none; }
+}

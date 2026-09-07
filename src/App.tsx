@@ -17,6 +17,8 @@ import {
     type IconName,
 } from './components/collection/Primitives';
 import './App.css';
+import { FavoritesContext } from './context/FavoritesContext';
+import { setFavorite, getPenById, getInkById } from './services/dataService';
 import { SAVE_CELEBRATION, type SaveOrigin } from './lib/saveCelebration';
 
 const SaveDialog = lazy(() => import('./components/SaveDialog'));
@@ -65,6 +67,7 @@ export default function App() {
         };
     }, []);
     const [message, setMessage] = useState('');
+    const [favoriteBusy, setFavoriteBusy] = useState(false);
     const [syncOpen, setSyncOpen] = useState(false);
     const location = useLocation();
     const canEdit = isLocal && !networkLoading;
@@ -88,6 +91,19 @@ export default function App() {
         setMessage(text);
         finishEditing(item, entry);
     };
+    const toggleFavorite = async (kind: 'pen' | 'ink', id: string) => {
+        if (!canEdit || favoriteBusy) return;
+        const item = kind === 'pen' ? getPenById(id) : getInkById(id);
+        if (!item) return;
+        const favorite = !item.favorite;
+        setFavoriteBusy(true);
+        const saving = setFavorite(kind, id, favorite);
+        refresh();
+        const saved = await saving;
+        refresh();
+        setFavoriteBusy(false);
+        setMessage(saved ? (favorite ? 'Added to favorites.' : 'Removed from favorites.') : 'Favorite could not be saved. Please try again.');
+    };
     const backLabel =
         location.pathname === '/pens'
             ? 'pens'
@@ -107,6 +123,7 @@ export default function App() {
         backLabel,
     };
     return (
+        <FavoritesContext.Provider value={{ canEdit, busy: favoriteBusy, toggle: toggleFavorite }}>
         <div className="app-shell">
             <a
                 className="skip-link"
@@ -376,5 +393,6 @@ export default function App() {
                 </Suspense>
             )}
         </div>
+        </FavoritesContext.Provider>
     );
 }

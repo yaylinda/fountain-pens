@@ -1,3 +1,4 @@
+import { FavoriteButton } from './FavoriteButton';
 import { useId, useState } from 'react';
 import type { Ink, Pen } from '../../models/types';
 import {
@@ -15,7 +16,7 @@ import {
     penLabel,
     type EditorState,
 } from '../../lib/collection';
-import { EntryRows, Icon, Swatch } from './Primitives';
+import { FavoriteMark, EntryRows, Icon, Swatch } from './Primitives';
 import {
     Field,
     ErrorMessage,
@@ -166,6 +167,7 @@ export function EntityEditor({
                                 ? 'The essentials'
                                 : 'A place in the cabinet'}
                         </span>
+                        {item && <FavoriteButton kind={editor.kind} item={item} />}
                         <h2>
                             {item
                                 ? penMode
@@ -548,8 +550,11 @@ export function EntityEditor({
                                         Currently in{' '}
                                         {model
                                             .currentPens(item.id)
-                                            .map(penLabel)
-                                            .join(', ')}
+                                            .map((currentPen, index) => (
+                                                <span key={currentPen.id}>
+                                                    {index > 0 && ', '}{penLabel(currentPen)}<FavoriteMark item={currentPen} />
+                                                </span>
+                                            ))}
                                         .
                                     </p>
                                 )}

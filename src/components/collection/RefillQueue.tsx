@@ -6,7 +6,7 @@ import {
     type CollectionModel,
     type EditorState,
 } from '../../lib/collection';
-import { InkNames } from './Primitives';
+import { FavoriteMark, InkNames } from './Primitives';
 
 export default function RefillQueue({ model, onOpen, canEdit }: {
     model: CollectionModel;
@@ -31,7 +31,7 @@ export default function RefillQueue({ model, onOpen, canEdit }: {
                                 data-focus-key={`desk-queue-pen-${pen.id}`}
                                 onClick={() => onOpen({ kind: 'pen', item: pen })}
                             >
-                                <strong>{penLabel(pen)}</strong>
+                                <strong>{penLabel(pen)}<FavoriteMark item={pen} /></strong>
                                 <span className="small muted">{penDescription(pen)}</span>
                             </button>
                             <div className="desk-refill-ink">
