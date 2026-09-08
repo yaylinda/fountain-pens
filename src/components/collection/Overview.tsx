@@ -38,6 +38,19 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
     const base = deskRows(model, filters, order, group);
     const groups = deskRows(model, filters, order, group, selectedInk);
     const count = groups.reduce((n, [, rows]) => n + rows.length, 0);
+    const refillCount = groups.reduce(
+        (n, [, rows]) => n + rows.filter(({ pen }) => pen.needsRefill).length,
+        0,
+    );
+    const paletteRefills = new Map<string, number>();
+    for (const [, rows] of base) {
+        for (const { pen, inks } of rows) {
+            if (!pen.needsRefill) continue;
+            for (const id of new Set(inks.map((ink) => ink.id))) {
+                paletteRefills.set(id, (paletteRefills.get(id) || 0) + 1);
+            }
+        }
+    }
     const palette = [
         ...new Map(
             base.flatMap(([, rows]) =>
@@ -260,13 +273,18 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     )}
                 </div>
                 <div className="desk-color-list">
-                    {palette.map((ink) => (
+                    {palette.map((ink) => {
+                        const refills = paletteRefills.get(ink.id) || 0;
+                        const refillLabel = refills
+                            ? ` · ${refills} ${refills === 1 ? 'pen needs' : 'pens need'} refill`
+                            : '';
+                        return (
                         <button
                             key={ink.id}
                             title={[ink.brand, ink.collection, ink.name]
                                 .filter(Boolean)
-                                .join(' · ')}
-                            aria-label={`Filter to ${inkLabel(ink)}`}
+                                .join(' · ') + refillLabel}
+                            aria-label={`Filter to ${inkLabel(ink)}${refillLabel}`}
                             aria-pressed={selectedInk === ink.id}
                             onClick={() =>
                                 setSelectedInk(
@@ -274,10 +292,18 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                                 )
                             }
                         >
-                            <Swatch ink={ink} large />
+                            <span className="desk-palette-swatch">
+                                <Swatch ink={ink} large />
+                                {refills > 0 && (
+                                    <span className="badge refill-badge desk-palette-refill" aria-hidden="true">
+                                        {refills}
+                                    </span>
+                                )}
+                            </span>
                             <span>{ink.name}<FavoriteMark item={ink} /></span>
                         </button>
-                    ))}
+                        );
+                    })}
                 </div>
                 <p className="small muted">
                     Select a color to see its pens. Colors and color families
@@ -287,6 +313,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
             <div className="desk-results-summary" aria-live="polite">
                 <span>
                     {count} of {model.inked.length} inked pens
+                    {refillCount > 0 && ` · ${refillCount} need${refillCount === 1 ? 's' : ''} refill`}
                     {selectedInk && model.inkById.get(selectedInk)
                         ? ` · ${inkLabel(model.inkById.get(selectedInk))}`
                         : ''}
@@ -338,9 +365,12 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                                     ))}
                                 </div>
                                 <div className="pairing-info">
-                                    <span className="overline">
-                                        {pen.brand}
-                                    </span>
+                                    <div className="desk-pen-status">
+                                        <span className="overline">{pen.brand}</span>
+                                        {pen.needsRefill && (
+                                            <span className="badge refill-badge">Needs refill</span>
+                                        )}
+                                    </div>
                                     <button
                                         className="name-link"
                                         data-focus-key={`desk-pen-${pen.id}`}

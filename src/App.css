@@ -2152,6 +2152,9 @@
 .desk-color-list button > span:last-child { font-size: .6875rem; line-height: 1.3; overflow-wrap: anywhere; }
 .desk-color-list button:hover, .desk-color-list button[aria-pressed='true'] { border-color: var(--accent); background: var(--surface, #faf6f0); }
 .desk-color-list .swatch-large { width: 44px; height: 44px; }
+.desk-palette-swatch { position: relative; display: inline-flex; }
+.desk-palette-refill { position: absolute; right: -6px; bottom: -4px; padding: 1px 5px; border: 1px solid var(--line); line-height: 1.3; }
+.desk-pen-status { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
 .desk-results-summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin: 24px 0; color: var(--muted); font-size: .8125rem; }
 .desk-group { margin: 32px 0; }
 .desk-group > h2 { margin-bottom: 16px; }
