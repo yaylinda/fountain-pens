@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
     byName,
@@ -7,7 +8,7 @@ import {
 } from '../../lib/collection';
 import {
     deskRows,
-    inkColor,
+    deskColorRanks,
     nibMaterial,
     type DeskFilters,
     type DeskGroup,
@@ -35,8 +36,9 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
         setParams(nextParams, { replace });
     };
     const setSelectedInk = (value: string) => update({ selectedInk: value });
-    const base = deskRows(model, filters, order, group);
-    const groups = deskRows(model, filters, order, group, selectedInk);
+    const colorRanks = useMemo(() => deskColorRanks(model), [model]);
+    const base = deskRows(model, filters, order, group, '', colorRanks);
+    const groups = deskRows(model, filters, order, group, selectedInk, colorRanks);
     const count = groups.reduce((n, [, rows]) => n + rows.length, 0);
     const refillCount = groups.reduce(
         (n, [, rows]) => n + rows.filter(({ pen }) => pen.needsRefill).length,
@@ -59,7 +61,8 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
         ).values(),
     ].sort(
         (a, b) =>
-            inkColor(a).hue - inkColor(b).hue ||
+            (colorRanks.get(a.id) ?? Number.MAX_SAFE_INTEGER) -
+                (colorRanks.get(b.id) ?? Number.MAX_SAFE_INTEGER) ||
             byName(inkLabel(a), inkLabel(b)),
     );
     const brands = [...new Set(model.inked.map((p) => p.brand))].sort(byName);

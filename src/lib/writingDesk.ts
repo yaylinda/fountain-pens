@@ -6,6 +6,7 @@ import {
     type CollectionModel,
 } from './collection';
 import type { Ink, Pen } from '../models/types';
+import { sortInksByColor } from './colorOrder';
 
 export const colorFamilies = [
     'Reds',
@@ -76,12 +77,26 @@ export const nibMaterial = (pen: Pen) =>
         : /steel/i.test(pen.nibType)
           ? 'Steel'
           : pen.nibType || 'Unknown';
+
+export function deskColorRanks(model: CollectionModel) {
+    const currentIds = new Set(model.inked.flatMap((pen) =>
+        model.latest.get(pen.id)?.inkIds || []));
+    const inks = [...currentIds].flatMap((id) => {
+        const ink = model.inkById.get(id);
+        return ink ? [ink] : [];
+    });
+    // Rank the complete desk before applying filters so selecting an ink,
+    // brand, or nib cannot rearrange the remaining colors.
+    return new Map(sortInksByColor(inks).map((ink, index) => [ink.id, index]));
+}
+
 export function deskRows(
     model: CollectionModel,
     filters: DeskFilters,
     order: DeskOrder,
     group: DeskGroup,
     inkId = '',
+    colorRanks?: ReadonlyMap<string, number>,
 ) {
     const included = Object.keys(filters.brands).filter(
         (b) => filters.brands[b] === 'include',
@@ -117,12 +132,12 @@ export function deskRows(
                       ? 'Mixed inks'
                       : inkColor(row.inks[0]).family
                   : 'Currently inked';
+    const ranks = order === 'color' ? colorRanks || deskColorRanks(model) : undefined;
+    const rank = (ink?: Ink) => ranks?.get(ink?.id || '') ?? Number.MAX_SAFE_INTEGER;
     rows.sort((a, b) => {
-        const ac = inkColor(a.inks[0]),
-            bc = inkColor(b.inks[0]);
         return (
             (order === 'color'
-                ? ac.hue - bc.hue || ac.light - bc.light
+                ? rank(a.inks[0]) - rank(b.inks[0])
                 : order === 'ink'
                   ? byName(
                         a.inks.map(inkLabel).join(' + '),
