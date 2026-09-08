@@ -47,6 +47,7 @@ export function RefillEditor({
         inkIds: editor.draft?.inkIds || [],
         notes: editor.draft?.notes || '',
         needsRefill: editor.draft?.needsRefill,
+        notPure: editor.draft?.notPure || false,
         ...(editor.draft?.index !== undefined
             ? { index: editor.draft.index }
             : {}),
@@ -453,6 +454,24 @@ export function RefillEditor({
                             </section>
                         )}
                         <section className="picker-section">
+                            {!cleaning && (
+                                <label className="refill-intent-field">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!draft.notPure}
+                                        onChange={(event) => setDraft((previous) => ({
+                                            ...previous,
+                                            notPure: event.target.checked,
+                                        }))}
+                                    />
+                                    <span>
+                                        <strong>Not pure</strong>
+                                        <span className="small muted block">
+                                            Contains leftover ink or other additions. Add details in notes.
+                                        </span>
+                                    </span>
+                                </label>
+                            )}
                             <Field label="Notes" optional>
                                 <textarea
                                     value={draft.notes}

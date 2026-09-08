@@ -116,6 +116,18 @@ const latestWrite = (filename: string) =>
 
 test('collection workflows work against isolated API fixtures without touching real inventory', async (t) => {
     const user = userEvent.setup({ document: dom.window.document });
+    await t.test('not-pure badges expose original notes and disappear for pure fills and cleanings', async () => {
+        const { RefillPurityMark } = await import('../src/components/collection/Primitives');
+        const entry = { ...source.refillLog[0], index: 0, notPure: true, notes: 'With leftover blue ink' };
+        const view = render(<RefillPurityMark entry={entry} />);
+        await user.click(screen.getByRole('button', { name: 'Not pure' }));
+        assert.ok(screen.getByText(entry.notes));
+        view.rerender(<RefillPurityMark entry={{ ...entry, notPure: false }} />);
+        assert.equal(screen.queryByRole('button', { name: 'Not pure' }), null);
+        view.rerender(<RefillPurityMark entry={{ ...entry, inkIds: ['NONE'] }} />);
+        assert.equal(screen.queryByRole('button', { name: 'Not pure' }), null);
+        cleanup();
+    });
     await t.test('desk refill queue includes empty pens and opens usable refill drafts', async () => {
         const { default: RefillQueue } = await import('../src/components/collection/RefillQueue');
         const { deriveCollection } = await import('../src/lib/collection');

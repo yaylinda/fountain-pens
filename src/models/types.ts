@@ -25,6 +25,7 @@ export interface RefillLog {
     penId: string;
     inkIds: string[];
     notes: string;
+    notPure?: boolean;
 }
 
 // For displaying joined data in the UI

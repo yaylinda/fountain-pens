@@ -15,7 +15,7 @@ import {
     type DeskState,
     readDeskState,
 } from '../../lib/writingDesk';
-import { FavoriteMark, EmptyState, Icon, InkNames, Swatch } from './Primitives';
+import { FavoriteMark, EmptyState, Icon, InkNames, RefillPurityMark, Swatch } from './Primitives';
 import RefillQueue from './RefillQueue';
 
 interface Props {
@@ -370,6 +370,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                                         {pen.needsRefill && (
                                             <span className="badge refill-badge">Needs refill</span>
                                         )}
+                                        {inks.length > 0 && <RefillPurityMark entry={entry} />}
                                     </div>
                                     <button
                                         className="name-link"

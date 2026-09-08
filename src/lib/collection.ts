@@ -195,5 +195,6 @@ export function refillPayload(draft: RefillDraft): RefillLog {
         penId: draft.penId,
         inkIds: [...new Set(draft.inkIds)],
         notes: draft.notes.trim(),
+        ...(!isCleaning(draft) && draft.notPure ? { notPure: true } : {}),
     };
 }

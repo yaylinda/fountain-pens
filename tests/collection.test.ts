@@ -208,6 +208,13 @@ test('payloads preserve simple JSON records and discard display-only indices and
     });
     assert.ok(isCleaning({ ...payload, inkIds: ['NONE'] }));
 });
+test('refill purity persists on refills and clears for pure fills or cleanings', () => {
+    const draft = { ...fixture.entries[1], notPure: true };
+    assert.equal(refillPayload(draft).notPure, true);
+    assert.equal(refillPayload({ ...draft, notPure: false }).notPure, undefined);
+    assert.equal(refillPayload({ ...draft, inkIds: ['NONE'] }).notPure, undefined);
+    assert.equal(refillPayload({ ...draft, inkIds: [] }).notPure, undefined);
+});
 test('recorded swatches override references and unknown inks never get invented colors', () => {
     assert.equal(
         getSwatch({ ...ink('x'), name: 'Happy Holidays' })?.hex,

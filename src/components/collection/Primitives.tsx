@@ -184,7 +184,19 @@ export function InkNames({
                     </span>
                 );
             })}
+            <RefillPurityMark entry={entry} />
         </span>
+    );
+}
+export function RefillPurityMark({ entry }: { entry?: JournalEntry }) {
+    if (!entry?.notPure || isCleaning(entry)) return null;
+    return (
+        <HoverDetails
+            label="Not pure"
+            details={entry.notes || 'Contains leftover ink or other additions.'}
+        >
+            <span className="badge neutral">Not pure</span>
+        </HoverDetails>
     );
 }
 export function EmptyState({
