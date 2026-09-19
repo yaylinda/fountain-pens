@@ -394,5 +394,13 @@
     "nibSize": "Stub 1.1mm",
     "nibType": "Steel",
     "id": "03b02fc1-1866-4fe1-ad1c-afa57871d312"
+  },
+  {
+    "id": "ca1cf42d-0859-4f0f-8d34-e3be00fde3b5",
+    "brand": "Tom's Studio",
+    "model": "Studio Fountain Pen",
+    "color": "Ivy",
+    "nibSize": "Extra Fine Semi-Flex",
+    "nibType": "Stainless Steel, 14k gold-plated"
   }
 ]
