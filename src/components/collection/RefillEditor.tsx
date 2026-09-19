@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
     addRefillLog,
     deleteRefillLog,
@@ -56,6 +56,8 @@ export function RefillEditor({
     const [penQuery, setPenQuery] = useState('');
     const [inkQuery, setInkQuery] = useState('');
     const [error, setError] = useState('');
+    const [saving, setSaving] = useState(false);
+    const pending = useRef(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
     useDraft(initial, draft, onDirty, editor.draft?.hasUnsavedChanges);
     const editing = draft.index !== undefined;
@@ -112,36 +114,61 @@ export function RefillEditor({
                       id,
                   ],
         }));
-    const save = (event: React.FormEvent) => {
+    const save = async (event: React.FormEvent) => {
         event.preventDefault();
-        if (!canEdit) return;
+        if (!canEdit || pending.current) return;
         const problem = validateRefill(draft, collection);
         if (problem) {
             setError(problem);
             return;
         }
-        const payload = refillPayload(draft);
-        const saved =
-            draft.index !== undefined
-                ? updateRefillLog(payload, draft.index)
-                : addRefillLog(payload);
-        if (updatesRefillQueue && selectedPen) {
-            const needsRefill = cleaning
-                ? (draft.needsRefill ?? selectedPen.needsRefill ?? false)
-                : false;
-            if (needsRefill !== !!selectedPen.needsRefill)
-                updatePen({ ...selectedPen, needsRefill });
+        pending.current = true;
+        setSaving(true);
+        setError('');
+        try {
+            const payload = refillPayload(draft);
+            const saved = draft.index !== undefined
+                ? await updateRefillLog(payload, draft.index)
+                : await addRefillLog(payload);
+            if (updatesRefillQueue && selectedPen) {
+                const needsRefill = cleaning
+                    ? (draft.needsRefill ?? selectedPen.needsRefill ?? false)
+                    : false;
+                if (needsRefill !== !!selectedPen.needsRefill)
+                    updatePen({ ...selectedPen, needsRefill });
+            }
+            onSaved(
+                editing
+                    ? 'Journal entry updated.'
+                    : cleaning
+                      ? 'Cleaning recorded.'
+                      : 'Refill added to your journal.',
+                undefined,
+                saved,
+            );
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Failed to save the journal. Please try again.');
+        } finally {
+            pending.current = false;
+            setSaving(false);
         }
-        onSaved(
-            editing
-                ? 'Journal entry updated.'
-                : cleaning
-                  ? 'Cleaning recorded.'
-                  : 'Refill added to your journal.',
-            undefined,
-            saved,
-        );
     };
+    const remove = async () => {
+        if (!canEdit || pending.current || draft.index === undefined) return;
+        pending.current = true;
+        setSaving(true);
+        setError('');
+        try {
+            await deleteRefillLog(draft.index);
+            onSaved('Journal entry deleted.', undefined, null);
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Failed to delete the journal entry. Please try again.');
+        } finally {
+            pending.current = false;
+            setSaving(false);
+        }
+    };
+
     return (
         <>
             <EditorHeading
@@ -160,7 +187,7 @@ export function RefillEditor({
                     noValidate
                 >
                     <ErrorMessage message={error} />
-                    <fieldset disabled={!canEdit} className="form-fields">
+                    <fieldset disabled={!canEdit || saving} className="form-fields">
                         <div className="refill-start">
                             <Field label="Date">
                                 <input
@@ -493,7 +520,7 @@ export function RefillEditor({
                     </fieldset>
                     {canEdit && (
                         <div className="form-actions">
-                            <button type="submit" className="button primary">
+                            <button type="submit" className="button primary" disabled={saving}>
                                 <Icon name="check" />
                                 {editing
                                     ? 'Save changes'
@@ -505,6 +532,7 @@ export function RefillEditor({
                                 type="button"
                                 className="button subtle"
                                 onClick={onClose}
+                                disabled={saving}
                             >
                                 Cancel
                             </button>
@@ -521,14 +549,8 @@ export function RefillEditor({
                                     <button
                                         type="button"
                                         className="button danger"
-                                        onClick={() => {
-                                            deleteRefillLog(draft.index!);
-                                            onSaved(
-                                                'Journal entry deleted.',
-                                                undefined,
-                                                null,
-                                            );
-                                        }}
+                                        disabled={saving}
+                                        onClick={remove}
                                     >
                                         Delete entry
                                     </button>
@@ -544,6 +566,7 @@ export function RefillEditor({
                                 <button
                                     type="button"
                                     className="text-link danger-text"
+                                    disabled={saving}
                                     onClick={() => setConfirmDelete(true)}
                                 >
                                     Delete this entry

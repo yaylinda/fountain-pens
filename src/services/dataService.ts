@@ -3,7 +3,7 @@ import { Ink, Pen, RefillLog, RefillLogDisplay } from '../models/types';
 import {
     saveInksToFile,
     savePensToFile,
-    saveRefillLogsToFile,
+    mutateRefillLog,
 } from './fileService';
 
 // In-memory storage (initialized from API)
@@ -176,59 +176,37 @@ export const getRefillLogByIndex = (
     return { ...item, penDetails, inkDetails };
 };
 
-export const addRefillLog = (
-    item: RefillLog
-): RefillLogDisplay & { index: number } => {
-    refillLogs = [...refillLogs, item];
-    const index = refillLogs.length - 1;
+const originalRefill = (index: number): RefillLog => {
+    if (!Number.isInteger(index) || !refillLogs[index])
+        throw new Error('This journal entry no longer exists. Reload the journal.');
+    return refillLogs[index];
+};
 
-    // Save to file
-    saveRefillLogsToFile(refillLogs).catch((err) =>
-        console.error('Failed to save refill logs to file:', err)
-    );
+export const addRefillLog = async (
+    item: RefillLog,
+): Promise<RefillLogDisplay & { index: number }> => {
+    const result = await mutateRefillLog('POST', { entry: item });
+    refillLogs = result.refillLog;
     notifyMutation();
-
-    const penDetails = getPenById(item.penId) as Pen;
-    const inkDetails = item.inkIds.map((id) => getInkById(id) as Ink);
-    return { ...item, penDetails, inkDetails, index };
+    return { ...getRefillLogByIndex(result.index)!, index: result.index };
 };
 
-export const updateRefillLog = (
+export const updateRefillLog = async (
     updatedItem: RefillLog,
-    index: number
-): RefillLogDisplay & { index: number } => {
-    if (index >= 0 && index < refillLogs.length) {
-        refillLogs = [
-            ...refillLogs.slice(0, index),
-            updatedItem,
-            ...refillLogs.slice(index + 1),
-        ];
-
-        // Save to file
-        saveRefillLogsToFile(refillLogs).catch((err) =>
-            console.error('Failed to save refill logs to file:', err)
-        );
-        notifyMutation();
-    }
-
-    const penDetails = getPenById(updatedItem.penId) as Pen;
-    const inkDetails = updatedItem.inkIds.map((id) => getInkById(id) as Ink);
-    return { ...updatedItem, penDetails, inkDetails, index };
+    index: number,
+): Promise<RefillLogDisplay & { index: number }> => {
+    const expected = originalRefill(index);
+    const result = await mutateRefillLog('PUT', { entry: updatedItem, expected }, index);
+    refillLogs = result.refillLog;
+    notifyMutation();
+    return { ...getRefillLogByIndex(result.index)!, index: result.index };
 };
 
-export const deleteRefillLog = (index: number): void => {
-    if (index >= 0 && index < refillLogs.length) {
-        refillLogs = [
-            ...refillLogs.slice(0, index),
-            ...refillLogs.slice(index + 1),
-        ];
-
-        // Save to file
-        saveRefillLogsToFile(refillLogs).catch((err) =>
-            console.error('Failed to save refill logs to file:', err)
-        );
-        notifyMutation();
-    }
+export const deleteRefillLog = async (index: number): Promise<void> => {
+    const expected = originalRefill(index);
+    const result = await mutateRefillLog('DELETE', { expected }, index);
+    refillLogs = result.refillLog;
+    notifyMutation();
 };
 
 // Read the current entity so a star never overwrites unrelated fields.

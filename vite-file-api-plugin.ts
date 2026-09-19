@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { createRefillApi } from './server/refill-api.js';
 import type { ServerResponse } from 'http';
 import * as path from 'path';
 import type { Connect } from 'vite';
@@ -108,6 +109,8 @@ export default function fileApiPlugin(): Plugin {
                 }
             );
 
+            server.middlewares.use('/api/refill-logs', createRefillApi(dataDir));
+
             // Handle JSON file saving
             server.middlewares.use(
                 '/api/save-json',
@@ -143,7 +146,7 @@ export default function fileApiPlugin(): Plugin {
                             ''
                         );
 
-                        if (!allowedFiles.includes(safeFilename)) {
+                        if (!allowedFiles.includes(safeFilename) || safeFilename === 'refillLog') {
                             res.statusCode = 400;
                             res.end('Bad Request: Invalid filename');
                             return;

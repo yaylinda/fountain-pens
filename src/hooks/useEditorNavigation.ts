@@ -52,7 +52,8 @@ export function useEditorNavigation(model: CollectionModel) {
     if (kind === 'ink' && (id === 'new' || model.inkById.has(id || '')))
         editor = { kind, item: model.inkById.get(id || ''), returnTo };
     if (kind === 'refill') {
-        const expected = savedEntries.current.has(location.key)
+        const wasSaved = savedEntries.current.has(location.key);
+        const expected = wasSaved
             ? savedEntries.current.get(location.key)
             : history?.draft;
         const sameEntry = (entry: JournalEntry) =>
@@ -62,15 +63,15 @@ export function useEditorNavigation(model: CollectionModel) {
         // Array indices can shift after deletion. Match the original record before reopening.
         const entry =
             model.journal.find(
-                (entry) => String(entry.index) === id && sameEntry(entry),
+                (entry) => String(entry.index) === (wasSaved ? String(expected?.index) : id) && sameEntry(entry),
             ) ||
             (expected && model.journal.find(sameEntry));
         const cached = drafts.current.get(location.key);
-        if (expected !== null && (id === 'new' || entry))
+        if (expected !== null && ((id === 'new' && !wasSaved) || entry))
             editor = {
                 kind,
                 draft:
-                    id === 'new'
+                    id === 'new' && !wasSaved
                         ? cached || history?.draft
                         : entry
                           ? { ...entry, ...cached, index: entry.index }
@@ -154,7 +155,8 @@ export function useEditorNavigation(model: CollectionModel) {
         }
     };
     const onSaved = (item?: Pen | Ink, entry?: JournalEntry | null) => {
-        if (entry !== undefined && id !== 'new')
+        // Forward navigation to a saved creation must reopen it as an edit.
+        if (entry !== undefined)
             savedEntries.current.set(location.key, entry);
         if (editor && editor.kind !== 'refill' && returnTo && history && item) {
             drafts.current.set(

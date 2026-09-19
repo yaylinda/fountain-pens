@@ -5,6 +5,7 @@ import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { promisify } from 'util';
+import { createRefillApi } from './server/refill-api.js';
 import { configureResponseDelivery, serveFrontend } from './server/http-delivery.js';
 
 const execAsync = promisify(exec);
@@ -245,6 +246,9 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
+// Refill creation, editing, and deletion operate on individual records.
+app.use('/api/refill-logs', createRefillApi(DATA_DIR));
+
 // API: Save JSON file
 app.post('/api/save-json', async (req, res) => {
     try {
@@ -258,7 +262,7 @@ app.post('/api/save-json', async (req, res) => {
 
         // Sanitize filename (only allow alphanumeric)
         const safeFilename = filename.replace(/[^a-zA-Z0-9]/g, '');
-        const allowedFiles = ['inks', 'pens', 'refillLog'];
+        const allowedFiles = ['inks', 'pens'];
 
         if (!allowedFiles.includes(safeFilename)) {
             return res.status(400).json({ error: 'Invalid filename' });

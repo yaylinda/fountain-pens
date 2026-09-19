@@ -61,12 +61,25 @@ export const writeJsonFile = async <T>(
     }
 };
 
-/**
- * Writes refill log data to the refillLog.json file
- * @param data The refill log data to write
- */
-export const saveRefillLogsToFile = (data: RefillLog[]): Promise<boolean> => {
-    return writeJsonFile('refillLog', data);
+// Refill operations never send or replace a client-side journal snapshot.
+export const mutateRefillLog = async (
+    method: 'POST' | 'PUT' | 'DELETE',
+    body: { entry?: RefillLog; expected?: RefillLog },
+    index?: number,
+): Promise<{ refillLog: RefillLog[]; index: number }> => {
+    const origin = captureSaveOrigin();
+    const response = await fetch(`/api/refill-logs${index === undefined ? '' : `/${index}`}`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const problem = await response.json().catch(() => null);
+        throw new Error(problem?.error || 'Failed to save the journal. Please try again.');
+    }
+    const result = await response.json();
+    celebrateSave(origin);
+    return result;
 };
 
 /**

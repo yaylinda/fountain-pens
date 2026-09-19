@@ -69,6 +69,10 @@ const source = {
         },
     ],
 };
+const persistedRefills = structuredClone(source.refillLog);
+const refillRequests: { method: string; url: string }[] = [];
+let failRefillSave = false;
+let releaseRefillSave: Promise<void> | undefined;
 let failLoad = true;
 let localNetwork = true;
 let failFavoriteSave = false;
@@ -79,7 +83,23 @@ globalThis.fetch = async (input: string, init?: RequestInit) => {
     }
     if (input === '/api/is-local')
         return Response.json({ isLocal: localNetwork });
+    if (input.startsWith('/api/refill-logs')) {
+        refillRequests.push({ method: init!.method!, url: input });
+        if (releaseRefillSave) await releaseRefillSave;
+        if (failRefillSave) return Response.json({ error: 'Journal save failed' }, { status: 503 });
+        const body = JSON.parse(String(init?.body));
+        const index = init?.method === 'POST' ? persistedRefills.length : Number(input.split('/').at(-1));
+        if (init?.method === 'POST') persistedRefills.push(body.entry);
+        else {
+            assert.deepEqual(persistedRefills[index], body.expected);
+            if (init?.method === 'PUT') persistedRefills[index] = body.entry;
+            else persistedRefills.splice(index, 1);
+        }
+        writes.push({ filename: 'refillLog', data: structuredClone(persistedRefills) });
+        return Response.json({ success: true, refillLog: persistedRefills, index });
+    }
     if (input === '/api/save-json') {
+        assert.notEqual(JSON.parse(String(init?.body)).filename, 'refillLog');
         if (failFavoriteSave) return new Response('Unavailable', { status: 503 });
         writes.push(JSON.parse(String(init?.body)));
         return Response.json({ success: true });
@@ -423,6 +443,7 @@ test('collection workflows work against isolated API fixtures without touching r
             await user.click(
                 screen.getByRole('button', { name: 'Log refill', exact: true }),
             );
+            assert.deepEqual(refillRequests.at(-1), { method: 'POST', url: '/api/refill-logs' });
             const entry = latestWrite('refillLog').data.at(-1)!;
             assert.equal(entry.penId, 'pen-a');
             assert.equal(entry.notes, 'Test mixing notes');
@@ -430,9 +451,33 @@ test('collection workflows work against isolated API fixtures without touching r
             assert.ok(!('index' in entry));
         },
     );
+    await t.test('Forward reopens a saved creation as an edit; failed and repeated saves never append', async () => {
+        const count = persistedRefills.length;
+        await act(async () => { await appRouter.navigate(1); });
+        assert.ok(screen.getByRole('heading', { name: 'Edit journal entry' }));
+        const submit = screen.getByRole('button', { name: 'Save changes' });
+        const before = refillRequests.length;
+        failRefillSave = true;
+        let release!: () => void;
+        releaseRefillSave = new Promise<void>((resolve) => { release = resolve; });
+        fireEvent.submit(submit.closest('form')!);
+        fireEvent.submit(submit.closest('form')!);
+        assert.equal(refillRequests.length, before + 1);
+        assert.equal(submit.disabled, true);
+        await act(async () => { release(); });
+        assert.ok(await screen.findByText('Journal save failed'));
+        assert.equal(persistedRefills.length, count);
+        assert.ok(screen.getByRole('heading', { name: 'Edit journal entry' }));
+        failRefillSave = false;
+        releaseRefillSave = undefined;
+        await user.click(screen.getByRole('button', { name: 'Save changes' }));
+        assert.equal(persistedRefills.length, count);
+        assert.deepEqual(refillRequests.at(-1), { method: 'PUT', url: '/api/refill-logs/1' });
+    });
     await t.test(
         'filtered journal edits address the source entry, including index zero',
         async () => {
+            const count = persistedRefills.length;
             const search = screen.getByRole('searchbox', {
                 name: 'Search pens, inks, or notes…',
             });
@@ -455,6 +500,8 @@ test('collection workflows work against isolated API fixtures without touching r
                 latestWrite('refillLog').data[0].notes,
                 'Revised original',
             );
+            assert.equal(persistedRefills.length, count);
+            assert.deepEqual(refillRequests.at(-1), { method: 'PUT', url: '/api/refill-logs/0' });
             assert.equal(
                 latestWrite('refillLog').data[1].notes,
                 'Test mixing notes',
