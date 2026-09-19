@@ -74,3 +74,5 @@ node scripts/measure-delivery.mjs
 The benchmark runs temporary local HTTP servers and performs no saves or git operations. On the September 5 snapshot, initial JS/CSS plus inventory fell from 448,376 to 127,240 bytes with gzip (71.6%). This excludes HTML, fonts, and protocol overhead and measures transfer size, not browser paint time.
 
 Read [the application review](docs/app-review.md) for findings and implementation decisions.
+
+See the [proposed client/API/PostgreSQL architecture](docs/design/client-api-postgres.md) for the database, migration, and deployment redesign. This is a design proposal; the running app still uses the JSON storage described above.
