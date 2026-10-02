@@ -742,5 +742,11 @@
         "url": "https://bennyslittlethings.pagecord.com/colorverse-colorvent-and-enigma-inkvent",
         "hex": "#4EADAF",
         "note": "Image-based approximation, not a manufacturer-published hex. Median RGB of base-color swatch area; crop (left, top, right-exclusive, bottom-exclusive)=(250, 1030, 550, 1220) in 1600x1490 image. Shimmer and shading are not represented by one hex. Source image: https://pagecord.com/cdn-cgi/image/width%3D1600%2Cheight%3D1600%2Cformat%3Dwebp%2Cquality%3D90/https%3A//storage.pagecord.com/liv129lpbw8s54ltha1unsmmfsgj (2026-09-06)."
+    },
+    "Bleu Pervenche": {
+        "name": "Bleu Pervenche",
+        "url": "https://inkswatch.com/ink.html?inkId=638",
+        "hex": "#00a7ec",
+        "note": "Approximate reference color from InkSwatch; verified J. Herbin Bleu Pervenche (inkId 638) and its published hex on 2026-10-02. Not a manufacturer-published color."
     }
 }
