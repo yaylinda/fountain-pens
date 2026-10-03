@@ -1,9 +1,11 @@
+import type { PaletteItem } from './deskPalette';
 import type { Ink, Pen, RefillLog } from '../models/types';
 import { getInkReference, referenceHex } from './inkReference';
 
 export const EMPTY_INK_ID = 'NONE';
 export type JournalEntry = RefillLog & { index: number };
 export interface Collection {
+    palette?: PaletteItem[];
     asOf?: string;
     canEdit?: boolean;
     pens: Pen[];
@@ -138,6 +140,7 @@ export function deriveCollection(collection: Collection, asOf = today()) {
     const currentPens = (id: string) =>
         inked.filter((pen) => latest.get(pen.id)?.inkIds.includes(id));
     return {
+        palette: collection.palette || [],
         penById,
         inkById,
         journal,

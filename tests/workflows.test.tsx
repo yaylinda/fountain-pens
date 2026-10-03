@@ -321,7 +321,7 @@ test('collection workflows work against isolated API fixtures without touching r
         assert.ok(screen.getByText('No pens match this selection'));
         await act(async () => { await appRouter.navigate(1); });
         assert.equal(screen.getByRole('button', { name: 'Gold nibs', exact: true }).getAttribute('aria-pressed'), 'true');
-        assert.ok(screen.getByText('Diamine · Inkvent'));
+        assert.ok(screen.getAllByText('Diamine · Inkvent').length > 0);
         await user.click(screen.getByRole('button', { name: 'Reset', exact: true }));
         assert.equal(writes.length, before);
     });

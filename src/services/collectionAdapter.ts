@@ -1,3 +1,4 @@
+import { paletteDto } from '../lib/deskPalette';
 import type { Ink, Pen, RefillLog, SourceLink, SwatchReference } from '../models/types';
 import type { Collection } from '../lib/collection';
 
@@ -60,7 +61,7 @@ export function collectionDto(value: unknown): Collection {
     const events = array(x.events).map(eventDto).sort((a, b) => BigInt(a.sequence) < BigInt(b.sequence) ? -1 : 1);
     const penIds = new Set(pens.map(p => p.id)), inkIds = new Set(inks.map(i => i.id));
     if (penIds.size !== pens.length || inkIds.size !== inks.length || new Set(events.map(e => e.id)).size !== events.length || events.some(e => !penIds.has(e.penId) || e.inkIds.some(id => !inkIds.has(id)))) throw new Error('Invalid collection relationships.');
-    return { canEdit: bool(x.canEdit), pens, inks, entries: events.map((e, index) => ({ ...e, index })), asOf: string(x.asOf) };
+    return { palette: paletteDto(x.palette ?? []), canEdit: bool(x.canEdit), pens, inks, entries: events.map((e, index) => ({ ...e, index })), asOf: string(x.asOf) };
 }
 
 function inkReferences(x: Record<string, unknown>): Pick<Ink, 'reference' | 'swatchReference'> {

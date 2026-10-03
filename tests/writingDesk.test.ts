@@ -1,3 +1,4 @@
+import { reconcilePalette, movePalette, paletteDto } from '../src/lib/deskPalette';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { deriveCollection } from '../src/lib/collection';
@@ -159,4 +160,17 @@ test('desk rows share palette ranks and retain their order through filters and s
     const selected = deskRows(collection, filters, 'color', 'none', samples[3].id, ranks)[0][1];
     assert.deepEqual(selected.map((row) => row.pen.id), [samples[3].id]);
     assert.deepEqual(deskRows(collection, filters, 'recent', 'none')[0][1].map((row) => row.pen.id), samplePens.map((pen) => pen.id).reverse());
+});
+
+
+test('palette preserves dormant omissions, appends new colors and moves by stable identity', () => {
+    const saved = [{ inkId: 'dormant', omitted: true }, { inkId: 'b', omitted: false }];
+    const current = [{ id: 'a' }, { id: 'b' }, { id: 'c' }] as Ink[];
+    const next = reconcilePalette(saved, current);
+    assert.deepEqual(next.map(i => i.inkId), ['dormant', 'b', 'a', 'c']);
+    assert.deepEqual(movePalette(next, 'c', 'b').map(i => i.inkId), ['dormant', 'c', 'b', 'a']);
+    assert.equal(reconcilePalette(next, [{id:'dormant'}] as Ink[])[0].omitted, true);
+    assert.equal(saved.length, 2);
+    assert.deepEqual(paletteDto(next), next);
+    assert.throws(() => paletteDto([{inkId:'a',omitted:false},{inkId:'a',omitted:true}]));
 });
