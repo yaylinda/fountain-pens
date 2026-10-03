@@ -1467,6 +1467,41 @@ test('collection workflows work against isolated API fixtures without touching r
             assert.equal(appRouter.state.location.search, '');
         },
     );
+    await t.test('direct editor URL changes reset item fields and source links even when history keys repeat', async () => {
+        cleanup(); appRouter.dispose();
+        const pen = state.pens[0], ink = state.inks[0];
+        Object.assign(pen, { details: 'Pen-only description', sources: [{ label: 'Pen source', url: 'https://example.test/pen' }] });
+        Object.assign(ink, { details: 'Ink-only description', sources: [{ label: 'Ink source', url: 'https://example.test/ink' }] });
+        await (await import('../src/services/dataService')).loadData(true);
+        window.history.replaceState(null, '', `/#/pens?editor=pen&id=${pen.id}`);
+        appRouter = createHashRouter([{ path: '*', element: <App /> }]);
+        render(<RouterProvider router={appRouter} />);
+        assert.ok(await screen.findByRole('link', { name: 'Pen source ↗' }));
+        const previousKey = appRouter.state.location.key;
+        await act(async () => {
+            // Address-bar fragment changes can preserve/default the history key.
+            window.history.pushState(window.history.state, '', `/#/inks?editor=ink&id=${ink.id}`);
+            window.dispatchEvent(new window.PopStateEvent('popstate'));
+        });
+        assert.equal(appRouter.state.location.key, previousKey);
+        assert.equal(screen.getByLabelText('Brand').value, ink.brand);
+        assert.equal(screen.getByLabelText('Ink name').value, ink.name);
+        assert.ok(screen.getByRole('link', { name: 'Ink source ↗' }));
+        assert.equal(screen.queryByRole('link', { name: 'Pen source ↗' }), null);
+        assert.ok(screen.getByText('Ink-only description', { selector: 'p' }));
+        for (const target of [pen, ink, pen, ink]) {
+            const kind = target === pen ? 'pen' : 'ink';
+            await act(async () => {
+                window.history.pushState(window.history.state, '', `/#/${kind}s?editor=${kind}&id=${target.id}`);
+                window.dispatchEvent(new window.PopStateEvent('popstate'));
+            });
+            assert.equal(appRouter.state.location.key, previousKey);
+            assert.equal(screen.getByLabelText('Brand').value, target.brand);
+            assert.ok(screen.getByRole('link', { name: `${kind === 'pen' ? 'Pen' : 'Ink'} source ↗` }));
+            assert.equal(screen.queryByRole('link', { name: `${kind === 'pen' ? 'Ink' : 'Pen'} source ↗` }), null);
+        }
+        cleanup(); appRouter.dispose();
+    });
     await t.test(
         'native hash history Back and Forward keep the editor and address in sync',
         async () => {

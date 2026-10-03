@@ -180,7 +180,8 @@ export function useEditorNavigation(model: CollectionModel) {
     return {
         editor,
         editorRequested: !!kind,
-        editorKey: location.key,
+        // Direct fragment navigation can reuse a history key across items.
+        editorKey: `${location.key}:${kind}:${id}`,
         onOpen,
         onClose,
         onSaved,
