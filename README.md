@@ -60,7 +60,7 @@ Swatches use the existing `scripts/output.json` reference, with a user-recorded 
 
 ## Production delivery
 
-The new runtime is a Vite SPA on Vercel; see [production setup and release gates](docs/deployment.md). The legacy Docker publication must be disabled and its updater paused or pinned before merging the Supabase-only runtime into a live deployment.
+The new runtime is a Vite SPA on Vercel; see [production setup and release gates](docs/deployment.md). Legacy Docker publication is disabled in the workflow; Docker builds remain verification only. The separate cutover must stop old app writes and confirm the homelab updater is paused or pinned before enabling the new live collection.
 
 The following compression benchmark describes the **legacy Express deployment**, retained for the separately coordinated retirement. The Express server negotiates response compression. Vite's fingerprinted `/assets/` files are cached for one year with `immutable`; HTML revalidates, and API responses use `no-store` so inventory stays fresh. Missing assets return 404 rather than the app document. Unversioned files such as fonts and the favicon retain revalidation.
 
