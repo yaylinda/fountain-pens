@@ -3,10 +3,21 @@
 GitHub Actions owns Vercel production releases. PRs run application tests, lint,
 build, import tests and disposable PostgreSQL checks; they create no hosted
 previews. The `deploy` job in `checks.yml` requires both check jobs to succeed
-for the same main push. Manual check runs, tags, other branches and PRs cannot
-deploy. It checks out the triggering SHA, serializes deployment, and rejects an
+for the same main push in `yaylinda/fountain-pens`. Manual check runs, tags, other
+branches and PRs cannot deploy. It checks out the triggering SHA, serializes deployment, and rejects an
 obsolete SHA immediately before publishing. A newer main push during publication
 can finish afterward; serialization prevents an older job overtaking it.
+
+Before Vercel setup, the deploy job waits up to ten minutes (polling every 15
+seconds) for the native Supabase integration's `Supabase Preview` check on the
+exact triggering SHA. Only app `supabase` with details URL
+`https://supabase.com/dashboard/project/dtdzbjxrqsrhfifxsebi` can satisfy the gate.
+The newest matching check by ID must be completed with conclusion `success`;
+other conclusions, API errors, or missing/pending checks at timeout block deploy.
+A retry must still pass the same gate and the current-main check. The built-in
+GitHub token gets `checks: read` only in the deploy job. The native Supabase
+integration remains the sole schema deployer; this wait uses no database secrets
+and runs no migrations.
 
 Deployment is initially disabled. Repository variable
 `VERCEL_PRODUCTION_ENABLED` must be exactly `true` to enable it. This switch is
