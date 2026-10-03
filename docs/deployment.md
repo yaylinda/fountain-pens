@@ -97,13 +97,18 @@ results and remaining limitations in the coordinated release report.
 
 ## Docker cutover and recovery
 
-`build_and_push.yml` remains unchanged because homelab still uses it. Merging
-this wiring with the enable variable unset does not replace the live app.
-After Vercel passes the release checks, explicitly disable the old homelab
-updater and old app writes, then disable **Build and Push Docker Image** in
-GitHub Actions. Remove that workflow and obsolete deployment docs in the
-coordinated cutover PR once rollback needs are settled. Do not leave GHCR and
-Vercel as competing production release owners.
+`build_and_push.yml` now builds without publishing, including on main, tags and
+manual runs. Its package permission is read-only. This prevents an unconfigured
+Supabase frontend from replacing legacy `prod`/`latest` images while preserving
+Docker build checks. The Dockerfile does not receive Supabase browser build
+configuration; Vercel owns the configured production build.
+
+The repository's Compose file references `:prod`; repository evidence does not
+establish whether an external updater is currently active. During coordinated
+cutover, confirm and pause/pin any homelab updater and stop old app writes before
+enabling live Supabase writes. Disabling publication does not stop an existing
+container or its JSON endpoints. Remove the legacy workflow and deployment
+artifacts once rollback needs are settled.
 
 Before the first Supabase write, the fixed JSON backup is a recovery input.
 After new writes, never restore service by pointing users at stale JSON.

@@ -1,3 +1,5 @@
+> Historical design: runtime access and mutation requirements are superseded by [the public-read, owner-only CRUD contract](../../supabase/RUNTIME.md). Do not implement the earlier conflict, retry receipt or private-browsing proposals.
+
 # Vercel application and Supabase persistence
 
 Status: proposed architecture for PR #9; documentation only. Reviewed 2026-10-03 against PR head `e271b7b` and local `main` snapshot `9256ece38eab7490633682d4630cf603e1178d13`. No live data, cloud resources, credentials, or deployments were inspected or changed.

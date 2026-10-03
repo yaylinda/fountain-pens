@@ -193,7 +193,7 @@ export default function Journal({ model, onOpen, canEdit }: Props) {
                                 return (
                                     <article
                                         className="journal-entry"
-                                        key={entry.index}
+                                        key={entry.id ?? entry.index}
                                     >
                                         <time dateTime={entry.date}>
                                             <strong>

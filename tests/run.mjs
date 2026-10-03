@@ -10,6 +10,7 @@ try {
     await build({
         entryPoints: [
             'tests/collection.test.ts',
+            'tests/supabase-runtime.test.tsx',
             'tests/writingDesk.test.ts',
             'tests/workflows.test.tsx',
             'tests/save-celebration.test.ts',
@@ -24,12 +25,15 @@ try {
         format: 'esm',
         packages: 'external',
         jsx: 'automatic',
+        define: { 'import.meta.env': JSON.stringify({ VITE_SUPABASE_URL: 'https://synthetic.supabase.co', VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_synthetic' }) },
     });
     const result = spawnSync(
         process.execPath,
         [
+            ...(Number(process.versions.node.split('.')[0]) === 20 ? ['--experimental-websocket'] : []),
             '--test',
             join(output, 'collection.test.mjs'),
+            join(output, 'supabase-runtime.test.mjs'),
             join(output, 'writingDesk.test.mjs'),
             join(output, 'workflows.test.mjs'),
             join(output, 'save-celebration.test.mjs'),

@@ -21,6 +21,8 @@ export interface Pen {
 }
 
 export interface RefillLog {
+    id?: string;
+    sequence?: string;
     date: string;
     penId: string;
     inkIds: string[];

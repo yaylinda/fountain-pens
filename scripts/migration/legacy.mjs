@@ -98,7 +98,6 @@ export async function importLegacy(client, captureResult, {ownerId,importId='leg
   const receiptManifest={...manifest,ownerId,targetIdentity};
   await client.query('begin');
   try {
-    await client.query('select pg_advisory_xact_lock(17012026,1)');
     const owner=(await client.query('select user_id::text,time_zone from private.collection_owner')).rows;
     if (owner.length!==1 || owner[0].user_id!==ownerId || owner[0].time_zone!=='America/Chicago') throw new Error('owner mapping mismatch');
     const old=(await client.query('select * from private.data_imports where id=$1',[importId])).rows[0];

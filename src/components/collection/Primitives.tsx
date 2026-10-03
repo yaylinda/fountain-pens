@@ -270,7 +270,7 @@ export function EntryRows({
             {entries.slice(0, limit).map((entry) => (
                 <button
                     className="entry-row"
-                    key={entry.index}
+                    key={entry.id ?? entry.index}
                     onClick={() => onEdit(entry)}
                 >
                     <time dateTime={entry.date}>
