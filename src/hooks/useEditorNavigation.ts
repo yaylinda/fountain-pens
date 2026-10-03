@@ -6,12 +6,11 @@ import type {
     RefillDraft,
     JournalEntry,
 } from '../lib/collection';
-import { refillPayload } from '../lib/collection';
 import type { Ink, Pen } from '../models/types';
 
 interface EditorHistory {
     parentKey: string;
-    draft?: RefillDraft;
+    draftKey?: string;
 }
 
 /** Editors are history entries; inventory filters remain in the return URL. */
@@ -24,6 +23,8 @@ export function useEditorNavigation(model: CollectionModel) {
     const history = location.state?.collectionEditor as
         EditorHistory | undefined;
     const drafts = useRef(new Map<string, RefillDraft>());
+    const initialDrafts = useRef(new Map<string, RefillDraft>());
+    const currentEditor = useRef<{ key: string; editor: EditorState | null }>({ key: '', editor: null });
     const savedEntries = useRef(new Map<string, JournalEntry | null>());
     const positions = useRef(
         new Map<string, { top: number; focusKey: string }>(),
@@ -55,29 +56,23 @@ export function useEditorNavigation(model: CollectionModel) {
         const wasSaved = savedEntries.current.has(location.key);
         const expected = wasSaved
             ? savedEntries.current.get(location.key)
-            : history?.draft;
-        const sameEntry = (entry: JournalEntry) =>
-            !expected ||
-            JSON.stringify(refillPayload(entry)) ===
-                JSON.stringify(refillPayload(expected));
-        // Array indices can shift after deletion. Match the original record before reopening.
-        const entry =
-            model.journal.find(
-                (entry) => String(entry.index) === (wasSaved ? String(expected?.index) : id) && sameEntry(entry),
-            ) ||
-            (expected && model.journal.find(sameEntry));
+            : history?.draftKey ? initialDrafts.current.get(history.draftKey) : undefined;
+        const entry = model.journal.find(entry => entry.id === (wasSaved ? expected?.id : id));
         const cached = drafts.current.get(location.key);
-        if (expected !== null && ((id === 'new' && !wasSaved) || entry))
+        if (expected !== null && ((id === 'new' && !wasSaved) || entry || expected))
             editor = {
                 kind,
                 draft:
                     id === 'new' && !wasSaved
-                        ? cached || history?.draft
+                        ? cached || (history?.draftKey ? initialDrafts.current.get(history.draftKey) : undefined)
                         : entry
                           ? { ...entry, ...cached, index: entry.index }
-                          : undefined,
+                          : expected || undefined,
             };
     }
+
+    if (currentEditor.current.key !== location.key) currentEditor.current = { key: location.key, editor };
+    else if (!editor && kind && currentEditor.current.editor) editor = currentEditor.current.editor;
 
     useEffect(() => {
         if (!dirty) return;
@@ -122,12 +117,14 @@ export function useEditorNavigation(model: CollectionModel) {
             });
             skipBlock.current = true;
         }
+        const draftKey = crypto.randomUUID();
+        if (next.kind === 'refill' && next.draft) initialDrafts.current.set(draftKey, next.draft);
         const nextParams = new URLSearchParams(location.search);
         nextParams.set('editor', next.kind);
         nextParams.set(
             'id',
             next.kind === 'refill'
-                ? String(next.draft?.index ?? 'new')
+                ? next.draft?.id ?? 'new'
                 : next.item?.id || 'new',
         );
         navigate(
@@ -136,7 +133,7 @@ export function useEditorNavigation(model: CollectionModel) {
                 state: {
                     collectionEditor: {
                         parentKey: location.key,
-                        draft: next.kind === 'refill' ? next.draft : undefined,
+                        draftKey: next.kind === 'refill' ? draftKey : undefined,
                     } satisfies EditorHistory,
                 },
             },
@@ -155,6 +152,7 @@ export function useEditorNavigation(model: CollectionModel) {
         }
     };
     const onSaved = (item?: Pen | Ink, entry?: JournalEntry | null) => {
+        currentEditor.current = { key: '', editor: null };
         // Forward navigation to a saved creation must reopen it as an edit.
         if (entry !== undefined)
             savedEntries.current.set(location.key, entry);

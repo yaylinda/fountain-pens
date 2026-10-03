@@ -1,11 +1,9 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import type { Ink, Pen } from './models/types';
 import type { JournalEntry } from './lib/collection';
 import { useCollection } from './hooks/useCollection';
 import { useEditorNavigation } from './hooks/useEditorNavigation';
-import { useLocalNetwork } from './context/LocalNetworkContext';
-import { useDirtyState } from './context/DirtyStateContext';
 import Overview from './components/collection/Overview';
 import Inventory from './components/collection/Inventory';
 import Journal from './components/collection/Journal';
@@ -18,10 +16,10 @@ import {
 } from './components/collection/Primitives';
 import './App.css';
 import { FavoritesContext } from './context/FavoritesContext';
-import { setFavorite, getPenById, getInkById } from './services/dataService';
+import { setFavorite, getPenById, getInkById, subscribeCollection, hasUnconfirmedSave, resolveUnconfirmedSave, isCollectionSaving } from './services/dataService';
 import { SAVE_CELEBRATION, type SaveOrigin } from './lib/saveCelebration';
 
-const SaveDialog = lazy(() => import('./components/SaveDialog'));
+import { signOutCollection } from './services/sessionLifecycle';
 const navItems: { to: string; label: string; icon: IconName }[] = [
     { to: '/', label: 'The desk', icon: 'desk' },
     { to: '/pens', label: 'Fountain pens', icon: 'pen' },
@@ -30,10 +28,8 @@ const navItems: { to: string; label: string; icon: IconName }[] = [
 ];
 
 export default function App() {
-    const { collection, model, loading, error, refresh, retry } =
+    const { collection, model, loading, error, warning, refresh, retry } =
         useCollection();
-    const { isLocal, isLoading: networkLoading } = useLocalNetwork();
-    const { isDirty: hasSyncChanges } = useDirtyState();
     const {
         editor,
         editorRequested,
@@ -66,11 +62,11 @@ export default function App() {
             window.removeEventListener(SAVE_CELEBRATION, saved);
         };
     }, []);
+    const unconfirmed = useSyncExternalStore(subscribeCollection, hasUnconfirmedSave);
     const [message, setMessage] = useState('');
     const [favoriteBusy, setFavoriteBusy] = useState(false);
-    const [syncOpen, setSyncOpen] = useState(false);
     const location = useLocation();
-    const canEdit = isLocal && !networkLoading;
+    const canEdit = true;
     useEffect(() => {
         window.scrollTo({ top: 0 });
     }, [location.pathname]);
@@ -183,20 +179,11 @@ export default function App() {
                             putting pen to paper.
                         </p>
                     </div>
-                    {canEdit && (
-                        <details className="data-tools">
-                            <summary>Data tools</summary>
-                            <button
-                                className="text-link"
-                                disabled={!hasSyncChanges}
-                                onClick={() => setSyncOpen(true)}
-                            >
-                                {hasSyncChanges
-                                    ? 'Review changes to sync'
-                                    : 'No changes to sync'}
-                            </button>
-                        </details>
-                    )}
+                    <button className="text-link" onClick={async () => {
+                        if (editor || isCollectionSaving()) { setMessage('Finish saving and close your editor before signing out.'); return; }
+                        const { error } = await signOutCollection();
+                        if (error) setMessage('Could not sign out. Please try again.');
+                    }}>Sign out</button>
                     <div className="profile">
                         <span className="profile-monogram">L</span>
                         <span>
@@ -219,12 +206,11 @@ export default function App() {
                         }).format(new Date())}
                     </span>
                 </div>
-                {!isLocal && (
-                    <p className="read-only-note">
-                        Your collection is in view-only mode outside your home
-                        network.
-                    </p>
-                )}
+                {unconfirmed && <div className="draft-notice" role="alert"><p>A previous save has an unknown outcome. Retry the unchanged save in your editor, or resolve it here and reopen the collection. Reopening closes other unfinished drafts.</p><button className="button secondary" onClick={async () => {
+                    try { await resolveUnconfirmedSave(); window.location.replace(`${window.location.pathname}#/`); window.location.reload(); }
+                    catch { setMessage('The previous save is still unconfirmed. Check your connection and retry.'); }
+                }}>Resolve save and reopen collection</button></div>}
+                {warning && <p role="alert">{warning} <button className="text-link" onClick={retry}>Refresh collection</button></p>}
                 {pending && (
                     <div className="draft-notice" role="alert">
                         <div>
@@ -250,7 +236,7 @@ export default function App() {
                         </div>
                     </div>
                 )}
-                {loading || networkLoading ? (
+                {loading ? (
                     <div className="loading-state" role="status">
                         <Icon name="pen" />
                         <h1>Opening your collection…</h1>
@@ -378,20 +364,6 @@ export default function App() {
                     </div>
                 )}
             </div>
-            {syncOpen && (
-                <Suspense
-                    fallback={
-                        <div className="notice-message">
-                            Opening data tools…
-                        </div>
-                    }
-                >
-                    <SaveDialog
-                        open={syncOpen}
-                        onClose={() => setSyncOpen(false)}
-                    />
-                </Suspense>
-            )}
         </div>
         </FavoritesContext.Provider>
     );

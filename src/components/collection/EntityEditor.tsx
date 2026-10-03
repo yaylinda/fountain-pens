@@ -1,5 +1,7 @@
+import { CollectionError } from '../../services/dataService';
+import { ConflictRecovery } from './ConflictRecovery';
 import { FavoriteButton } from './FavoriteButton';
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import type { Ink, Pen } from '../../models/types';
 import {
     addInk,
@@ -40,9 +42,9 @@ export function EntityEditor({
     backLabel,
 }: SharedProps & { editor: EntityEditorState }) {
     const penMode = editor.kind === 'pen';
-    const item = editor.item;
-    const pen = penMode ? (editor.item as Pen | undefined) : undefined;
-    const ink = !penMode ? (editor.item as Ink | undefined) : undefined;
+    const [item, setItem] = useState(editor.item);
+    const pen = penMode ? (item as Pen | undefined) : undefined;
+    const ink = !penMode ? (item as Ink | undefined) : undefined;
     const [initial] = useState(() => ({
         brand: item?.brand || '',
         model: pen?.model || '',
@@ -56,9 +58,20 @@ export function EntityEditor({
     }));
     const [draft, setDraft] = useState(initial);
     const [error, setError] = useState('');
+    const [conflict, setConflict] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const pending = useRef(false);
+    const run = async (fn: () => Promise<void>) => {
+        if (pending.current) return;
+        pending.current = true; setSaving(true); setError('');
+        try { await fn(); } catch (e) {
+            setError(e instanceof Error ? e.message : 'Could not save. Your draft is kept.');
+            setConflict(e instanceof CollectionError && (e.code === 'conflict' || e.code === 'not-found'));
+        } finally { pending.current = false; setSaving(false); }
+    };
     const [confirmDelete, setConfirmDelete] = useState(false);
     const prefix = useId();
-    const hasEdits = useDraft(initial, draft, onDirty);
+    const hasEdits = useDraft(initial, draft, onDirty, saving);
     const change = <Key extends keyof typeof draft>(
         key: Key,
         value: (typeof draft)[Key],
@@ -100,6 +113,7 @@ export function EntityEditor({
             );
             return;
         }
+        void run(async () => {
         if (penMode) {
             const data = {
                 brand: draft.brand.trim(),
@@ -111,7 +125,7 @@ export function EntityEditor({
                     ? { needsRefill: draft.needsRefill }
                     : {}),
             };
-            const saved = pen ? updatePen({ ...pen, ...data }) : addPen(data);
+            const saved = pen ? await updatePen({ ...pen, ...data }) : await addPen(data);
             onSaved(
                 pen ? 'Pen updated.' : 'Pen added to your collection.',
                 saved,
@@ -125,28 +139,33 @@ export function EntityEditor({
                     ? { colorHex: draft.colorHex }
                     : {}),
             };
-            const saved = ink ? updateInk({ ...ink, ...data }) : addInk(data);
+            const saved = ink ? await updateInk({ ...ink, ...data }) : await addInk(data);
             onSaved(
                 ink ? 'Ink updated.' : 'Ink added to your collection.',
                 saved,
             );
         }
+        });
     };
     const archive = () => {
         if (!item || !canEdit || hasEdits) return;
-        if (penMode) updatePen({ ...(item as Pen), archived: !item.archived });
-        else updateInk({ ...(item as Ink), archived: !item.archived });
+        void run(async () => {
+        if (penMode) await updatePen({ ...(item as Pen), archived: !item.archived });
+        else await updateInk({ ...(item as Ink), archived: !item.archived });
         onSaved(
             item.archived
                 ? 'Returned to your collection.'
                 : 'Archived. Your journal is preserved.',
         );
+        });
     };
     const remove = () => {
         if (!item || history.length || !canEdit || hasEdits) return;
-        if (penMode) deletePen(item.id);
-        else deleteInk(item.id);
+        void run(async () => {
+        if (penMode) await deletePen(item as Pen);
+        else await deleteInk(item as Ink);
         onSaved(`${penMode ? 'Pen' : 'Ink'} removed.`);
+        });
     };
     return (
         <>
@@ -184,7 +203,8 @@ export function EntityEditor({
                         </p>
                     </div>
                     <ErrorMessage message={error} />
-                    <fieldset disabled={!canEdit} className="form-fields">
+                    {conflict && item && <ConflictRecovery kind={editor.kind} id={item.id} onRebase={value => { setItem(value as Pen | Ink); setConflict(false); setError(''); }} />}
+                    <fieldset disabled={!canEdit || saving} className="form-fields">
                         <div className="field-pair">
                             <Field label="Brand">
                                 <input
@@ -426,7 +446,7 @@ export function EntityEditor({
                                 type="button"
                                 className="button secondary"
                                 onClick={archive}
-                                disabled={hasEdits}
+                                disabled={hasEdits || saving}
                             >
                                 <Icon name="archive" />
                                 {item.archived
@@ -446,7 +466,7 @@ export function EntityEditor({
                                                 type="button"
                                                 className="button danger"
                                                 onClick={remove}
-                                                disabled={hasEdits}
+                                                disabled={hasEdits || saving}
                                             >
                                                 Delete {editor.kind}
                                             </button>

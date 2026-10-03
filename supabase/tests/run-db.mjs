@@ -45,7 +45,7 @@ try {
  const writer=(await client.query("select rolcanlogin,rolsuper,rolbypassrls from pg_roles where rolname='collection_writer'")).rows[0];
  assert.deepEqual(writer,{rolcanlogin:false,rolsuper:false,rolbypassrls:false});
  const definers=(await client.query("select p.proconfig,r.rolname from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_roles r on r.oid=p.proowner where n.nspname='private' and p.prosecdef")).rows;
- assert.equal(definers.length,3);
+ assert.equal(definers.length,4);
  for(const f of definers) {assert.equal(f.rolname,'collection_writer');assert.ok(f.proconfig.includes('search_path=""'));}
  for(const table of ['pens','inks','refill_events','refill_event_inks']) {
   const r=(await client.query('select relrowsecurity,relforcerowsecurity from pg_class where oid=$1::regclass',[`public.${table}`])).rows[0];
@@ -133,6 +133,48 @@ try {
  assert.equal((await client.query('select count(*)::int as n from public.refill_events')).rows[0].n,before);
  assert.equal((await client.query('select * from private.mutation_receipts where request_id=$1',[failedEventRequest])).rowCount,0);
  console.log('PASS refill mixtures, same-day/backdated/latest queue, cleaning choice, edits/deletes, validation, replay and injected link rollback');
+
+ // New browser read and inventory contracts use the same real RLS/transaction boundary.
+ const getCollection=async(uid=ownerId)=>(await role('authenticated',uid,()=>client.query('select public.get_collection() as result'))).rows[0].result;
+ await assert.rejects(getCollection(strangerId),e=>e.code==='42501');
+ await assert.rejects(role('anon',null,()=>client.query('select public.get_collection()')),e=>e.code==='42501');
+ const read=await getCollection();
+ assert.equal(read.pens.length,1); assert.equal(read.inks.length,2);
+ assert.ok(read.events.every(e=>typeof e.version==='string' && typeof e.sequence==='string'));
+ assert.deepEqual(read.events.find(e=>e.id===sameDay.event.id).inkIds,['ink_b','ink_a']);
+ const inventory=async(kind,action,item,id=null,version=null,requestId=randomUUID(),uid=ownerId)=>{
+  const args=action==='create'?[requestId,item]:action==='update'?[requestId,id,version,item]:[requestId,id,version];
+  return (await role('authenticated',uid,()=>client.query(`select public.${action}_${kind}(${args.map((_,n)=>'$'+(n+1)).join(',')}) as result`,args))).rows[0].result;
+ };
+ const newPen={brand:'Test',model:'New',color:'',nibSize:'',nibType:'',archived:false,favorite:false,needsRefill:true};
+ const newInk={brand:'Test',collection:'',name:'New',colorHex:null,archived:false,favorite:false};
+ for(const [kind,item] of [['pen',newPen],['ink',newInk]]) {
+  const request=randomUUID();
+  const created=await inventory(kind,'create',item,null,null,request);
+  assert.equal(created.item.version,'1');
+  assert.deepEqual(await inventory(kind,'create',item,null,null,request),created);
+  await assert.rejects(inventory(kind,'create',{...item,brand:'Different'},null,null,request),e=>e.code==='40001');
+  await assert.rejects(inventory(kind,'create',item,null,null,randomUUID(),strangerId),e=>e.code==='42501');
+  for(const extra of [{...item,owner_id:ownerId},{...item,version:'99'},{...item,brand:''},{...item,favorite:null}])
+   await assert.rejects(inventory(kind,'create',extra),e=>e.code==='22023');
+  const updated=await inventory(kind,'update',{...item,archived:true,favorite:true},created.item.id,'1');
+  assert.equal(updated.item.version,'2'); assert.equal(updated.item.archived,true);
+  await assert.rejects(inventory(kind,'update',item,created.item.id,'1'),e=>e.code==='40001');
+  const restored=await inventory(kind,'update',item,created.item.id,'2');assert.equal(restored.item.archived,false);
+  const deleted=await inventory(kind,'delete',null,created.item.id,'3');assert.equal(deleted.deletedId,created.item.id);
+  await assert.rejects(inventory(kind,'delete',null,created.item.id,'3'),e=>e.code==='P0002');
+ }
+ const referenced=await getCollection();
+ for(const [kind,item] of [['pen',referenced.pens[0]],['ink',referenced.inks[0]]]) {
+  await assert.rejects(inventory(kind,'delete',null,item.id,item.version),e=>e.code==='23503');
+  const {id,version,...payload}=item;
+  await inventory(kind,'update',{...payload,archived:true},id,version);
+ }
+ assert.equal((await getCollection()).events.length,referenced.events.length);
+ // One aggregate JSON value must include more than the usual Data API row cap.
+ await client.query("insert into public.inks(owner_id,brand,collection,name) select $1,'bulk','','fixture-'||n from generate_series(1,1100) n",[ownerId]);
+ assert.equal((await getCollection()).inks.length,1102);
+ console.log('PASS snapshot >1000 rows, owner gating, ordered links, inventory validation/version/replay/archive/delete contracts');
 
  await client.query('truncate public.refill_event_inks,public.refill_events,public.pens,public.inks,private.data_imports,private.mutation_receipts');
  const bad=structuredClone(snapshot);bad.mapped.links[0].ink_id='missing';

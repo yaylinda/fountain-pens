@@ -5,6 +5,7 @@ import { getInkReference, referenceHex } from './inkReference';
 export const EMPTY_INK_ID = 'NONE';
 export type JournalEntry = RefillLog & { index: number };
 export interface Collection {
+    asOf?: string;
     pens: Pen[];
     inks: Ink[];
     entries: JournalEntry[];
@@ -20,10 +21,7 @@ export type EditorState =
     | { kind: 'ink'; item?: Ink; returnTo?: RefillDraft }
     | { kind: 'refill'; draft?: RefillDraft };
 
-export const today = () => {
-    const date = new Date();
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-};
+export const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 export const isCleaning = (entry: RefillLog) =>
     entry.inkIds.length === 0 ||
     entry.inkIds.every((id) => id === EMPTY_INK_ID);
@@ -62,7 +60,7 @@ export const byPenName = (a: Pen, b: Pen) =>
     byNibSize(a.nibSize, b.nibSize) ||
     byName(penDescription(a), penDescription(b));
 export const newestFirst = (a: JournalEntry, b: JournalEntry) =>
-    b.date.localeCompare(a.date) || b.index - a.index;
+    b.date.localeCompare(a.date) || (a.sequence && b.sequence ? (BigInt(b.sequence) > BigInt(a.sequence) ? 1 : BigInt(b.sequence) < BigInt(a.sequence) ? -1 : 0) : b.index - a.index);
 export const formatDate = (value?: string, short = false) => {
     if (!value) return 'No refills yet';
     const date = new Date(`${value}T12:00:00`);

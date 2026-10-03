@@ -18,33 +18,18 @@ The `scripts/` directory contains a Python utility for scraping ink hex colors f
 ## Architecture
 
 ### Data Flow
-The app uses an **in-memory data store** with JSON file persistence during development:
-1. Data loads from `src/data/*.json` files at startup
-2. `dataService.ts` maintains in-memory arrays for pens, inks, and refill logs
-3. On any data mutation, changes persist back to JSON via `fileService.ts` → custom Vite plugin (`vite-file-api-plugin.ts`)
-4. The Vite plugin exposes `POST /api/save-json` endpoint that writes to `src/data/{filename}.json`
+The React/Vite SPA uses Supabase Auth and owner-only PostgreSQL RPCs:
+1. `AuthGate` restores the session or shows email/password sign-in (no public signup).
+2. `dataService.ts` reads a consistent `get_collection` snapshot and adapts it to existing UI models.
+3. Narrow inventory/refill commands await a durable versioned receipt. Refill event, ordered ink links and queue effects commit atomically.
+4. Collection data lives in an owner-scoped memory cache, cleared on sign-out/account change. No mutable JSON fallback, file API plugin, LAN authorization or Git sync is part of the browser runtime.
 
-### Key Types (`src/models/types.ts`)
-- **Pen**: id, brand, model, color, nibSize, nibType
-- **Ink**: id, brand, collection, name  
-- **RefillLog**: date, penId, inkIds[], notes (tracks when pens were filled with which inks)
-- **RefillLogDisplay**: extends RefillLog with resolved pen/ink details for UI
+Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are browser configuration. Never supply secret/service-role credentials. See `supabase/RUNTIME.md` for contracts and verification limits.
 
-### Services Layer (`src/services/`)
-- `dataService.ts`: CRUD operations for all entities, maintains in-memory state
-- `fileService.ts`: JSON persistence via Vite dev server API, toast notifications
-- `countService.ts`: Derived data (refill counts, most recent ink per pen)
+`src/data/{pens,inks,refillLog}.json` is the fixed offline importer source, not runtime inventory. Keep the source snapshot and manufacturer/reference catalogs. The legacy `server.js` and file API fixtures remain for the old deployment until its separate retirement; do not reattach them to Vite.
 
-### Component Structure
-- `App.tsx`: Tab-based layout (Refill Log, Inks, Pens)
-- Each tab has a corresponding list component in `src/components/{Entity}/`:
-  - Sortable tables with MUI components
-  - Inline add/edit dialogs
-  - Color-coded chips for brands/collections using HSL hashing
-
-### Data Relationships
-- RefillLog references pens by `penId` and inks by `inkIds[]` (supports ink mixing)
-- Components join data at render time via `getPenById()` / `getInkById()`
+### Verification
+Run `npm test`, `npm run lint`, `npm run build`, `npm run test:migration`, and `npm run test:db`. The database harness only creates its own labeled disposable PostgreSQL container. Node 22 is the CI runtime; the app test runner enables native WebSocket support when run under Node 20. Local synthetic tests do not establish hosted Auth/PostgREST compatibility.
 
 ## Deploy Auth Responsibilities
 

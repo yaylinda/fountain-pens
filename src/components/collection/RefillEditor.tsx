@@ -1,9 +1,10 @@
+import { CollectionError } from '../../services/dataService';
+import { ConflictRecovery } from './ConflictRecovery';
 import { useRef, useState } from 'react';
 import {
     addRefillLog,
     deleteRefillLog,
     updateRefillLog,
-    updatePen,
 } from '../../services/dataService';
 import {
     EMPTY_INK_ID,
@@ -42,9 +43,12 @@ export function RefillEditor({
     backLabel,
 }: SharedProps & { editor: Extract<EditorState, { kind: 'refill' }> }) {
     const [initial] = useState<RefillDraft>(() => ({
+        id: editor.draft?.id,
+        version: editor.draft?.version,
+        sequence: editor.draft?.sequence,
         date: editor.draft?.date || today(),
         penId: editor.draft?.penId || '',
-        inkIds: editor.draft?.inkIds || [],
+        inkIds: editor.draft && isCleaning(editor.draft) && editor.draft.id ? [EMPTY_INK_ID] : editor.draft?.inkIds || [],
         notes: editor.draft?.notes || '',
         needsRefill: editor.draft?.needsRefill,
         notPure: editor.draft?.notPure || false,
@@ -56,11 +60,12 @@ export function RefillEditor({
     const [penQuery, setPenQuery] = useState('');
     const [inkQuery, setInkQuery] = useState('');
     const [error, setError] = useState('');
+    const [conflict, setConflict] = useState(false);
     const [saving, setSaving] = useState(false);
     const pending = useRef(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
-    useDraft(initial, draft, onDirty, editor.draft?.hasUnsavedChanges);
-    const editing = draft.index !== undefined;
+    useDraft(initial, draft, onDirty, editor.draft?.hasUnsavedChanges || saving);
+    const editing = draft.id !== undefined;
     const cleaning = draft.inkIds.includes(EMPTY_INK_ID);
     const selectedPen = model.penById.get(draft.penId);
     // Queue intent belongs to the pen today, not to historical journal edits.
@@ -97,7 +102,7 @@ export function RefillEditor({
               .get(draft.penId)
               ?.find(
                   (entry) =>
-                      entry.index !== draft.index &&
+                      (draft.id ? entry.id !== draft.id : entry.index !== draft.index) &&
                       !isCleaning(entry) &&
                       entry.date <= draft.date,
               )
@@ -127,16 +132,9 @@ export function RefillEditor({
         setError('');
         try {
             const payload = refillPayload(draft);
-            const saved = draft.index !== undefined
-                ? await updateRefillLog(payload, draft.index)
-                : await addRefillLog(payload);
-            if (updatesRefillQueue && selectedPen) {
-                const needsRefill = cleaning
-                    ? (draft.needsRefill ?? selectedPen.needsRefill ?? false)
-                    : false;
-                if (needsRefill !== !!selectedPen.needsRefill)
-                    updatePen({ ...selectedPen, needsRefill });
-            }
+            const saved = draft.id
+                ? await updateRefillLog(payload, draft)
+                : await addRefillLog(payload, cleaning ? draft.needsRefill : undefined);
             onSaved(
                 editing
                     ? 'Journal entry updated.'
@@ -147,6 +145,7 @@ export function RefillEditor({
                 saved,
             );
         } catch (error) {
+            setConflict(error instanceof CollectionError && (error.code === 'conflict' || error.code === 'not-found'));
             setError(error instanceof Error ? error.message : 'Failed to save the journal. Please try again.');
         } finally {
             pending.current = false;
@@ -154,14 +153,15 @@ export function RefillEditor({
         }
     };
     const remove = async () => {
-        if (!canEdit || pending.current || draft.index === undefined) return;
+        if (!canEdit || pending.current || !draft.id) return;
         pending.current = true;
         setSaving(true);
         setError('');
         try {
-            await deleteRefillLog(draft.index);
+            await deleteRefillLog(draft);
             onSaved('Journal entry deleted.', undefined, null);
         } catch (error) {
+            setConflict(error instanceof CollectionError && (error.code === 'conflict' || error.code === 'not-found'));
             setError(error instanceof Error ? error.message : 'Failed to delete the journal entry. Please try again.');
         } finally {
             pending.current = false;
@@ -187,6 +187,7 @@ export function RefillEditor({
                     noValidate
                 >
                     <ErrorMessage message={error} />
+                    {conflict && draft.id && <ConflictRecovery kind="refill" id={draft.id} onRebase={value => { setDraft(d => ({ ...d, version: value.version })); setConflict(false); setError(''); }} />}
                     <fieldset disabled={!canEdit || saving} className="form-fields">
                         <div className="refill-start">
                             <Field label="Date">

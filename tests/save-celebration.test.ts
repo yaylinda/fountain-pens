@@ -1,30 +1,9 @@
-﻿import test from 'node:test';
+import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 const dom = new JSDOM('<!doctype html><body><button>Save</button></body>', { url: 'http://localhost' });
 Object.assign(globalThis, { window: dom.window, document: dom.window.document });
-const { writeJsonFile } = await import('../src/services/fileService');
-const { SAVE_CELEBRATION, captureSaveOrigin } = await import('../src/lib/saveCelebration');
-
-test('celebration follows a confirmed response, never failed HTTP or network saves', async () => {
-    const events: Event[] = [];
-    const listener = (event: Event) => events.push(event);
-    window.addEventListener(SAVE_CELEBRATION, listener);
-    let resolve!: (value: Response) => void;
-    globalThis.fetch = () => new Promise<Response>((done) => { resolve = done; });
-    const pending = writeJsonFile('pens', []);
-    assert.equal(events.length, 0);
-    resolve(new Response('{}', { status: 200 }));
-    assert.equal(await pending, true);
-    assert.equal(events.length, 1);
-    globalThis.fetch = async () => new Response('Disk full', { status: 500 });
-    assert.equal(await writeJsonFile('pens', []), false);
-    globalThis.fetch = async () => { throw new Error('Offline'); };
-    assert.equal(await writeJsonFile('pens', []), false);
-    assert.equal(events.length, 1);
-    assert.equal(document.querySelectorAll('[role=alert]').length, 2);
-    window.removeEventListener(SAVE_CELEBRATION, listener);
-});
+const { captureSaveOrigin } = await import('../src/lib/saveCelebration');
 
 test('origin captures the keyboard-focused save control before editor navigation', () => {
     const button = document.querySelector('button')!;

@@ -1,6 +1,6 @@
-# Database foundation (local review candidate)
+# Database foundation and runtime contracts
 
-This slice leaves the running JSON app and UI unchanged. The current JSON files are a fixed input snapshot: there are no concurrent legacy writers to coordinate. The remaining path is schema setup → one validated import → Supabase client integration. There is no dual-write, ongoing sync, writer-freeze service, or reverse-sync implementation.
+PR10 established the database foundation. The following runtime slice switches the React/Vite client to Supabase; see [RUNTIME.md](RUNTIME.md) for current setup, commands, tests and remaining hosted checks. The foundation notes below describe the initial boundary. The current JSON files are a fixed input snapshot: there are no concurrent legacy writers to coordinate. The remaining path is schema setup → one validated import → Supabase client integration. There is no dual-write, ongoing sync, writer-freeze service, or reverse-sync implementation.
 
 ## Run locally
 
