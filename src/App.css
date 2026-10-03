@@ -2301,3 +2301,38 @@
 @media (prefers-reduced-motion: reduce) {
     .favorite-button { transition: none; }
 }
+
+/* A personal swatch sheet: ink carries the color; labels stay on paper. */
+.custom-palette .section-heading { align-items: center; flex-wrap: wrap; gap: 16px; }
+.custom-palette .eyebrow { margin: 0 0 8px; }
+.custom-palette h2 { margin: 0; }
+.custom-palette > p { max-width: 72ch; }
+.palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 168px), 1fr)); gap: 24px 16px; padding: 0; margin: 24px 0; list-style: none; }
+.palette-color, .palette-tile { display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 0; text-align: left; }
+.palette-color { padding: 8px; border: 1px solid transparent; background: transparent; border-radius: 4px; color: var(--ink); }
+.palette-color[aria-pressed="true"] { border-color: var(--accent); background: var(--paper); }
+.palette-color .desk-palette-swatch { display: block; }
+.palette-grid .swatch-large { width: 100%; height: 76px; border-radius: 4px 16px 4px 4px; }
+.palette-grid strong { font-size: 1rem; line-height: 1.3; overflow-wrap: anywhere; }
+.palette-grid .small { line-height: 1.4; }
+.palette-tile { padding: 12px; border: 1px solid var(--line); background: var(--paper); border-radius: 4px; }
+.palette-tile.is-dragging { z-index: 2; outline: 2px solid var(--accent); opacity: .85; }
+.palette-tile-top, .palette-tile-actions, .palette-save-actions { display: flex; align-items: center; gap: 8px; }
+.palette-tile-top { justify-content: space-between; }
+.palette-position { font-variant-numeric: tabular-nums; color: var(--muted); }
+.palette-handle { touch-action: none; cursor: grab; font-size: 1.5rem; }
+.palette-handle:active { cursor: grabbing; }
+.palette-tile button { min-width: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 4px; background: transparent; color: inherit; }
+.palette-tile-actions { margin-top: auto; gap: 4px; }
+.palette-tile-actions button:last-child { flex: 1; }
+.palette-edit-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 16px 0; border-block: 1px solid var(--line); }
+.palette-edit-toolbar p { flex: 1 1 320px; max-width: 65ch; margin: 0; font-size: .875rem; }
+.palette-omitted { margin: 24px 0; }
+.palette-omitted summary { cursor: pointer; padding: 12px 0; }
+.palette-omitted ul { list-style: none; padding: 0; }
+.palette-omitted li { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.palette-omitted li > span:nth-child(2) { flex: 1; min-width: 120px; }
+.palette-empty { padding: 24px 0; }
+.custom-palette button:focus-visible, .custom-palette summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.custom-palette button:disabled { opacity: .45; cursor: default; }
+@media (prefers-reduced-motion: reduce) { .palette-tile { transition: none !important; } }

@@ -1,3 +1,4 @@
+import { paletteDto, type PaletteItem } from '../lib/deskPalette';
 import type { MutationName, MutationPayload } from './database.types';
 import type { Ink, Pen, RefillLog } from '../models/types';
 import { isCleaning, realInkIds, type Collection, type JournalEntry } from '../lib/collection';
@@ -122,4 +123,10 @@ export async function setFavorite(kind: 'pen' | 'ink', id: string, favorite: boo
         else await updateInk({ ...item as Ink, favorite });
         return true;
     } catch { return false; }
+}
+
+export async function saveDeskPalette(items: PaletteItem[]) {
+    await command('save_desk_palette', { p_items: items.map(item => ({ ...item })) }, result => {
+        collection = { ...collection, palette: paletteDto(result.items) };
+    });
 }

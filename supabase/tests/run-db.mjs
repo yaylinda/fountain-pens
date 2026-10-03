@@ -78,6 +78,26 @@ try {
    await assert.rejects(rpc(name,args,who,uid),e=>e.code==='42501');
  }
  assert.equal((await role('authenticated',strangerId,()=>client.query("update public.pens set model='forbidden' where id=$1",[p.id]))).rowCount,0);
+ const paletteBefore = await rpc('get_collection');
+ const arrangement = [{inkId:b.id,omitted:true},{inkId:a.id,omitted:false}];
+ assert.deepEqual((await rpc('save_desk_palette',[JSON.stringify(arrangement)])).items,arrangement);
+ assert.deepEqual((await rpc('get_collection',[],'anon',null)).palette,arrangement);
+ assert.deepEqual((await rpc('get_collection')).events,paletteBefore.events);
+ assert.deepEqual((await rpc('get_collection')).pens,paletteBefore.pens);
+ for(const [who,uid] of [['anon',null],['authenticated',strangerId],['authenticated',null]]) {
+  await assert.rejects(rpc('save_desk_palette',['[]'],who,uid),e=>e.code==='42501');
+  await assert.rejects(role(who,uid,()=>client.query('insert into public.desk_palette values($1,$2,5,false)',[ownerId,a.id])),e=>e.code==='42501');
+ }
+ assert.equal((await role('authenticated',strangerId,()=>client.query('delete from public.desk_palette'))).rowCount,0);
+ assert.equal((await role('authenticated',strangerId,()=>client.query('update public.desk_palette set omitted=false'))).rowCount,0);
+ for(const invalid of [null,{},[{inkId:a.id,omitted:'false'}],[{inkId:'unknown',omitted:false}],[arrangement[0],arrangement[0]]]) {
+  await assert.rejects(rpc('save_desk_palette',[JSON.stringify(invalid)]),e=>e.code==='22023');
+  assert.deepEqual((await rpc('get_collection')).palette,arrangement);
+ }
+ await rpc('save_desk_palette',[JSON.stringify([...arrangement].reverse().map(i=>({...i,omitted:false})))]);
+ await rpc('save_desk_palette',['[]']);
+ assert.deepEqual((await rpc('get_collection')).palette,[]);
+ console.log('PASS palette round trip, public reads, owner-only writes, validation rollback and unchanged inventory/history');
  console.log('PASS public collection/journal reads, anonymous/stranger write denial and owner inventory CRUD');
  await rpc('update_pen',[p.id,{...pen,archived:true}]);
  assert.equal((await rpc('get_collection')).events.length,1);

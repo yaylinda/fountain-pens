@@ -18,6 +18,7 @@ import {
 } from '../../lib/writingDesk';
 import { FavoriteMark, EmptyState, Icon, InkNames, RefillPurityMark, Swatch } from './Primitives';
 import RefillQueue from './RefillQueue';
+import DeskPalette from './DeskPalette';
 
 interface Props {
     model: CollectionModel;
@@ -37,7 +38,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
     };
     const setSelectedInk = (value: string) => update({ selectedInk: value });
     const colorRanks = useMemo(() => deskColorRanks(model), [model]);
-    const base = deskRows(model, filters, order, group, '', colorRanks);
+    const base = deskRows(model, { brands: {}, nib: '', inkBrand: '' }, 'color', 'none', '', colorRanks);
     const groups = deskRows(model, filters, order, group, selectedInk, colorRanks);
     const count = groups.reduce((n, [, rows]) => n + rows.length, 0);
     const refillCount = groups.reduce(
@@ -260,59 +261,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     </div>
                 )}
             </div>
-            <section className="desk-palette" aria-label="Current ink palette">
-                <div className="section-heading">
-                    <h2>
-                        Your palette{' '}
-                        <span className="count">{palette.length}</span>
-                    </h2>
-                    {selectedInk && (
-                        <button
-                            className="text-link"
-                            onClick={() => setSelectedInk('')}
-                        >
-                            Show all colors
-                        </button>
-                    )}
-                </div>
-                <div className="desk-color-list">
-                    {palette.map((ink) => {
-                        const refills = paletteRefills.get(ink.id) || 0;
-                        const refillLabel = refills
-                            ? ` · ${refills} ${refills === 1 ? 'pen needs' : 'pens need'} refill`
-                            : '';
-                        return (
-                        <button
-                            key={ink.id}
-                            title={[ink.brand, ink.collection, ink.name]
-                                .filter(Boolean)
-                                .join(' · ') + refillLabel}
-                            aria-label={`Filter to ${inkLabel(ink)}${refillLabel}`}
-                            aria-pressed={selectedInk === ink.id}
-                            onClick={() =>
-                                setSelectedInk(
-                                    selectedInk === ink.id ? '' : ink.id,
-                                )
-                            }
-                        >
-                            <span className="desk-palette-swatch">
-                                <Swatch ink={ink} large />
-                                {refills > 0 && (
-                                    <span className="badge refill-badge desk-palette-refill" aria-hidden="true">
-                                        {refills}
-                                    </span>
-                                )}
-                            </span>
-                            <span>{ink.name}<FavoriteMark item={ink} /></span>
-                        </button>
-                        );
-                    })}
-                </div>
-                <p className="small muted">
-                    Select a color to see its pens. Colors and color families
-                    are approximate.
-                </p>
-            </section>
+            <DeskPalette key={canEdit ? 'owner' : 'public'} inks={palette} saved={model.palette} canEdit={canEdit} selectedInk={selectedInk} onSelect={setSelectedInk} refills={paletteRefills} />
             <div className="desk-results-summary" aria-live="polite">
                 <span>
                     {count} of {model.inked.length} inked pens
