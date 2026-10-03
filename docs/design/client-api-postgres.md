@@ -41,7 +41,7 @@ Read these documents in order:
 | [`inkReference.ts`](../../src/lib/inkReference.ts) | Pilot/Wearingeul records join by brand and inventory ID; sourced facts and color precedence must survive. |
 | [`LocalNetworkContext.tsx`](../../src/context/LocalNetworkContext.tsx), [`server.js`](../../server.js), [`vite-file-api-plugin.ts`](../../vite-file-api-plugin.ts) | Network detection/UI controls do not enforce authorization. Remove persistence endpoints and LAN-based capability checks only during integration/cutover; RLS/RPC must enforce access independently of UI. |
 
-The branch snapshot has 49 pens and 483 journal entries. The newer local `main` snapshot has 50 pens, 194 real inks plus `NONE`, 486 events, and 507 real event/ink links. These are rehearsal observations, **not production truth**. The [migration audit](supabase-migration.md#source-audit) distinguishes the snapshots and requires recapture with all JSON writers stopped.
+The branch snapshot has 49 pens and 483 journal entries. The newer local `main` snapshot has 50 pens, 194 real inks plus `NONE`, 486 events, and 507 real event/ink links. These are rehearsal observations, **not production truth**. The [migration audit](supabase-migration.md#source-audit) distinguishes the snapshots and records the fixed source and its one-time import checks.
 
 ## Runtime boundary and repository shape
 
@@ -95,6 +95,6 @@ A Vercel Function is appropriate for a future external service secret, privilege
 | 2 | Standalone importer, dry-run, manifest, reconciliation | Disposable import matches every field/relationship/derived view; duplicate preservation, repeat no-op, mismatch abort, failure rollback; Gate B accepted. |
 | 3 | Implement reads, then commands and client integration | Real RPC atomicity/conflict/idempotency tests; current domain and UI workflow tests; no JSON fallback/writers. |
 | 4 | Isolated Vercel preview + nonproduction Supabase | Deep-link, Auth, permission, persistence, Storage, secret-leak and failure smoke checks; no production credentials in previews. |
-| 5 | Authorized final stopped-writer import and cutover | Fresh manifest reconciled, owner/public policy accepted, recovery exercised; production writes opened only after verification. |
+| 5 | Authorized one-time import and deployment | Fixed-source manifest reconciled, owner/public policy accepted, recovery exercised; production writes opened only after verification. |
 
 Preserve the existing tests in `tests/`; add SQL/transaction/authorization tests when implementation begins. Use `npm test`, `npm run lint`, and `npm run build` for code phases, plus the focused import/RPC/deployment checks in the companion docs. No app test run or database migration can validate prose as executable SQL; this PR requires documentation consistency, link checks, and a source audit only. Update README and AGENTS runtime instructions when implementation actually replaces JSON; their current homelab guidance describes the existing deployment, not the target architecture.

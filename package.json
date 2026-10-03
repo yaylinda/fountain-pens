@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "node server.js",
-    "test": "node tests/run.mjs"
+    "test": "node tests/run.mjs",
+    "db:import-json": "node scripts/migration/dry-run.mjs",
+    "test:migration": "node --test supabase/tests/import.test.mjs",
+    "test:db": "node supabase/tests/run-db.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -36,6 +39,8 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
     "jsdom": "^26.1.0",
+    "pg": "8.16.3",
+    "supabase": "2.119.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0"
