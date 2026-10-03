@@ -158,6 +158,80 @@
     font-size: 0.6875rem;
     letter-spacing: 0.02em;
 }
+/* Account access stays near the collection, outside the narrow navigation rail. */
+.owner-controls {
+    border-bottom: 1px solid var(--line);
+}
+.access-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    min-height: 56px;
+}
+.access-mode {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+.access-mode strong {
+    font-weight: 600;
+    color: var(--ink);
+}
+.access-mode.is-owner strong {
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--accent);
+    background: var(--accent-soft);
+}
+.account-button {
+    min-height: 44px;
+    flex-shrink: 0;
+    font-size: 0.8125rem;
+}
+.access-note, .access-error {
+    margin: 0 0 var(--space-md);
+    font-size: 0.8125rem;
+    max-width: 65ch;
+}
+.access-note { color: var(--muted); }
+.access-error { color: var(--danger); }
+.owner-sign-in {
+    display: grid;
+    gap: var(--space-xl);
+    width: min(100%, 400px);
+    margin: 0 0 var(--space-xl) auto;
+    padding: var(--space-xl);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: var(--surface);
+}
+.owner-sign-in h2 {
+    font-size: 1.375rem;
+    line-height: 1.25;
+    margin-bottom: var(--space-sm);
+}
+.owner-sign-in-fields {
+    display: grid;
+    min-width: 0;
+    gap: var(--space-lg);
+}
+.owner-sign-in .field { gap: var(--space-sm); }
+.owner-sign-in input { min-width: 0; font-size: 1rem; }
+.owner-sign-in .access-error { margin: 0; }
+.owner-sign-in-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+}
+@media (max-width: 420px) {
+    .access-mode { flex-direction: column; align-items: flex-start; gap: 0; }
+    .owner-sign-in { padding: var(--space-lg); }
+}
 .page-header {
     display: flex;
     justify-content: space-between;

@@ -178,7 +178,6 @@ export default function App() {
                             putting pen to paper.
                         </p>
                     </div>
-                    <OwnerControls canEdit={canEdit} />
                     <div className="profile">
                         <span className="profile-monogram">L</span>
                         <span>
@@ -201,6 +200,7 @@ export default function App() {
                         }).format(new Date())}
                     </span>
                 </div>
+                <OwnerControls canEdit={canEdit} />
                 {warning && <p role="alert">{warning} <button className="text-link" onClick={retry}>Refresh collection</button></p>}
                 {pending && (
                     <div className="draft-notice" role="alert">
