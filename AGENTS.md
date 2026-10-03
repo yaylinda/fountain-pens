@@ -1,11 +1,11 @@
 # AGENTS.md
 
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
+Guidance for contributors and coding agents working in this repository.
 
 ## Build & Development Commands
 
 ```bash
-npm install          # Install dependencies
+npm ci               # Install locked dependencies
 npm run dev          # Start Vite dev server (http://localhost:5173)
 npm run build        # Type-check and build for production
 npm run lint         # Run ESLint
@@ -27,16 +27,13 @@ The React/Vite SPA uses public Supabase reads and owner-only writes:
 
 Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are browser configuration. Never supply secret/service-role credentials. See `supabase/RUNTIME.md` for contracts and verification limits.
 
-`src/data/{pens,inks,refillLog}.json` is the fixed offline importer source, not runtime inventory. Keep the source snapshot and manufacturer/reference catalogs. The legacy `server.js` and file API fixtures remain for the old deployment until its separate retirement; do not reattach them to Vite.
+`src/data/{pens,inks,refillLog}.json` is the fixed offline importer source, not runtime inventory. Keep the source snapshot and manufacturer/reference catalogs. Preserve these inputs for reproducible import tests and audit history; they are not current production data.
 
 ### Verification
 Run `npm test`, `npm run lint`, `npm run build`, `npm run test:migration`, and `npm run test:db`. The database harness only creates its own labeled disposable PostgreSQL container. Node 22 is the CI runtime; the app test runner enables native WebSocket support when run under Node 20. Local synthetic tests do not establish hosted Auth/PostgREST compatibility.
 
-## Deploy Auth Responsibilities
+## Deployment
 
-- Deployment auth is infra-owned in `homelab-infra` and read at runtime from Vault.
-- Canonical deploy-auth path for this repo: `secret/homelab/deploy-auth/fountain-pens`.
-- The deploy PAT from that path is used for both HTTPS git fetch and GHCR image pulls.
-- This repo continues to own only its application secret schema/policies in Vault.
-- Do not rely on persistent deployment creds in `~/.docker/config.json` or `~/.git-credentials`.
+GitHub Actions in `.github/workflows/checks.yml` owns Vercel production deployment after application/database checks and the successful exact-SHA Supabase integration check. Supabase's GitHub integration owns schema deployment from main. There are no hosted PR previews. See [deployment operations](docs/deployment.md).
 
+Run `npm run check` for the aggregate application, deployment, lint, type/build, migration and disposable database checks. Never modify applied migration files. Docker is used only by the disposable database harness, not to host the app. No LAN gating, filesystem writes, Git sync or legacy container deployment belongs in the application.

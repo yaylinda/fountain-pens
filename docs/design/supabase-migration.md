@@ -1,8 +1,6 @@
-> Historical design: runtime access and mutation requirements are superseded by [the public-read, owner-only CRUD contract](../../supabase/RUNTIME.md). Do not implement the earlier conflict, retry receipt or private-browsing proposals.
-
 # One-time JSON migration
 
-Implementation status and executable commands are in [supabase/README.md](../../supabase/README.md). This runbook supersedes the original stopped-writer/cutover choreography: the user confirmed the JSON source is fixed while the database and application are rewritten.
+The live app now uses Supabase. This document preserves the fixed import mapping and reproducibility procedure; it is not an instruction to import into the live collection. The source snapshot, importer and tests remain because they establish provenance and allow isolated schema/import rehearsals. See [current runtime](../../supabase/RUNTIME.md).
 
 ## Source audit
 
@@ -24,16 +22,13 @@ Read-only inspection of local `main` at `9256ece38eab7490633682d4630cf603e1178d1
 | Catalog records | 15 Pilot / 21 Wearingeul |
 | Next sequence for this snapshot only | 487; derive from actual imported maximum |
 
-The user confirmed that JSON will not change during the rewrite. Treat the current repository files as the fixed source snapshot, retain a backup, and compare their raw hashes before the one-time import. No live-writer coordination, ongoing sync, or reverse migration is required.
+The three repository JSON files are a fixed snapshot, not current production data. Preserve their bytes and hashes. No ongoing sync or reverse migration exists.
 
-## Simple delivery sequence
+## Reproducibility
 
-1. Review the schema and locally tested migrations; confirm the Supabase target and approved Auth owner. Hosting remains Vercel, database/storage Supabase, access private, journal dates America/Chicago. Login provider is still a separate choice.
-2. Retain a backup of `pens.json`, `inks.json`, and `refillLog.json`. Run the dry-run over these fixed files and review validation findings, raw file hashes and counts. No build, startup or web request imports data.
-3. Apply reviewed migrations to the approved empty target; establish the owner through a separately authorized administrative action. Rehearse managed roles/RLS and real Auth/Data API behavior first. Local tests use a disposable PostgreSQL 17.11 instance, not a full Supabase stack.
-4. Run the one-time importer through an authorized operator connection. Require the explicit owner and verified target. All rows, deferred constraints, full field/link readback and a small source-hash marker commit in one transaction. A matching rerun is a no-op; changed input or a populated unmarked target aborts. There is no upsert into an active collection.
-5. Integrate `supabase-js` reads and writes, using narrow transactional RPCs for multi-ink events and their pen queue effect. Preserve the existing UI until that integration is deliberately switched. Remove obsolete JSON write/Git sync paths in that change.
-6. Verify app workflows, owner authorization, failure/conflict handling and deployment checks, then release to Vercel through the agreed deployment workflow. Keep the backup and import summary for reference. Once database writes begin, restoring the old JSON application would discard new writes; use database recovery or a compatible app rollback instead. No automated reverse sync is planned.
+Run `npm run db:import-json -- --source src/data --as-of 2026-10-03 --dry-run` to inspect hashes, validation findings and counts without a database connection. `npm run test:db` exercises the reusable importer against its own disposable database. The CLI intentionally supports only dry-run; no application build, startup or request imports data.
+
+A new administrative import requires a separately approved empty target and owner. The importer commits rows, deferred constraints, field/link reconciliation and the source marker together; a matching rerun is a no-op, changed input or a populated unmarked target aborts. Do not replay this procedure against production. After live writes, recovery must preserve database changes rather than restore the old JSON app.
 
 ## Mapping and validation
 
@@ -45,6 +40,6 @@ The dry-run and import share one mapping implementation. Raw file bytes are hash
 
 ## Acceptance
 
-`npm run test:migration` validates synthetic edge cases. `npm run test:db` creates/removes its own disposable database and verifies exact fields/relationships, duplicate/order preservation, constraints, repeated no-op, source/owner mismatch, populated-target rejection, concurrent import serialization, rollback after partial insertion and sequence continuation. It also tests owner/stranger/anonymous SQL permissions, command versions/retry receipts, queue behavior and injected link failure rollback.
+`npm run test:migration` validates source conversion and malformed fixtures. `npm run test:db` verifies fixed-source field/link reconciliation, matching rerun no-op, public reads beyond 1,000 rows, owner/stranger/anonymous permissions, ordinary CRUD, queue behavior and injected link failure rollback. These are synthetic/local tests, not a claim that every hosted recovery scenario is covered.
 
-The current CLI supports `--dry-run`; cloud execution intentionally awaits the approved target and operator connection. Before real import, complete Supabase-specific role/JWT/Data API/advisor checks and target verification. During client integration, add the typed read adapter, derived-view parity and existing UI workflow tests. Preserve notes, custom swatches, catalog joins, favorites, archive flags, cleaning state, same-day order, histories and queue intent.
+The historical [readiness record](../../supabase/operations/READINESS.md) retains reviewed SQL/source hashes and rehearsal evidence. Linda subsequently validated production login and updates manually. Preserve notes, custom swatches, catalog joins, favorites, archive flags, cleaning state, same-day order, histories and queue intent in future changes.

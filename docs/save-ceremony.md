@@ -2,7 +2,7 @@
 
 Run `npm run dev -- --port 5177`, then open `/tests/ceremony-preview.html` for a non-writing rehearsal. Replay runs the actual production animation; phase controls freeze it for artwork inspection. Reduced motion previews the static alternative. This development-only HTML is not a Vite production entry point.
 
-In the app, successful pen, ink and refill JSON writes trigger the ceremony. Data tools > Review changes to sync > Confirm & Push triggers it only when both HTTP status and the GitHub sync response confirm success. Existing editor navigation remains immediate. A pointer-transparent Saved marker retains the source button position after navigation. Keyboard form submissions use the form submit button as the destination.
+In the app, confirmed successful Supabase mutations trigger the ceremony. Existing editor navigation remains immediate. A pointer-transparent Saved marker retains the source button position after navigation. Keyboard form submissions use the form submit button as the destination.
 
 The event bridge is small; `inkCeremony` imports only after success. Save persistence never awaits animation loading. App unmount, replacement celebration, Escape, resize and motion preference changes remove the canvas and cancel its animation frame and timers. Reduced motion uses only a short status message. No sound, focus movement or input interception.
 

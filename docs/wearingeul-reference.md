@@ -1,6 +1,6 @@
 # Wearingeul ink reference
 
-`src/data/wearingeul-inks.json` contains the manufacturer reference for the 21 Wearingeul inks in the collection. It is bundled with the app and joined by stable inventory `inkId`, independently of the mutable `/api/data` inventory. Editing, archiving, or saving an ink does not copy or overwrite the reference catalog. New inks need an explicit researched catalog entry.
+`src/data/wearingeul-inks.json` contains the manufacturer reference for the 21 Wearingeul inks in the collection. It is bundled with the app and joined by stable inventory `inkId`, independently of the mutable Supabase inventory. Editing, archiving, or saving an ink does not copy or overwrite the reference catalog. New inks need an explicit researched catalog entry.
 
 Each entry stores:
 

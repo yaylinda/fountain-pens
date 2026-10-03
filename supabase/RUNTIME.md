@@ -18,12 +18,12 @@ Public wrappers and private mutation helpers use invoker rights. Authenticated D
 
 The application has straightforward CRUD and ordinary pending/error states. Rejected saves keep the current form draft. A confirmed write whose refresh fails stays visible with a saved/refresh warning. There are no expected versions, runtime receipts, automatic write replay, advisory locks, or session-preserved draft registries. Nested form navigation still keeps ordinary in-memory drafts.
 
-## Migration coordination
+## Migration history
 
-The two original foundation migration files were never applied to the target project. They are deliberately replaced before first deployment: the original custom-role ownership and delegated Auth grants are incompatible with managed Supabase permissions. Applying a later repair could not rescue failure in those earlier files. Do not apply this rewritten migration history over an already deployed database; this rollout targets the confirmed empty project. Refresh the operations report's hashes and role expectations before hosted application.
+The three versioned SQL migrations are the deployed schema history. Keep them unchanged; add reviewed migrations for future schema changes. The foundations were revised before first hosted deployment to avoid custom-role ownership and delegated Auth grants incompatible with managed permissions. That is historical rationale, not an instruction to replace deployed migrations.
 
 ## Evidence and remaining verification
 
 `npm test` uses the actual pinned browser client with synthetic HTTP/Auth responses and exercises public browse, owner sign-in, ordinary errors, inventory, drafts, journal and queue behavior. `npm run test:db` uses disposable PostgreSQL 17.11 with a non-superuser migration operator and Auth privileges without grant option. It checks fresh installation, public/owner/stranger authorization, inventory CRUD/archive/delete, ordered multi-ink transactions and rollback, fixed import reconciliation, and snapshots larger than 1,000 rows.
 
-These tests do not prove hosted Auth JWT/PostgREST/schema-cache behavior. Real sign-in, approved UUID binding, managed migration application and Data API checks remain for the hosted setup task. This PR does not deploy or import the live collection. Legacy Docker publication is disabled while build verification remains enabled. Coordinate retirement of any homelab updater and old app writes during cutover; this PR does not change a live host.
+These tests do not prove hosted Auth JWT/PostgREST/schema-cache behavior. Linda manually validated production login and updates after the rearchitecture. Future runtime changes still require appropriate hosted verification. GitHub Actions owns Vercel releases after the exact-SHA schema gate; Supabase integration owns schema deployment. See [operations](../docs/deployment.md). This cleanup does not change a live host or database.

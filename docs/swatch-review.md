@@ -5,7 +5,7 @@ on published writing observations, not measured ink colors or manufacturer
 specifications. Paper, nib, lighting, shading, sheen, and shimmer cannot be
 represented by one flat color. The goal is a useful collection palette.
 
-Overrides live in `src/data/inks.json`; original reference data stays intact.
+These historical overrides are preserved in the import snapshot `src/data/inks.json`; current edits save to Supabase `inks.color_hex`. Original reference data stays intact.
 
 | Ink | Previous displayed color | Decision | Rationale |
 | --- | --- | --- | --- |

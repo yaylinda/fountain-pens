@@ -8,23 +8,18 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "node server.js",
     "test": "node tests/run.mjs",
     "db:import-json": "node scripts/migration/dry-run.mjs",
     "test:migration": "node --test supabase/tests/import.test.mjs",
-    "test:db": "node supabase/tests/run-db.mjs"
+    "test:db": "node supabase/tests/run-db.mjs",
+    "test:deployment": "node --test scripts/deployment/*.test.mjs",
+    "check": "npm test && npm run test:deployment && npm run lint && npm run build && npm run test:migration && npm run test:db"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/material": "^6.4.7",
     "@supabase/supabase-js": "2.109.0",
-    "compression": "^1.8.1",
-    "express": "^4.21.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.3.0",
-    "uuid": "^11.1.0"
+    "react-router-dom": "^7.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

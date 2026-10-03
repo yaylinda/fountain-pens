@@ -24,7 +24,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - run: node --test scripts/deployment/*.test.mjs
+      - run: npm run test:deployment
       - run: npm run lint
       - run: npm run build
 
