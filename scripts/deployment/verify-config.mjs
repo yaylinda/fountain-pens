@@ -9,9 +9,9 @@ const url = process.env.VITE_SUPABASE_URL;
 assert.ok(url && /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(url), 'Missing or invalid VITE_SUPABASE_URL');
 const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 assert.ok(key?.startsWith('sb_publishable_'), 'VITE_SUPABASE_PUBLISHABLE_KEY must be a publishable key');
-for (const [name, value] of Object.entries(process.env)) {
+const allowedPublicVariables = new Set(['VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY']);
+for (const name of Object.keys(process.env)) {
   if (!name.startsWith('VITE_')) continue;
-  assert.ok(!/secret|service_role|password|token/i.test(name), 'Disallowed privileged VITE_ variable name');
-  assert.ok(!value?.startsWith('sb_secret_'), 'Secret key cannot be included in browser configuration');
+  assert.ok(allowedPublicVariables.has(name), 'Unexpected public build variable; only the approved Supabase URL and publishable key are allowed');
 }
 console.log('Verified project identity and public Supabase build configuration.');

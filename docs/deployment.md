@@ -34,7 +34,9 @@ not a substitute for review or production-environment protection.
    review where available on the selected GitHub plan. Protect main with review
    and required `check` and `database` checks; prevent direct bypass. Store the
    approved Vercel deployment token using GitHub's secure environment-secret UI
-   as `VERCEL_TOKEN`. Use minimum supported scope and expiry. Creating this
+   as `VERCEL_TOKEN`. It is exposed only to the pull, build and deploy steps;
+   dependency installation and setup steps do not receive it. Use minimum
+   supported scope and expiry. Creating this
    persistent credential is a separate operator approval step. Connector OAuth
    and Vercel runtime OIDC do not supply CLI deployment authentication.
 5. Set `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` as production environment
@@ -48,6 +50,10 @@ not a substitute for review or production-environment protection.
    | --- | --- |
    | `VITE_SUPABASE_URL` | Approved project's HTTPS `*.supabase.co` URL |
    | `VITE_SUPABASE_PUBLISHABLE_KEY` | That project's `sb_publishable_…` key |
+
+   The build guard allows exactly these two `VITE_` variables and rejects all
+   others, including legacy JWT keys. Any additional public setting requires
+   an explicit reviewed allowlist change.
 
    Never put a service-role/secret key, database password, Vercel token or other
    privileged value in any `VITE_` variable. Keep production credentials out of
