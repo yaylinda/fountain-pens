@@ -1,3 +1,5 @@
+> Historical design: runtime access and mutation requirements are superseded by [the public-read, owner-only CRUD contract](../../supabase/RUNTIME.md). Do not implement the earlier conflict, retry receipt or private-browsing proposals.
+
 # Proposed Supabase relational schema
 
 Status: for Gate A approval, not executable migration SQL. Read [architecture and decisions](client-api-postgres.md) first. This model is a recommendation for a single private owner; public browsing requires a separately reviewed projection/policy before shipping.

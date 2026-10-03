@@ -1,6 +1,5 @@
 export interface Ink {
     id: string;
-    version?: string;
     brand: string;
     collection: string;
     name: string;
@@ -11,7 +10,6 @@ export interface Ink {
 
 export interface Pen {
     id: string;
-    version?: string;
     brand: string;
     model: string;
     color: string;
@@ -24,7 +22,6 @@ export interface Pen {
 
 export interface RefillLog {
     id?: string;
-    version?: string;
     sequence?: string;
     date: string;
     penId: string;

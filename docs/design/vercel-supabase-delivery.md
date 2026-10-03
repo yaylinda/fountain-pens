@@ -1,3 +1,5 @@
+> Historical design: runtime access and mutation requirements are superseded by [the public-read, owner-only CRUD contract](../../supabase/RUNTIME.md). Do not implement the earlier conflict, retry receipt or private-browsing proposals.
+
 # Vercel and Supabase delivery contract
 
 Status: future implementation guidance; no project creation, credentials, deployment, DNS changes, or production writes authorized by this docs PR. See [architecture gates](client-api-postgres.md#direction-and-decision-gates) and [one-time import](supabase-migration.md#simple-delivery-sequence).

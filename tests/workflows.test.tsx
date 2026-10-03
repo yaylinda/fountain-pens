@@ -78,20 +78,23 @@ let releaseRefillSave: Promise<void> | undefined;
 let failLoad = true;
 let failFavoriteSave = false;
 const state = {
-    pens: source.pens.map(p => ({ ...p, version: '1', archived: false, favorite: false, needsRefill: false })),
-    inks: source.inks.filter(i => i.id !== 'NONE').map(i => ({ ...i, version: '1', colorHex: null, archived: false, favorite: false })),
-    events: source.refillLog.map((e, n) => ({ ...e, id: `event-${n}`, version: '1', sequence: String(n + 1), kind: 'refill', notPure: false })),
+    pens: source.pens.map(p => ({ ...p, archived: false, favorite: false, needsRefill: false })),
+    inks: source.inks.filter(i => i.id !== 'NONE').map(i => ({ ...i, colorHex: null, archived: false, favorite: false })),
+    events: source.refillLog.map((e, n) => ({ ...e, id: `event-${n}`, sequence: String(n + 1), kind: 'refill', notPure: false })),
 };
 let nextSequence = 2;
-const receipts = new Map<string, unknown>();
+const owner = '00000000-0000-4000-8000-000000000001';
 globalThis.fetch = async (input: string, init?: RequestInit) => {
+    if (String(input).includes('/auth/v1/token')) {
+        const token = `${btoa(JSON.stringify({ alg: 'HS256' }))}.${btoa(JSON.stringify({ sub: owner, exp: Math.floor(Date.now()/1000)+3600 }))}.synthetic`;
+        return Response.json({ access_token: token, refresh_token: 'synthetic-refresh', expires_in: 3600, token_type: 'bearer', user: { id: owner, email: 'owner@example.test', aud: 'authenticated', app_metadata: {}, user_metadata: {} } });
+    }
     const name = String(input).split('/').at(-1);
     const body = JSON.parse(String(init?.body || '{}'));
     if (name === 'get_collection') {
         if (failLoad) return new Response('Unavailable', { status: 503 });
-        return Response.json({ ...state, asOf: '2026-10-03' });
+        return Response.json({ ...state, canEdit: true, asOf: '2026-10-03' });
     }
-    if (receipts.has(body.p_request_id)) return Response.json(receipts.get(body.p_request_id));
     let result;
     if (name?.endsWith('_refill_event')) {
         const action = name.split('_')[0];
@@ -99,21 +102,20 @@ globalThis.fetch = async (input: string, init?: RequestInit) => {
         refillRequests.push({ method: action === 'create' ? 'POST' : action === 'update' ? 'PUT' : 'DELETE', url: action === 'create' ? '/api/refill-logs' : `/api/refill-logs/${index}` });
         if (releaseRefillSave) await releaseRefillSave;
         if (failRefillSave) return Response.json({ code: '22023' }, { status: 400 });
-        if (action !== 'create' && state.events[index]?.version !== body.p_expected_version) return Response.json({ code: '40001' }, { status: 409 });
         if (action === 'delete') { state.events.splice(index, 1); result = { deletedId: body.p_event_id }; }
         else {
             const { queueAfterCleaning, ...entry } = body.p_entry;
-            const event = { ...entry, id: action === 'create' ? `event-${nextSequence}` : body.p_event_id, version: action === 'create' ? '1' : String(Number(state.events[index].version) + 1), sequence: action === 'create' ? String(nextSequence++) : state.events[index].sequence };
+            const event = { ...entry, id: action === 'create' ? `event-${nextSequence}` : body.p_event_id, sequence: action === 'create' ? String(nextSequence++) : state.events[index].sequence };
             const pen = state.pens.find(p => p.id === event.penId)!;
             if (action === 'create') {
                 const latest = state.events.filter(e => e.penId === event.penId).sort((a, b) => b.date.localeCompare(a.date))[0];
                 if (!latest || event.date >= latest.date) {
                     const queue = entry.kind === 'refill' ? false : queueAfterCleaning ?? pen.needsRefill;
-                    if (queue !== pen.needsRefill) { pen.needsRefill = queue; pen.version = String(Number(pen.version) + 1); writes.push({ filename: 'pens', data: structuredClone(state.pens) }); }
+                    if (queue !== pen.needsRefill) { pen.needsRefill = queue; writes.push({ filename: 'pens', data: structuredClone(state.pens) }); }
                 }
                 state.events.push(event);
             } else state.events[index] = event;
-            result = { event, pen: { id: pen.id, version: pen.version, needsRefill: pen.needsRefill } };
+            result = { event, pen: { id: pen.id, needsRefill: pen.needsRefill } };
         }
         persistedRefills.splice(0, persistedRefills.length, ...state.events.map(({ date, penId, inkIds, notes, notPure, kind }) => ({ date, penId, inkIds: kind === 'cleaning' ? ['NONE'] : inkIds, notes, ...(notPure ? { notPure } : {}) })));
         writes.push({ filename: 'refillLog', data: structuredClone(persistedRefills) });
@@ -122,20 +124,20 @@ globalThis.fetch = async (input: string, init?: RequestInit) => {
         const [action, kind] = name.split('_');
         const items = kind === 'pen' ? state.pens : state.inks;
         const index = items.findIndex(i => i.id === body.p_id);
-        if (action !== 'create' && items[index]?.version !== body.p_expected_version) return Response.json({ code: '40001' }, { status: 409 });
         if (action === 'delete') { items.splice(index, 1); result = { deletedId: body.p_id }; }
         else {
-            const item = { ...body.p_item, id: body.p_id || crypto.randomUUID(), version: action === 'create' ? '1' : String(Number(items[index].version) + 1) };
+            const item = { ...body.p_item, id: body.p_id || crypto.randomUUID() };
             if (action === 'create') items.push(item); else items[index] = item;
             result = { item };
         }
         writes.push({ filename: kind === 'pen' ? 'pens' : 'inks', data: structuredClone(items) });
     } else throw new Error(`Unexpected request in isolated UI test: ${input}`);
-    receipts.set(body.p_request_id, result);
     return Response.json(result);
 };
 const { activateCollection, isCollectionSaving } = await import('../src/services/dataService');
-activateCollection('synthetic-owner');
+const { getSupabase } = await import('../src/services/supabaseClient');
+await getSupabase().auth.signInWithPassword({ email: 'owner@example.test', password: 'synthetic-password' });
+activateCollection(owner);
 const { render, screen, within, waitFor, cleanup, fireEvent, act } =
     await import('@testing-library/react');
 const userEvent = (await import('@testing-library/user-event')).default;
@@ -165,7 +167,7 @@ test('collection workflows work against isolated API fixtures without touching r
     const click = user.click.bind(user);
     user.click = async (...args) => {
         await click(...args);
-        // A user-visible save includes receipt handling, refetch and editor navigation.
+        // A user-visible save includes acknowledgement, refetch and editor navigation.
         await waitFor(() => assert.equal(isCollectionSaving(), false));
         await act(async () => {});
     };
@@ -247,9 +249,6 @@ test('collection workflows work against isolated API fixtures without touching r
         assert.equal(screen.getByLabelText('Color / finishOptional').value, 'Sapphire draft');
         await user.click(screen.getByRole('button', { name: 'Save changes' }));
         await waitFor(() => assert.equal(latestWrite('pens').data.find((item) => item.id === 'pen-a')?.favorite, false));
-        await user.click(await screen.findByRole('button', { name: 'Review latest saved item' }));
-        await user.click(await screen.findByRole('button', { name: 'Keep my draft using this version' }));
-        await user.click(screen.getByRole('button', { name: 'Save changes' }));
         await screen.findByRole('heading', { name: 'Fountain pens', exact: true });
         // Restore the fixture finish without altering the favorite state.
         const service = await import('../src/services/dataService');
@@ -1532,5 +1531,6 @@ test('collection workflows work against isolated API fixtures without touching r
     await waitFor(() =>
         assert.equal(document.querySelector('.app-shell'), null),
     );
+    await getSupabase().auth.stopAutoRefresh();
     dom.window.close();
 });

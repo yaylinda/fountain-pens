@@ -6,6 +6,7 @@ export const EMPTY_INK_ID = 'NONE';
 export type JournalEntry = RefillLog & { index: number };
 export interface Collection {
     asOf?: string;
+    canEdit?: boolean;
     pens: Pen[];
     inks: Ink[];
     entries: JournalEntry[];

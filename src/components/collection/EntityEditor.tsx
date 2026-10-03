@@ -1,5 +1,3 @@
-import { CollectionError } from '../../services/dataService';
-import { ConflictRecovery } from './ConflictRecovery';
 import { FavoriteButton } from './FavoriteButton';
 import { useId, useRef, useState } from 'react';
 import type { Ink, Pen } from '../../models/types';
@@ -42,7 +40,7 @@ export function EntityEditor({
     backLabel,
 }: SharedProps & { editor: EntityEditorState }) {
     const penMode = editor.kind === 'pen';
-    const [item, setItem] = useState(editor.item);
+    const item = editor.item;
     const pen = penMode ? (item as Pen | undefined) : undefined;
     const ink = !penMode ? (item as Ink | undefined) : undefined;
     const [initial] = useState(() => ({
@@ -58,7 +56,6 @@ export function EntityEditor({
     }));
     const [draft, setDraft] = useState(initial);
     const [error, setError] = useState('');
-    const [conflict, setConflict] = useState(false);
     const [saving, setSaving] = useState(false);
     const pending = useRef(false);
     const run = async (fn: () => Promise<void>) => {
@@ -66,7 +63,6 @@ export function EntityEditor({
         pending.current = true; setSaving(true); setError('');
         try { await fn(); } catch (e) {
             setError(e instanceof Error ? e.message : 'Could not save. Your draft is kept.');
-            setConflict(e instanceof CollectionError && (e.code === 'conflict' || e.code === 'not-found'));
         } finally { pending.current = false; setSaving(false); }
     };
     const [confirmDelete, setConfirmDelete] = useState(false);
@@ -203,7 +199,6 @@ export function EntityEditor({
                         </p>
                     </div>
                     <ErrorMessage message={error} />
-                    {conflict && item && <ConflictRecovery kind={editor.kind} id={item.id} onRebase={value => { setItem(value as Pen | Ink); setConflict(false); setError(''); }} />}
                     <fieldset disabled={!canEdit || saving} className="form-fields">
                         <div className="field-pair">
                             <Field label="Brand">

@@ -1,5 +1,3 @@
-import { CollectionError } from '../../services/dataService';
-import { ConflictRecovery } from './ConflictRecovery';
 import { useRef, useState } from 'react';
 import {
     addRefillLog,
@@ -44,7 +42,6 @@ export function RefillEditor({
 }: SharedProps & { editor: Extract<EditorState, { kind: 'refill' }> }) {
     const [initial] = useState<RefillDraft>(() => ({
         id: editor.draft?.id,
-        version: editor.draft?.version,
         sequence: editor.draft?.sequence,
         date: editor.draft?.date || today(),
         penId: editor.draft?.penId || '',
@@ -60,7 +57,6 @@ export function RefillEditor({
     const [penQuery, setPenQuery] = useState('');
     const [inkQuery, setInkQuery] = useState('');
     const [error, setError] = useState('');
-    const [conflict, setConflict] = useState(false);
     const [saving, setSaving] = useState(false);
     const pending = useRef(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
@@ -145,7 +141,6 @@ export function RefillEditor({
                 saved,
             );
         } catch (error) {
-            setConflict(error instanceof CollectionError && (error.code === 'conflict' || error.code === 'not-found'));
             setError(error instanceof Error ? error.message : 'Failed to save the journal. Please try again.');
         } finally {
             pending.current = false;
@@ -161,7 +156,6 @@ export function RefillEditor({
             await deleteRefillLog(draft);
             onSaved('Journal entry deleted.', undefined, null);
         } catch (error) {
-            setConflict(error instanceof CollectionError && (error.code === 'conflict' || error.code === 'not-found'));
             setError(error instanceof Error ? error.message : 'Failed to delete the journal entry. Please try again.');
         } finally {
             pending.current = false;
@@ -187,7 +181,6 @@ export function RefillEditor({
                     noValidate
                 >
                     <ErrorMessage message={error} />
-                    {conflict && draft.id && <ConflictRecovery kind="refill" id={draft.id} onRebase={value => { setDraft(d => ({ ...d, version: value.version })); setConflict(false); setError(''); }} />}
                     <fieldset disabled={!canEdit || saving} className="form-fields">
                         <div className="refill-start">
                             <Field label="Date">

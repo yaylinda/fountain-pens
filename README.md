@@ -23,10 +23,10 @@ Archive an item to remove it from the active collection while keeping its journa
 
 ## Development
 
-Use Node.js 20.19 or later.
+Use Node.js 22.16.0 (the CI version), or compatible Node 20.19+. Copy `.env.example` to `.env.local` and supply the approved Supabase URL and **publishable** key. The database must have the reviewed migrations and approved Auth owner configured; there is no JSON fallback or public signup. See [runtime setup](supabase/RUNTIME.md).
 
 ```sh
-npm install
+npm ci
 npm run dev
 npm test
 npm run lint
@@ -37,17 +37,15 @@ npm run build
 
 ## Source data
 
-The app continues to use three JSON arrays:
+Anyone can browse the collection and journal notes. Only the approved owner can sign in and save changes. Saves use straightforward database CRUD; a refill, its ordered ink links and queue effect commit together. Journal URLs use stable event IDs, and same-day ordering uses the database sequence. Calendar behavior uses America/Chicago. Ordinary form failures keep the current draft available for correction.
 
-- `src/data/pens.json`: pen identity, brand, model, finish, nib size, and material.
-- `src/data/inks.json`: ink identity, brand, collection, and name.
-- `src/data/refillLog.json`: calendar date, pen ID, ink IDs, and notes.
+These fixed JSON files are retained only for the separately authorized one-time import:
 
-During `npm run dev`, saving an inventory item or journal entry sends the updated JSON array to the Vite API, which writes the corresponding file under `src/data/` in this checkout. Those edits survive reloads and server restarts. They are local working-tree changes until explicitly committed and pushed; saving in the app does not publish them to GitHub. Browser local storage holds layout preferences, not inventory records. The existing sync review is available under **Data tools**.
+- `src/data/pens.json`: source pen inventory.
+- `src/data/inks.json`: source ink inventory, including the legacy cleaning sentinel.
+- `src/data/refillLog.json`: source journal entries in original order.
 
-No source inventory migration is required. Optional, backward-compatible fields support the interface: `archived` on pens/inks, `needsRefill` on pens, and `colorHex` on inks. They are added only when the corresponding action is used. Pens without `needsRefill` are treated as unflagged.
-
-The legacy ink ID `NONE` represents a cleaned/empty pen. It is excluded from ink inventory and refill counts. The newest calendar date determines the latest pairing; for same-day entries, the later position in the original JSON array wins. Future entries remain in history but do not change today's pairing. Historical events retain their original array position for editing; UI-only fields are never added to new saved events.
+No build, startup or web request imports or writes those files. The importer maps `NONE` to cleaning events with no ink links; future entries remain in history but do not change today's pairing. Manufacturer catalogs and approximate swatch references remain versioned reference data. Browser storage holds layout preferences and Supabase's normal Auth session; ordinary form drafts stay in memory while editing.
 
 ## Code organization
 
@@ -55,14 +53,16 @@ The legacy ink ID `NONE` represents a cleaned/empty pen. It is excluded from ink
 - `src/hooks/useCollection.ts`: app-level loading, retry, and refresh.
 - `src/hooks/useEditorNavigation.ts`: editor URLs, browser history, draft protection, and return positions.
 - `src/components/collection/`: dashboard, inventories, journal, editing workspaces, and shared presentation components.
-- `src/App.tsx`: navigation, draft protection, feedback, and the existing data-tools entry point.
+- `src/App.tsx`: navigation, draft protection, feedback, and owner session controls.
 - `src/index.css` and `src/App.css`: design tokens, shared controls, layouts, and responsive rules.
 
 Swatches use the existing `scripts/output.json` reference, with a user-recorded `colorHex` taking precedence. Unmatched inks display an explicit unknown swatch. These are approximate screen colors, not photographic ink samples. Fonts are self-hosted in `public/fonts` with their OFL licenses.
 
 ## Production delivery
 
-The Express server negotiates response compression. Vite's fingerprinted `/assets/` files are cached for one year with `immutable`; HTML revalidates, and API responses use `no-store` so inventory stays fresh. Missing assets return 404 rather than the app document. Unversioned files such as fonts and the favicon retain revalidation.
+The new runtime is a Vite SPA on Vercel; see [production setup and release gates](docs/deployment.md). The legacy Docker publication must be disabled and its updater paused or pinned before merging the Supabase-only runtime into a live deployment.
+
+The following compression benchmark describes the **legacy Express deployment**, retained for the separately coordinated retirement. The Express server negotiates response compression. Vite's fingerprinted `/assets/` files are cached for one year with `immutable`; HTML revalidates, and API responses use `no-store` so inventory stays fresh. Missing assets return 404 rather than the app document. Unversioned files such as fonts and the favicon retain revalidation.
 
 To compare response-body transfer sizes using the same local build and inventory:
 
@@ -75,4 +75,4 @@ The benchmark runs temporary local HTTP servers and performs no saves or git ope
 
 Read [the application review](docs/app-review.md) for findings and implementation decisions.
 
-See the [proposed Vercel/Supabase architecture](docs/design/client-api-postgres.md) and its schema, migration, and deployment guides. The implementation sequence is schema approval, JSON migration validation, then database read/write integration. This is documentation only; the running app still uses the JSON storage described above.
+See the [Vercel/Supabase architecture](docs/design/client-api-postgres.md), [implemented runtime contract](supabase/RUNTIME.md), and [one-time migration guide](docs/design/supabase-migration.md). Hosted Auth/PostgREST verification, owner setup, the live import and deployed CRUD checks are separate release steps; local synthetic tests do not establish their completion.

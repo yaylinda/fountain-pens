@@ -12,11 +12,10 @@ export function useCollection() {
     const clientDay = useRef(today());
     const retry = useCallback(async () => {
         setLoading(!opened.current); setError('');
-        try { await loadData(true); if (isDataLoaded()) opened.current = true; } catch { setError('Your collection could not refresh. Check your connection or sign in again.'); }
+        try { await loadData(true); if (isDataLoaded()) opened.current = true; } catch { setError('Your collection could not refresh. Check your connection and try again.'); }
         finally { setLoading(false); }
     }, []);
     useEffect(() => {
-        if (!owner) return;
         void retry();
         const refetch = () => { clientDay.current = today(); void retry(); };
         window.addEventListener('focus', refetch);

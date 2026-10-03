@@ -1,3 +1,5 @@
+> Historical design: runtime access and mutation requirements are superseded by [the public-read, owner-only CRUD contract](../../supabase/RUNTIME.md). Do not implement the earlier conflict, retry receipt or private-browsing proposals.
+
 # One-time JSON migration
 
 Implementation status and executable commands are in [supabase/README.md](../../supabase/README.md). This runbook supersedes the original stopped-writer/cutover choreography: the user confirmed the JSON source is fixed while the database and application are rewritten.

@@ -18,11 +18,12 @@ The `scripts/` directory contains a Python utility for scraping ink hex colors f
 ## Architecture
 
 ### Data Flow
-The React/Vite SPA uses Supabase Auth and owner-only PostgreSQL RPCs:
-1. `AuthGate` restores the session or shows email/password sign-in (no public signup).
-2. `dataService.ts` reads a consistent `get_collection` snapshot and adapts it to existing UI models.
-3. Narrow inventory/refill commands await a durable versioned receipt. Refill event, ordered ink links and queue effects commit atomically.
-4. Collection data lives in an owner-scoped memory cache, cleared on sign-out/account change. No mutable JSON fallback, file API plugin, LAN authorization or Git sync is part of the browser runtime.
+The React/Vite SPA uses public Supabase reads and owner-only writes:
+1. Everyone can browse collection data and displayed journal notes. `OwnerControls` offers email/password sign-in with no signup UI.
+2. `dataService.ts` reads `get_collection`, including the database-approved `canEdit` capability.
+3. Inventory CRUD and refill RPCs use invoker rights, owner checks and RLS. A refill's event, ordered ink links and queue effect commit atomically.
+4. Normal forms keep drafts during editing and show save errors. Do not add retry receipts, expected-version conflicts, advisory locks or session draft recovery.
+5. No mutable JSON fallback, file API plugin, LAN authorization or Git sync is part of the browser runtime.
 
 Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are browser configuration. Never supply secret/service-role credentials. See `supabase/RUNTIME.md` for contracts and verification limits.
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import type { Ink, Pen } from './models/types';
 import type { JournalEntry } from './lib/collection';
@@ -16,10 +16,10 @@ import {
 } from './components/collection/Primitives';
 import './App.css';
 import { FavoritesContext } from './context/FavoritesContext';
-import { setFavorite, getPenById, getInkById, subscribeCollection, hasUnconfirmedSave, resolveUnconfirmedSave, isCollectionSaving } from './services/dataService';
+import { setFavorite, getPenById, getInkById } from './services/dataService';
 import { SAVE_CELEBRATION, type SaveOrigin } from './lib/saveCelebration';
 
-import { signOutCollection } from './services/sessionLifecycle';
+import { OwnerControls } from './components/OwnerControls';
 const navItems: { to: string; label: string; icon: IconName }[] = [
     { to: '/', label: 'The desk', icon: 'desk' },
     { to: '/pens', label: 'Fountain pens', icon: 'pen' },
@@ -62,11 +62,10 @@ export default function App() {
             window.removeEventListener(SAVE_CELEBRATION, saved);
         };
     }, []);
-    const unconfirmed = useSyncExternalStore(subscribeCollection, hasUnconfirmedSave);
     const [message, setMessage] = useState('');
     const [favoriteBusy, setFavoriteBusy] = useState(false);
     const location = useLocation();
-    const canEdit = true;
+    const canEdit = collection.canEdit === true;
     useEffect(() => {
         window.scrollTo({ top: 0 });
     }, [location.pathname]);
@@ -179,11 +178,7 @@ export default function App() {
                             putting pen to paper.
                         </p>
                     </div>
-                    <button className="text-link" onClick={async () => {
-                        if (editor || isCollectionSaving()) { setMessage('Finish saving and close your editor before signing out.'); return; }
-                        const { error } = await signOutCollection();
-                        if (error) setMessage('Could not sign out. Please try again.');
-                    }}>Sign out</button>
+                    <OwnerControls canEdit={canEdit} />
                     <div className="profile">
                         <span className="profile-monogram">L</span>
                         <span>
@@ -206,10 +201,6 @@ export default function App() {
                         }).format(new Date())}
                     </span>
                 </div>
-                {unconfirmed && <div className="draft-notice" role="alert"><p>A previous save has an unknown outcome. Retry the unchanged save in your editor, or resolve it here and reopen the collection. Reopening closes other unfinished drafts.</p><button className="button secondary" onClick={async () => {
-                    try { await resolveUnconfirmedSave(); window.location.replace(`${window.location.pathname}#/`); window.location.reload(); }
-                    catch { setMessage('The previous save is still unconfirmed. Check your connection and retry.'); }
-                }}>Resolve save and reopen collection</button></div>}
                 {warning && <p role="alert">{warning} <button className="text-link" onClick={retry}>Refresh collection</button></p>}
                 {pending && (
                     <div className="draft-notice" role="alert">

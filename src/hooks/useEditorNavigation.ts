@@ -24,7 +24,6 @@ export function useEditorNavigation(model: CollectionModel) {
         EditorHistory | undefined;
     const drafts = useRef(new Map<string, RefillDraft>());
     const initialDrafts = useRef(new Map<string, RefillDraft>());
-    const currentEditor = useRef<{ key: string; editor: EditorState | null }>({ key: '', editor: null });
     const savedEntries = useRef(new Map<string, JournalEntry | null>());
     const positions = useRef(
         new Map<string, { top: number; focusKey: string }>(),
@@ -71,8 +70,6 @@ export function useEditorNavigation(model: CollectionModel) {
             };
     }
 
-    if (currentEditor.current.key !== location.key) currentEditor.current = { key: location.key, editor };
-    else if (!editor && kind && currentEditor.current.editor) editor = currentEditor.current.editor;
 
     useEffect(() => {
         if (!dirty) return;
@@ -152,7 +149,6 @@ export function useEditorNavigation(model: CollectionModel) {
         }
     };
     const onSaved = (item?: Pen | Ink, entry?: JournalEntry | null) => {
-        currentEditor.current = { key: '', editor: null };
         // Forward navigation to a saved creation must reopen it as an edit.
         if (entry !== undefined)
             savedEntries.current.set(location.key, entry);

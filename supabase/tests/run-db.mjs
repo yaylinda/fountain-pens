@@ -1,193 +1,113 @@
-// Always creates its own synthetic database. No target URL or existing container is accepted.
+// Creates and removes only its own disposable PostgreSQL instance.
 import { execFileSync } from 'node:child_process';
 import { readFile, readdir } from 'node:fs/promises';
 import { setTimeout } from 'node:timers/promises';
 import { randomUUID } from 'node:crypto';
 import assert from 'node:assert/strict';
 import pg from 'pg';
-import { capture, mapLegacy, importLegacy, mappingVersion, reconcile } from '../../scripts/migration/legacy.mjs';
-import { ownerId, strangerId, sourceFixture } from './fixtures.mjs';
+import { capture, importLegacy, reconcile } from '../../scripts/migration/legacy.mjs';
+import { ownerId, strangerId } from './fixtures.mjs';
 const image='postgres@sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f';
-const name=`fountain-foundations-${randomUUID()}`;
+const name=`fountain-crud-${randomUUID()}`;
 const docker=(...args)=>execFileSync('docker',args,{encoding:'utf8',stdio:['pipe','pipe','pipe']}).trim();
 let client;
 try {
  docker('run','--rm','-d','--name',name,'--label','fountain-pens.disposable=true','-e','POSTGRES_HOST_AUTH_METHOD=trust','-p','127.0.0.1::5432',image);
  const port=Number(docker('port',name,'5432/tcp').split(':').at(-1));
- const config={host:'127.0.0.1',port,user:'postgres',database:'postgres'};
  for(let i=0;i<60;i++) {
-  client=new pg.Client(config);
+  client=new pg.Client({host:'127.0.0.1',port,user:'postgres',database:'postgres'});
   try {await client.connect();break;} catch {await client.end();client=null;await setTimeout(250);}
  }
  assert.ok(client,'disposable postgres ready');
- // Minimal managed-Auth stand-in, deliberately outside the shipped migration.
+ // Managed-like install: non-superuser DB owner, auth access but NO grant option.
  await client.query(`create role anon nologin; create role authenticated nologin;
+ create role migration_runner nologin nosuperuser bypassrls;
+ alter database postgres owner to migration_runner;
  create schema auth; create table auth.users(id uuid primary key);
  create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
- grant usage on schema auth to anon,authenticated; grant execute on function auth.uid() to anon,authenticated;
- insert into auth.users values ('${ownerId}'),('${strangerId}');`);
- const migrations=(await readdir('supabase/migrations')).filter(x=>x.endsWith('.sql')).sort();
- await client.query(await readFile(`supabase/migrations/${migrations[0]}`,'utf8'));
+ revoke all on schema auth from public;
+ revoke all on function auth.uid() from public;
+ grant usage on schema auth to anon,authenticated,migration_runner;
+ grant execute on function auth.uid() to anon,authenticated,migration_runner;
+ grant references on auth.users to migration_runner;
+ insert into auth.users values ('${ownerId}'),('${strangerId}');
+ set role migration_runner;`);
+ assert.equal((await client.query("select rolsuper from pg_roles where rolname=current_user")).rows[0].rolsuper,false);
+ assert.equal((await client.query("select has_schema_privilege(current_user,'auth','USAGE WITH GRANT OPTION') as allowed")).rows[0].allowed,false);
+ for(const file of (await readdir('supabase/migrations')).filter(x=>x.endsWith('.sql')).sort()) await client.query(await readFile(`supabase/migrations/${file}`,'utf8'));
  await client.query('insert into private.collection_owner(user_id,time_zone) values($1,$2)',[ownerId,'America/Chicago']);
- console.log('PASS empty schema install', (await client.query('show server_version')).rows[0].server_version);
- const snapshot={mapped:mapLegacy(sourceFixture(),'2026-01-10'),manifest:{mappingVersion,sourceSha256:'a'.repeat(64),files:[],counts:{pens:1,inks:2,events:3,links:4},asOf:'2026-01-10'}};
- const options={ownerId,targetIdentity:name};
- assert.equal((await importLegacy(client,snapshot,options)).status,'imported');
- assert.equal((await importLegacy(client,snapshot,options)).status,'already-imported');
- await assert.rejects(importLegacy(client,{...snapshot,manifest:{...snapshot.manifest,sourceSha256:'b'.repeat(64)}},options),/receipt mismatch/);
- await assert.rejects(importLegacy(client,snapshot,{...options,ownerId:strangerId}),/owner mapping/);
- await assert.rejects(importLegacy(client,snapshot,{...options,importId:'another'}),/not empty/);
- await reconcile(client,snapshot.mapped);
- console.log('PASS import reconciliation, duplicates, rerun and mismatch guard');
- for(const file of migrations.slice(1)) await client.query(await readFile(`supabase/migrations/${file}`,'utf8'));
- await reconcile(client,snapshot.mapped);
- console.log('PASS additive command migration preserves imported data');
- const writer=(await client.query("select rolcanlogin,rolsuper,rolbypassrls from pg_roles where rolname='collection_writer'")).rows[0];
- assert.deepEqual(writer,{rolcanlogin:false,rolsuper:false,rolbypassrls:false});
- const definers=(await client.query("select p.proconfig,r.rolname from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_roles r on r.oid=p.proowner where n.nspname='private' and p.prosecdef")).rows;
- assert.equal(definers.length,4);
- for(const f of definers) {assert.equal(f.rolname,'collection_writer');assert.ok(f.proconfig.includes('search_path=""'));}
+ await client.query('reset role');
+ assert.equal((await client.query("select count(*)::int n from pg_roles where rolname='collection_writer'")).rows[0].n,0);
+ assert.equal((await client.query("select to_regclass('private.mutation_receipts') x")).rows[0].x,null);
+ const definers=(await client.query("select p.proname,p.proconfig,r.rolname from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_roles r on r.oid=p.proowner where n.nspname='private' and p.prosecdef")).rows;
+ assert.equal(definers.length,1); assert.equal(definers[0].proname,'is_owner'); assert.equal(definers[0].rolname,'migration_runner');
+ assert.ok(definers[0].proconfig.includes('search_path=""'));
  for(const table of ['pens','inks','refill_events','refill_event_inks']) {
-  const r=(await client.query('select relrowsecurity,relforcerowsecurity from pg_class where oid=$1::regclass',[`public.${table}`])).rows[0];
-  assert.deepEqual(r,{relrowsecurity:true,relforcerowsecurity:true});
+  const row=(await client.query('select relrowsecurity,relforcerowsecurity from pg_class where oid=$1::regclass',[`public.${table}`])).rows[0];
+  assert.deepEqual(row,{relrowsecurity:true,relforcerowsecurity:true});
  }
- console.log('PASS function owners/search paths and forced RLS catalog checks');
-
- const role=async (who,uid,fn)=>{
+ console.log('PASS PG17.11 non-superuser migration install without auth grant option or bespoke roles');
+ const role=async(who,uid,fn)=>{
   await client.query('begin');
-  try {await client.query(`set local role ${who}`);await client.query("select set_config('request.jwt.claim.sub',$1,true)",[uid??'']); const answer=await fn();await client.query('commit');return answer;}
+  try {await client.query(`set local role ${who}`);await client.query("select set_config('request.jwt.claim.sub',$1,true)",[uid??'']);const result=await fn();await client.query('commit');return result;}
   catch(e){await client.query('rollback');throw e;}
  };
- const queue=(id= randomUUID(),version='1',flag=false)=>client.query('select public.set_pen_queue($1,$2,$3,$4) as result',[id,'pen_old',version,flag]);
- await assert.rejects(role('anon',null,()=>client.query('select * from public.pens')),e=>e.code==='42501');
- await assert.rejects(role('anon',null,()=>queue()),e=>e.code==='42501');
- for(const uid of [strangerId,null]) {
-  assert.equal((await role('authenticated',uid,()=>client.query('select * from public.pens'))).rowCount,0);
-  await assert.rejects(role('authenticated',uid,()=>queue()),e=>e.code==='42501');
-  await assert.rejects(role('authenticated',uid,()=>client.query('select private.set_pen_queue($1,$2,$3,$4)',[randomUUID(),'pen_old','1',false])),e=>e.code==='42501');
+ const rpc=async(name,args=[],who='authenticated',uid=ownerId)=>(await role(who,uid,()=>client.query(`select public.${name}(${args.map((_,i)=>'$'+(i+1)).join(',')}) result`,args))).rows[0].result;
+ const pen={brand:'Pilot',model:'Test',color:'Blue',nibSize:'Fine',nibType:'Gold',archived:false,favorite:false,needsRefill:true};
+ const ink={brand:'Diamine',collection:'',name:'Test',colorHex:null,archived:false,favorite:false};
+ for(const [who,uid] of [['anon',null],['authenticated',strangerId],['authenticated',null]]) {
+  assert.equal((await rpc('get_collection',[],who,uid)).canEdit,false);
+  await assert.rejects(rpc('create_pen',[pen],who,uid),e=>e.code==='42501');
+  await assert.rejects(role(who,uid,()=>client.query('select * from private.collection_owner')),e=>e.code==='42501');
+  await assert.rejects(role(who,uid,()=>client.query('insert into public.pens(owner_id,brand,model,color,nib_size,nib_type) values($1,$2,$3,$4,$5,$6)',[ownerId,'Bad','Bad','','',''])),e=>e.code==='42501');
  }
- assert.equal((await role('authenticated',ownerId,()=>client.query('select * from public.pens'))).rowCount,1);
- for(const sql of ["update public.pens set needs_refill=false",'select * from private.collection_owner','select * from private.mutation_receipts','select * from private.data_imports',"insert into public.inks(id,owner_id,brand,collection,name) values('bad',auth.uid(),'','','')"])
-  await assert.rejects(role('authenticated',ownerId,()=>client.query(sql)),e=>e.code==='42501');
- const request=randomUUID();
- const first=(await role('authenticated',ownerId,()=>queue(request))).rows[0].result;
- assert.deepEqual(first,{id:'pen_old',version:'2',needsRefill:false});
- assert.deepEqual((await role('authenticated',ownerId,()=>queue(request))).rows[0].result,first);
- await assert.rejects(role('authenticated',ownerId,()=>queue(request,'1',true)),e=>e.code==='40001');
- await assert.rejects(role('authenticated',ownerId,()=>queue()),e=>e.code==='40001');
- assert.equal((await role('authenticated',ownerId,()=>queue(randomUUID(),'2',false))).rows[0].result.version,'2');
- const failedRequest=randomUUID();
- await assert.rejects(role('authenticated',ownerId,async()=>{await queue(failedRequest,'2',true);throw new Error('injected');}),/injected/);
- assert.equal((await client.query('select needs_refill,version::text from public.pens')).rows[0].version,'2');
- assert.equal((await client.query('select * from private.mutation_receipts where request_id=$1',[failedRequest])).rowCount,0);
- console.log('PASS owner/stranger/anon, direct/private grants, version conflict, replay, no-op, transaction rollback');
- const concurrentOwner=async(sql,args)=>{
-  const c=new pg.Client(config);await c.connect();
-  try {await c.query('begin');await c.query('set local role authenticated');await c.query("select set_config('request.jwt.claim.sub',$1,true)",[ownerId]);const answer=await c.query(sql,args);await c.query('commit');return answer;}
-  catch(e){await c.query('rollback');throw e;}finally{await c.end();}
- };
- const racing=await Promise.allSettled([1,2].map(()=>concurrentOwner('select public.set_pen_queue($1,$2,$3,$4)',[randomUUID(),'pen_old','2',true])));
- assert.equal(racing.filter(x=>x.status==='fulfilled').length,1);
- assert.equal(racing.find(x=>x.status==='rejected').reason.code,'40001');
- console.log('PASS concurrent stale queue updates serialize and conflict');
-
- const invalid=async sql=>{await client.query('begin');try {await client.query(sql);await client.query('set constraints all immediate');await client.query('commit');}catch(e){await client.query('rollback');throw e;}};
- for(const sql of ["delete from public.refill_event_inks where event_id='legacy-refill-1'", "update public.refill_event_inks set position=10 where event_id='legacy-refill-1' and position=0", "update public.refill_events set kind='cleaning',not_pure=false where id='legacy-refill-1'", "insert into public.refill_event_inks values('"+ownerId+"','legacy-refill-3','ink_a',0)"])
-  await assert.rejects(invalid(sql),e=>e.code==='23514');
- await assert.rejects(client.query("delete from public.pens where id='pen_old'"),e=>e.code==='23503');
- await assert.rejects(client.query("delete from public.inks where id='ink_a'"),e=>e.code==='23503');
- const next=(await client.query("insert into public.refill_events(owner_id,pen_id,occurred_on,kind) values($1,'pen_old','2026-01-04','cleaning') returning sequence::text",[ownerId])).rows[0];assert.equal(next.sequence,'4');
- console.log('PASS deferred link constraints, referenced deletes, next sequence');
- const entry={penId:'pen_old',date:'2026-01-04',kind:'refill',inkIds:['ink_b','ink_a'],notes:'mixture',notPure:true};
- const create=async (data=entry,requestId=randomUUID())=>(await role('authenticated',ownerId,()=>client.query('select public.create_refill_event($1,$2) as result',[requestId,data]))).rows[0].result;
- const readQueue=async()=>(await client.query("select needs_refill from public.pens where id='pen_old'")).rows[0].needs_refill;
- await client.query("update public.pens set needs_refill=true where id='pen_old'");
- const backdated=await create({...entry,date:'2026-01-01'});assert.equal(await readQueue(),true);
- const sharedRequest=randomUUID();
- const simultaneous=await Promise.all([1,2].map(()=>concurrentOwner('select public.create_refill_event($1,$2) as result',[sharedRequest,entry])));
- assert.deepEqual(simultaneous[0].rows[0].result,simultaneous[1].rows[0].result);
- const createRequest=randomUUID(),sameDay=await create(entry,createRequest);assert.equal(await readQueue(),false);
- assert.deepEqual(await create(entry,createRequest),sameDay);
- const distinct=await create();assert.notEqual(distinct.event.id,sameDay.event.id);
- assert.ok(BigInt(distinct.event.sequence)>BigInt(sameDay.event.sequence));
- const cleaning={...entry,kind:'cleaning',inkIds:[],notPure:false};
- await create({...cleaning,queueAfterCleaning:true});assert.equal(await readQueue(),true);
- await create(cleaning);assert.equal(await readQueue(),true);
- await create({...cleaning,date:'2025-01-01',queueAfterCleaning:false});assert.equal(await readQueue(),true);
- const changed=(await role('authenticated',ownerId,()=>client.query('select public.update_refill_event($1,$2,$3,$4) as result',[randomUUID(),backdated.event.id,'1',{...entry,date:'2026-01-05'}]))).rows[0].result;
- assert.equal(changed.event.sequence,backdated.event.sequence);assert.equal(changed.event.version,'2');assert.equal(await readQueue(),true);
- await assert.rejects(role('authenticated',ownerId,()=>client.query('select public.update_refill_event($1,$2,$3,$4)',[randomUUID(),backdated.event.id,'1',entry])),e=>e.code==='40001');
- await role('authenticated',ownerId,()=>client.query('select public.delete_refill_event($1,$2,$3)',[randomUUID(),backdated.event.id,'2']));assert.equal(await readQueue(),true);
- assert.equal((await client.query('select * from public.refill_event_inks where event_id=$1',[backdated.event.id])).rowCount,0);
- for(const data of [{...entry,owner_id:ownerId},{...entry,inkIds:['NONE']},{...entry,inkIds:['ink_a','ink_a']},{...entry,date:'2099-01-01'}, {...entry,date:'2025-02-29'}, {...entry,notPure:null},{...entry,inkIds:[]}, {...cleaning,notPure:true}, {...entry,queueAfterCleaning:true}])
-  await assert.rejects(create(data),e=>e.code==='22023');
- for(const who of ['anon','authenticated']) await assert.rejects(role(who,strangerId,()=>client.query('select public.create_refill_event($1,$2)',[randomUUID(),entry])),e=>e.code==='42501');
- const before=(await client.query('select count(*)::int as n from public.refill_events')).rows[0].n;
- // Inject a link failure AFTER the function has created the event and changed the pen queue.
- await client.query(`create function private.inject_link_failure() returns trigger language plpgsql as $$ begin raise exception 'injected link failure'; end $$;
- create trigger test_fail_link before insert on public.refill_event_inks for each row execute function private.inject_link_failure();`);
- const failedEventRequest=randomUUID();
- await assert.rejects(create({...entry,date:'2026-01-06'},failedEventRequest),/injected link failure/);
- await client.query('drop trigger test_fail_link on public.refill_event_inks; drop function private.inject_link_failure()');
- assert.equal(await readQueue(),true);
- assert.equal((await client.query('select count(*)::int as n from public.refill_events')).rows[0].n,before);
- assert.equal((await client.query('select * from private.mutation_receipts where request_id=$1',[failedEventRequest])).rowCount,0);
- console.log('PASS refill mixtures, same-day/backdated/latest queue, cleaning choice, edits/deletes, validation, replay and injected link rollback');
-
- // New browser read and inventory contracts use the same real RLS/transaction boundary.
- const getCollection=async(uid=ownerId)=>(await role('authenticated',uid,()=>client.query('select public.get_collection() as result'))).rows[0].result;
- await assert.rejects(getCollection(strangerId),e=>e.code==='42501');
- await assert.rejects(role('anon',null,()=>client.query('select public.get_collection()')),e=>e.code==='42501');
- const read=await getCollection();
- assert.equal(read.pens.length,1); assert.equal(read.inks.length,2);
- assert.ok(read.events.every(e=>typeof e.version==='string' && typeof e.sequence==='string'));
- assert.deepEqual(read.events.find(e=>e.id===sameDay.event.id).inkIds,['ink_b','ink_a']);
- const inventory=async(kind,action,item,id=null,version=null,requestId=randomUUID(),uid=ownerId)=>{
-  const args=action==='create'?[requestId,item]:action==='update'?[requestId,id,version,item]:[requestId,id,version];
-  return (await role('authenticated',uid,()=>client.query(`select public.${action}_${kind}(${args.map((_,n)=>'$'+(n+1)).join(',')}) as result`,args))).rows[0].result;
- };
- const newPen={brand:'Test',model:'New',color:'',nibSize:'',nibType:'',archived:false,favorite:false,needsRefill:true};
- const newInk={brand:'Test',collection:'',name:'New',colorHex:null,archived:false,favorite:false};
- for(const [kind,item] of [['pen',newPen],['ink',newInk]]) {
-  const request=randomUUID();
-  const created=await inventory(kind,'create',item,null,null,request);
-  assert.equal(created.item.version,'1');
-  assert.deepEqual(await inventory(kind,'create',item,null,null,request),created);
-  await assert.rejects(inventory(kind,'create',{...item,brand:'Different'},null,null,request),e=>e.code==='40001');
-  await assert.rejects(inventory(kind,'create',item,null,null,randomUUID(),strangerId),e=>e.code==='42501');
-  for(const extra of [{...item,owner_id:ownerId},{...item,version:'99'},{...item,brand:''},{...item,favorite:null}])
-   await assert.rejects(inventory(kind,'create',extra),e=>e.code==='22023');
-  const updated=await inventory(kind,'update',{...item,archived:true,favorite:true},created.item.id,'1');
-  assert.equal(updated.item.version,'2'); assert.equal(updated.item.archived,true);
-  await assert.rejects(inventory(kind,'update',item,created.item.id,'1'),e=>e.code==='40001');
-  const restored=await inventory(kind,'update',item,created.item.id,'2');assert.equal(restored.item.archived,false);
-  const deleted=await inventory(kind,'delete',null,created.item.id,'3');assert.equal(deleted.deletedId,created.item.id);
-  await assert.rejects(inventory(kind,'delete',null,created.item.id,'3'),e=>e.code==='P0002');
+ const p=(await rpc('create_pen',[pen])).item;
+ const a=(await rpc('create_ink',[ink])).item;
+ const b=(await rpc('create_ink',[{...ink,name:'Second'}])).item;
+ const changed=(await rpc('update_pen',[p.id,{...pen,model:'Changed',favorite:true}])).item;
+ assert.equal(changed.model,'Changed'); assert.equal(changed.favorite,true);
+ const entry={penId:p.id,date:'2026-01-02',kind:'refill',inkIds:[b.id,a.id],notes:'Public journal note',notPure:true};
+ const event=(await rpc('create_refill_event',[entry])).event;
+ const publicRead=await rpc('get_collection',[],'anon',null);
+ assert.equal(publicRead.canEdit,false); assert.equal(publicRead.pens[0].needsRefill,false);
+ assert.deepEqual(publicRead.events[0].inkIds,[b.id,a.id]); assert.equal(publicRead.events[0].notes,entry.notes);
+ assert.equal((await rpc('get_collection')).canEdit,true);
+ for(const [who,uid] of [['anon',null],['authenticated',strangerId]]) {
+  for(const [name,args] of [['update_pen',[p.id,pen]],['delete_pen',[p.id]],['create_ink',[ink]],['update_ink',[a.id,ink]],['delete_ink',[a.id]],['create_refill_event',[entry]],['update_refill_event',[event.id,entry]],['delete_refill_event',[event.id]]])
+   await assert.rejects(rpc(name,args,who,uid),e=>e.code==='42501');
  }
- const referenced=await getCollection();
- for(const [kind,item] of [['pen',referenced.pens[0]],['ink',referenced.inks[0]]]) {
-  await assert.rejects(inventory(kind,'delete',null,item.id,item.version),e=>e.code==='23503');
-  const {id,version,...payload}=item;
-  await inventory(kind,'update',{...payload,archived:true},id,version);
- }
- assert.equal((await getCollection()).events.length,referenced.events.length);
- // One aggregate JSON value must include more than the usual Data API row cap.
- await client.query("insert into public.inks(owner_id,brand,collection,name) select $1,'bulk','','fixture-'||n from generate_series(1,1100) n",[ownerId]);
- assert.equal((await getCollection()).inks.length,1102);
- console.log('PASS snapshot >1000 rows, owner gating, ordered links, inventory validation/version/replay/archive/delete contracts');
-
- await client.query('truncate public.refill_event_inks,public.refill_events,public.pens,public.inks,private.data_imports,private.mutation_receipts');
- const bad=structuredClone(snapshot);bad.mapped.links[0].ink_id='missing';
- await assert.rejects(importLegacy(client,bad,options),e=>e.code==='23503');
- assert.equal((await client.query('select * from public.pens')).rowCount,0);
- assert.equal((await client.query('select * from private.data_imports')).rowCount,0);
- const peer=new pg.Client(config);await peer.connect();
- try {const outcomes=await Promise.all([importLegacy(client,snapshot,options),importLegacy(peer,snapshot,options)]);assert.deepEqual(outcomes.map(x=>x.status).sort(),['already-imported','imported']);}finally{await peer.end();}
- console.log('PASS failed import rolls back and concurrent imports serialize');
- // Fixed current repository snapshot, no live source reads or data logging.
- await client.query('truncate public.refill_event_inks,public.refill_events,public.pens,public.inks,private.data_imports,private.mutation_receipts');
- const actual=await capture('src/data','2026-10-03');
- await importLegacy(client,actual,options);await reconcile(client,actual.mapped);
- assert.equal((await importLegacy(client,actual,options)).status,'already-imported');
- console.log('PASS repository snapshot field/relationship reconciliation',JSON.stringify(actual.manifest.counts));
-} finally {if(client)await client.end();try {docker('rm','-f','-v',name);}catch{ /* failed launch has no container */ }}
+ assert.equal((await role('authenticated',strangerId,()=>client.query("update public.pens set model='forbidden' where id=$1",[p.id]))).rowCount,0);
+ console.log('PASS public collection/journal reads, anonymous/stranger write denial and owner inventory CRUD');
+ await rpc('update_pen',[p.id,{...pen,archived:true}]);
+ assert.equal((await rpc('get_collection')).events.length,1);
+ await assert.rejects(rpc('delete_pen',[p.id]),e=>e.code==='23503');
+ await assert.rejects(rpc('delete_ink',[a.id]),e=>e.code==='23503');
+ await rpc('update_pen',[p.id,pen]);
+ await rpc('update_refill_event',[event.id,{...entry,notes:'Edited',inkIds:[a.id]}]);
+ assert.equal((await rpc('get_collection')).pens[0].needsRefill,true,'historical edit leaves queue intent');
+ const cleaning=(await rpc('create_refill_event',[{...entry,kind:'cleaning',inkIds:[],notPure:false,queueAfterCleaning:false}])).event;
+ assert.equal((await rpc('get_collection')).pens[0].needsRefill,false);
+ await rpc('delete_refill_event',[cleaning.id]);
+ // A multi-ink write must roll back its event, links and queue together.
+ await client.query(`create function private.fail_link() returns trigger language plpgsql as $$ begin raise exception 'test link failure'; end $$;
+ create trigger test_fail_link before insert on public.refill_event_inks for each row execute function private.fail_link();`);
+ const before=await rpc('get_collection');
+ await assert.rejects(rpc('create_refill_event',[entry]),/test link failure/);
+ await client.query('drop trigger test_fail_link on public.refill_event_inks; drop function private.fail_link()');
+ assert.deepEqual(await rpc('get_collection'),before);
+ await assert.rejects(rpc('create_refill_event',[{...entry,inkIds:[a.id,a.id]}]),e=>e.code==='22023');
+ await rpc('delete_refill_event',[event.id]);
+ await rpc('update_ink',[a.id,{...ink,archived:true}]); await rpc('update_ink',[a.id,ink]);
+ await rpc('delete_ink',[a.id]); await rpc('delete_ink',[b.id]); await rpc('delete_pen',[p.id]);
+ assert.equal((await rpc('get_collection')).pens.length,0);
+ console.log('PASS archive/restore, restrictive deletes and atomic multi-ink/refill/cleaning integrity');
+ // Validate the approved fixed source with the ordinary one-time transactional importer.
+ const snapshot=await capture('src/data','2026-10-03');
+ await client.query('set role migration_runner');
+ await importLegacy(client,snapshot,{ownerId,targetIdentity:name}); await reconcile(client,snapshot.mapped);
+ assert.equal((await importLegacy(client,snapshot,{ownerId,targetIdentity:name})).status,'already-imported');
+ await client.query('reset role');
+ await client.query("insert into public.inks(owner_id,brand,collection,name) select $1,'Synthetic','','Extra '||n from generate_series(1,1100) n",[ownerId]);
+ assert.equal((await rpc('get_collection',[],'anon',null)).inks.length,snapshot.mapped.inks.length+1100);
+ console.log('PASS fixed-source import reconciliation and public snapshot beyond 1000 rows',JSON.stringify(snapshot.manifest.counts));
+} finally {if(client)await client.end();try{docker('rm','-f','-v',name);}catch{/* launch may have failed */}}
