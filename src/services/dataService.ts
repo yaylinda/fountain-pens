@@ -70,8 +70,8 @@ async function command(name: MutationName, payload: MutationPayload, apply: (val
     } catch (error) { throw error instanceof CollectionError ? error : safeError(error); }
     finally { saving = false; emit(); }
 }
-const penInput = (p: Omit<Pen, 'id'>) => ({ brand: p.brand, model: p.model, color: p.color, nibSize: p.nibSize, nibType: p.nibType, needsRefill: !!p.needsRefill, favorite: !!p.favorite, archived: !!p.archived });
-const inkInput = (i: Omit<Ink, 'id'>) => ({ brand: i.brand, collection: i.collection, name: i.name, colorHex: i.colorHex || null, favorite: !!i.favorite, archived: !!i.archived });
+const penInput = (p: Omit<Pen, 'id'>) => ({ details: p.details || '', sources: (p.sources || []).map(s => ({ ...s })), brand: p.brand, model: p.model, color: p.color, nibSize: p.nibSize, nibType: p.nibType, needsRefill: !!p.needsRefill, favorite: !!p.favorite, archived: !!p.archived });
+const inkInput = (i: Omit<Ink, 'id'>) => ({ details: i.details || '', sources: (i.sources || []).map(s => ({ ...s })), brand: i.brand, collection: i.collection, name: i.name, colorHex: i.colorHex || null, favorite: !!i.favorite, archived: !!i.archived });
 async function savePen(p: Omit<Pen, 'id'>, existing?: Pen) {
     let saved!: Pen;
     await command(existing ? 'update_pen' : 'create_pen', { ...(existing ? { p_id: existing.id } : {}), p_item: penInput(p) }, result => {

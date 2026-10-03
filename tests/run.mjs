@@ -15,6 +15,7 @@ try {
             'tests/workflows.test.tsx',
             'tests/save-celebration.test.ts',
             'tests/inkReference.test.tsx',
+            'tests/details.test.tsx',
         ],
         outdir: output,
         outExtension: { '.js': '.mjs' },
@@ -36,6 +37,7 @@ try {
             join(output, 'workflows.test.mjs'),
             join(output, 'save-celebration.test.mjs'),
             join(output, 'inkReference.test.mjs'),
+            join(output, 'details.test.mjs'),
         ],
         { stdio: 'inherit', env: { ...process.env, TZ: 'America/Chicago' } },
     );

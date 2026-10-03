@@ -27,3 +27,7 @@ The three versioned SQL migrations are the deployed schema history. Keep them un
 `npm test` uses the actual pinned browser client with synthetic HTTP/Auth responses and exercises public browse, owner sign-in, ordinary errors, inventory, drafts, journal and queue behavior. `npm run test:db` uses disposable PostgreSQL 17.11 with a non-superuser migration operator and Auth privileges without grant option. It checks fresh installation, public/owner/stranger authorization, inventory CRUD/archive/delete, ordered multi-ink transactions and rollback, fixed import reconciliation, and snapshots larger than 1,000 rows.
 
 These tests do not prove hosted Auth JWT/PostgREST/schema-cache behavior. Linda manually validated production login and updates after the rearchitecture. Future runtime changes still require appropriate hosted verification. GitHub Actions owns Vercel releases after the exact-SHA schema gate; Supabase integration owns schema deployment. See [operations](../docs/deployment.md). This cleanup does not change a live host or database.
+
+## Optional collection details
+
+See [collection details and source links](../docs/design/collection-details.md) for the additive details, sources, reference and swatch fields, the one-time seed, and deployment verification. Rich catalog JSON remains offline evidence; public runtime reads now come from `get_collection`.
