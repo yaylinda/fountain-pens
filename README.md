@@ -75,4 +75,4 @@ The benchmark runs temporary local HTTP servers and performs no saves or git ope
 
 Read [the application review](docs/app-review.md) for findings and implementation decisions.
 
-See the [proposed client/API/PostgreSQL architecture](docs/design/client-api-postgres.md) for the database, migration, and deployment redesign. This is a design proposal; the running app still uses the JSON storage described above.
+See the [proposed Vercel/Supabase architecture](docs/design/client-api-postgres.md) and its schema, migration, and deployment guides. The implementation sequence is schema approval, JSON migration validation, then database read/write integration. This is documentation only; the running app still uses the JSON storage described above.
