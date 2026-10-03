@@ -26,3 +26,6 @@ dist-ssr
 # Supabase local CLI state
 supabase/.temp/
 supabase/.branches/
+
+# Vercel linkage, downloaded environments and generated output
+.vercel/
