@@ -1,6 +1,6 @@
 # Vercel and Supabase delivery contract
 
-Status: future implementation guidance; no project creation, credentials, deployment, DNS changes, or production writes authorized by this docs PR. See [architecture gates](client-api-postgres.md#direction-and-decision-gates) and [final cutover](supabase-migration.md#final-live-cutover).
+Status: future implementation guidance; no project creation, credentials, deployment, DNS changes, or production writes authorized by this docs PR. See [architecture gates](client-api-postgres.md#direction-and-decision-gates) and [one-time import](supabase-migration.md#simple-delivery-sequence).
 
 ## Hosting and environment separation
 
@@ -59,4 +59,12 @@ Before enabling production writes, choose and verify a recovery policy appropria
 
 Supabase database backups do not include Storage object bytes; object metadata alone cannot restore uploaded photos. If there are uploaded objects, back up/restore the bytes separately and reconcile bucket/path/checksum metadata. With today's no-media snapshot, document that the object set is empty instead of inventing a backfill. [Supabase backup scope](https://supabase.com/docs/guides/platform/backups).
 
-Before new database writes, the final frozen JSON capture is a usable legacy recovery input. After new database writes, recovery must preserve/reconcile those writes: use database recovery or a compatible app rollback. **Never reopen the JSON app with stale files.** An explicit reverse migration is a separate project requiring write freeze, full export/reconciliation, and approval.
+Before database writes, the fixed JSON backup is a recovery input. After database writes begin, use database recovery or a compatible app rollback; do not return to stale JSON and lose new writes. There is no reverse-sync implementation or live-writer freeze choreography.
+
+## GitHub Actions and Vercel implementation scope
+
+The rewrite includes updating GitHub Actions, not only changing persistence. Current `checks.yml` runs app tests/lint/build and now a separate disposable database job for source validation, schema/import/RLS/RPC/rollback checks on PRs and main pushes. These checks need no cloud secrets.
+
+For the hosting slice, use **GitHub Actions as the single deployment owner**: PRs run CI against local/disposable test databases; after a reviewed merge to main and passing checks, deploy/promote production through its protected environment. Hosted PR previews are optional future work, not a release blocker. If added, they must use isolated nonproduction Supabase configuration. Disable duplicate automatic Vercel Git deployments if Actions owns deployment. Confirm the workflow and branch/environment protections before enabling it; do not rely on two competing triggers.
+
+Keep production Vercel and Supabase secrets out of PR test jobs; if hosted previews are later added, scope their configuration separately; fork PRs must not receive deployment credentials. Project creation, token configuration and production import/deployment remain separate authorized operations. Retire `build_and_push.yml`, GHCR production publication and the homelab updater only when Vercel is ready and serving the app. The current Docker workflow remains needed by the live JSON app and is unchanged in this database slice.
