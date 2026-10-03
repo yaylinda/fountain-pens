@@ -1,60 +1,47 @@
-# Hosted readiness review — deployment blocked
+# Hosted release readiness
 
-Reviewed main `8cbe712963db213974c0f00a9a25374bf5a73096` on 2026-10-03. PR12 was draft/unmerged at `de2e9054ba742d93947825d36c7ef3958cbe61c8`; do not deploy its SQL until parent review and merge. This report does not approve hosted application.
+Updated 2026-10-03 for merged PR12, commit `8235b955a1cdb3a0b29a01a7bd8b622ff45bd690`.
 
-## Updated access requirement
+## Current state
 
-The user now requires public browsing for everyone and Linda-only writes, with no public signup or browse login gate. This supersedes the private-read foundation and original PR12 design. Coordinate public SELECT grants/RLS on all four domain tables and the collection snapshot RPC with the app task. Keep owner configuration and import metadata private. Remove runtime mutation receipts, expected-version conflict handling, advisory-lock concurrency and recovery logic per the user’s explicit request. Prioritize straightforward single-writer CRUD, ordinary constraints/FKs and a small atomic multi-ink transaction. The app task owns these SQL/runtime edits; this readiness branch changes no migration. No live apply until this is synchronized.
+The application supports public collection browsing, including displayed journal notes, with Linda-only writes and no public signup. Runtime mutations are straightforward CRUD, with an atomic transaction for multi-ink refill changes. Custom writer roles, expected-version conflicts, runtime retry receipts, advisory locks and session draft recovery have been removed.
 
-## Historical findings — 2026-10-03, main 8cbe712
+The approved Supabase project is `dtdzbjxrqsrhfifxsebi`, PostgreSQL 17.11. The owner created her application Auth account privately and its email was confirmed; public signup is disabled. No password or token is stored in this repository. Owner binding is part of the separately reviewed one-time import operation.
 
-Connected Supabase read-only checks against approved project `dtdzbjxrqsrhfifxsebi` found PostgreSQL 17.11, zero public tables, zero Auth users, and real `auth.uid()`. `postgres` has CREATEROLE/BYPASSRLS but is not superuser. It can reference `auth.users`, but lacks grant option for both auth schema USAGE and auth.uid EXECUTE.
+Production GitHub integration is enabled for `main`, working directory `.`, with automatic branching disabled. Enabling it after PR12 merged did not replay that commit: the latest read-only check still found zero migrations and zero public tables. This readiness update supplies the next meaningful repository push. Confirm the resulting integration deployment before importing data or releasing the app.
 
-The foundation therefore needs a coordinated role-model correction **before first application**:
+## Reviewed migration manifest
 
-1. A PG17 non-superuser role creator does not automatically obtain SET membership in its new role. Foundation fails at the first ALTER FUNCTION OWNER with `must be able to SET ROLE collection_writer` in a disposable PG17.11 reproduction.
-2. After membership is addressed, the target owner needs CREATE on the containing schema during ownership transfer; current migrations grant only USAGE. Scope any CREATE grant to the migration transaction, revoke afterward, and apply the same pattern to refill and pending inventory private functions.
-3. The grant of auth schema USAGE to collection_writer cannot be delegated by hosted postgres. The disposable reproduction emitted `no privileges were granted for auth` and `uid`. Explicit EXECUTE may already be inherited from PUBLIC, but auth schema access is still missing. Coordinate the simplest owner-checked command design with PR12; any privileged function must enforce the approved owner and a safe search path. Changes to the definer ownership model need explicit review and managed validation. Granting an existing role's membership has wider implications and requires review of effective privileges.
+The following SQL was reviewed and rehearsed. It is unchanged between implementation revision `2219a916`, final PR12 head `41481a2`, and merged commit `8235b95`.
 
-The synthetic reproduction used only a temporary Docker PostgreSQL instance, with auth/roles approximating observed managed ACLs; it was deleted afterward. It is evidence for PostgreSQL permission failures, **not** full Supabase compatibility verification. No hosted DDL, rows, account, credentials, or import were created.
-
-Security advisors already report `public.rls_auto_enable()` executable SECURITY DEFINER for anon and authenticated on this otherwise empty project. Investigate the provider-owned event trigger and its ACL separately; do not silently drop it or broaden the app migration. Performance advisors returned no findings.
-
-- https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable
-- https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable
-- https://www.postgresql.org/docs/17/sql-alterfunction.html
-- https://www.postgresql.org/docs/17/sql-createrole.html
-
-## Reviewed migration identity (not deployable yet)
-
-| File | SHA-256 |
+| Version / file | SHA-256 |
 | --- | --- |
-| `supabase/migrations/20261003031321_collection_foundations.sql` | `dfeb197966f6067e8382d4c8a7b9b37202ee4b9562abcaf9c9905ee60aebbaec` |
-| `supabase/migrations/20261003032129_refill_commands.sql` | `4ad74d84de2219201e62cdd0abc83a00d66e97d64cae017b8baa17f9516ff71b` |
+| `20261003031321_collection_foundations.sql` | `c2d477d52424d2b596810246d0c0ff26536ff9836964402f7aa67035f4a5e6f6` |
+| `20261003032129_refill_commands.sql` | `5a01c551e8b8a92822f7cbd4cfd2d48d73e6ea19c61701053ac0e6f33e7ac22b` |
+| `20261003034609_collection_runtime.sql` | `760e234474f10a445cf724e51e7bb9b2a590c7a2b6b39a50ed3592cd9c38edab` |
 
-A later additive fix cannot rescue an earlier migration that fails. Since this target has no applied migrations, coordinate repair of unpublished foundation SQL with all branches and regenerate this manifest after review. Do not silently edit any migration applied elsewhere.
+All three migrations installed on disposable PostgreSQL 17.11 as a non-superuser database owner with BYPASSRLS and ordinary Auth access, without Auth grant options. The old foundation's custom-role SET membership, schema CREATE and delegated Auth-access failures are resolved by removing that role model. The only application definer helper, `private.is_owner()`, returns a boolean; mutation and snapshot functions run as the caller. Domain RLS permits public reads and restricts writes to the configured owner.
 
-## Coordinated release sequence
+This local rehearsal uses an Auth stand-in and synthetic claims. It does not replace hosted Auth/JWT/PostgREST checks.
 
-1. Keep production integration disabled and app deployment held. Fix the blockers with a non-superuser install regression and the full disposable database suite. Resolve PR12 overlap and inspect fresh main/migration history.
-2. Parent reviews the exact merged SQL, commit and SHA-256 manifest. Confirm project identity and empty history immediately before application. Use a single schema deployer: recommended GitHub integration after parent explicitly enables it. Do not also apply the same migrations with MCP; preserve canonical migration versions. If integration is unavailable, agree on a migration-history-preserving alternative first.
-3. Verify migration versions and the actual reviewed minimal role model from the final SQL. Domain RLS and grants must permit public SELECT and Linda-only writes; private owner/import metadata must remain inaccessible to clients. Check direct-table and RPC access for anon, Linda and an unrelated authenticated identity. Check any privileged function’s owner authorization, safe search path and intended EXECUTE grants. Do not require the superseded collection_writer role, wrapper layout or FORCE RLS choices. Run both advisors and compare baseline findings.
-4. Execute managed `auth.uid()` and role checks in a read-only transaction (`BEGIN READ ONLY`, `SET LOCAL ROLE authenticated`, transaction-local claims, SELECT only, `ROLLBACK`). An arbitrary synthetic UUID is not an authenticated session; label it correctly. Confirm stranger/null claims can browse the collection but cannot pass owner write checks. Test anon write denial independently. Do not insert synthetic collection rows.
-5. Lowest-friction owner setup: parent opens the approved project’s Authentication → Users → Add user → Create a new user, then hands control to Linda. Linda enters her own email and password privately, keeps Auto confirm user enabled for her own account, and submits. Agents do not read/capture the password or operate the credential form. This creates the **application Auth user**, distinct from the dashboard account. Keep public signups disabled and email/password login enabled. Read back only the resulting UUID/email-confirmed status and have parent approve the owner binding. Invitation is an alternative only when the app already handles its callback and password setup; an invitation alone does not provide a password-setting screen. Do not add that flow solely for this one-user setup.
-6. Register that UUID once in private.collection_owner with America/Chicago using a reviewed, target-bound operator step. No import until hosted schema validation and owner binding approval are complete.
-7. Verify public PostgREST reads plus actual signed-in JWT owner write gating, including `/rpc/get_collection` after the runtime migration is merged. This requires the real app Auth session; SQL SET ROLE alone is insufficient. Keep tokens out of logs. Validate anonymous HTTP reads and write denial separately using only the publishable key.
-8. Perform the one authorized import through a separately reviewed operator path, retain reconciliation/receipt evidence, then release the app and do user-coordinated real CRUD smoke tests. GitHub Actions must wait for the exact schema revision/readiness check; its disposable DB tests alone are not proof of hosted deployment. The parent owns the deployment gate and Vercel configuration.
+## Integration and post-deployment checks
 
-## Import readiness
+Supabase's [GitHub integration documentation](https://supabase.com/docs/guides/deployment/branching/github-integration) states that pushing or merging to the configured production branch applies new files from `supabase/migrations`. Production API/Auth configuration and seeds are ignored by default. `config.toml` is documented for configuration, Edge Functions and Storage resources; none are being deployed here. No requirement for a config file for this migrations-only deployment was established, so this change adds no speculative configuration or hosted Auth overrides. If the integration reports a missing-config error, resolve that specific error before proceeding.
 
-The fixed source snapshot's combined raw-file SHA-256 is `369692352fa2796aa7932ed7f87f3a5233291f8fd51c2751c9a8efdb1ca7aa58`: 50 pens, 194 inks, 486 events, 507 links. Preserve the three source files and review a fresh dry-run before import.
+1. Confirm integration success and exactly the three migration versions above, in order. Do not duplicate them with MCP `apply_migration`, which does not expose an explicit version argument. Do not modify applied migrations.
+2. Verify the four domain tables have RLS, public SELECT grants/policies and owner-only write policies. Verify the two private tables have RLS and no anon/authenticated table privileges. Confirm only intended function EXECUTE grants, the helper's safe search path, and caller-rights mutation functions.
+3. Run security and performance advisors. The pre-schema baseline already flagged provider-created `public.rls_auto_enable()` as executable SECURITY DEFINER for anon/authenticated; performance advisors were clear. Compare new findings without silently dropping provider objects. [Security finding reference](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable).
+4. Check public `/rest/v1/rpc/get_collection` and table reads using the publishable key, then real owner Auth/JWT behavior through the app. Read-only SQL role/claim checks supplement these tests; they are not a real login. No synthetic collection rows should be written in the hosted project.
+5. Parent approves the one-time import after hosted schema validation. Keep the Vercel app release coordinated with that readiness; local database CI alone does not establish hosted deployment success.
 
-The currently merged `importLegacy` wraps its writes in one transaction with owner/empty-target checks, exact field/order reconciliation and sequence advancement. It also contains advisory-lock/receipt logic from the superseded design; do not perpetuate that generalized recovery model in new tooling. Keep one-time validation and the basic empty-target guard while coordinating simplification with the app task. `targetIdentity` is a receipt label, not proof of connection identity. The CLI is dry-run only.
+## One-time import prepared
 
-The supported low-friction transport is native `execute_sql(project_id, query)` for the one-time data transaction; it uses the existing connector authorization, without a database password or public import RPC. The generator must still be adapted to the finalized simple schema and reviewed before executing. Do not split its transaction into independent execute_sql calls, upload data to a public RPC/build, or obtain a database password to work around this gap. A follow-up can generate one reviewed atomic SQL transaction from the same validated snapshot for an authorized connector, with reconciliation, target/owner guards, an empty-target check, and a synthetic atomic rollback test. Keep generated real-data SQL out of Git/public artifacts and logs. Use one call containing the complete transaction, not one call per statement: `BEGIN;` then a `DO` block with explicit approved owner/existence and empty-target guards, inserts, reconciliation and sequence advancement, then `COMMIT;`. Encode validated source values safely (for example collision-checked dollar-quoted JSON plus jsonb_to_recordset), never concatenate raw strings into SQL. Raise on any mismatch so no partial import commits. Return only summary counts/hash, not notes. On uncertain transport outcome, inspect rows before deciding any next action; do not add automatic replay infrastructure. Rehearse the exact generated transaction and an injected-error rollback locally. The tool schema accepts raw SQL without a declared query-size cap, but acceptance of this payload size is not yet verified. Do not silently chunk if rejected.
+The fixed source snapshot is unchanged: combined raw-file SHA-256 `369692352fa2796aa7932ed7f87f3a5233291f8fd51c2751c9a8efdb1ca7aa58`, with **50 pens, 194 inks, 486 events and 507 links**. Preserve the three source JSON files.
 
-Native `apply_migration(project_id,name,query)` can execute the reviewed schema DDL through the same connector. Its tool contract does not accept an explicit migration version, so it cannot promise preservation of repository filename versions. Prefer the agreed GitHub schema integration; if parent selects MCP bootstrap instead, coordinate migration-history reconciliation before enabling integration. Keep collection data out of apply_migration/history: use execute_sql for the separately approved import. No hosted apply or import is authorized by this runbook.
+An operational generator and SQL payload are held outside Git. Reviewed SQL SHA-256 is `53f764f723f08329272b0ced43ffc8cb9810df78285adfe709e64f7d11d62fbb`, 149,737 bytes. It checks the approved confirmed Auth owner and empty target, binds the owner if absent, inserts the validated snapshot, reconciles every mapped field and ordered link, records a basic import audit marker, and advances the event sequence. It contains no automatic replay or concurrency framework.
 
-Dashboard create-user form source: https://github.com/supabase/supabase/blob/master/apps/studio/components/interfaces/Auth/Users/CreateUserModal.tsx. Supabase user management: https://supabase.com/docs/guides/auth/managing-user-data.
+Local rehearsal passed exact reconciliation, an injected-error rollback of collection/owner/audit rows, rejection of a populated target, public snapshot reads and owner/stranger access checks. The next event sequence is 487. PostgreSQL `setval` is not transactional: a later failure can leave a harmless sequence advance even when rows roll back.
 
-The current Supabase changelog was reviewed, including PG17.11 breaking changes. This schema uses none of the identified legacy pgcrypto ciphers, ltree, btree_gist float indexes, or custom selectivity operators.
+Execute the complete reviewed transaction in one native `execute_sql` call with the explicitly approved project ID, using existing connector authorization. No database password or public import RPC is needed. Do not split the transaction across calls. Connector acceptance of the full payload size and actual hosted import remain untested. If a response is uncertain, inspect the resulting state before any further action. Keep generated SQL, passwords and tokens out of Git, build artifacts and logs; return only reconciliation summaries.
+
+No hosted import has occurred as of this update. Historical role findings from the pre-PR12 schema are not outstanding blockers for the revised SQL.
