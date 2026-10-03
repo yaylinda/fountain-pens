@@ -1,8 +1,10 @@
+> Historical redesign review (September 2026). Counts, persistence details and validation results below describe that revision. Current persistence uses Supabase, public reads and owner-only writes; same-day ordering uses the database sequence. See [current architecture](design/client-api-postgres.md).
+
 # Application review and redesign
 
 ## Scope
 
-Reviewed the application entry points, all inventory/refill components, contexts, models, services, CSS, application configuration, and the three source JSON collections. Inspected the existing swatch reference and its role in the UI. Deployment, Claudia, server infrastructure, and git synchronization implementation are excluded as requested.
+Reviewed the application entry points, all inventory/refill components, contexts, models, services, CSS, application configuration, and the three source JSON collections. Inspected the existing swatch reference and its role in the UI. Deployment and server infrastructure were outside the original review.
 
 The original source contains 48 pens, 194 ink records including the `NONE` placeholder, and 436 journal events. These files remain unchanged by this work.
 

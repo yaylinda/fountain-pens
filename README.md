@@ -39,7 +39,7 @@ npm run build
 
 Anyone can browse the collection and journal notes. Only the approved owner can sign in and save changes. Saves use straightforward database CRUD; a refill, its ordered ink links and queue effect commit together. Journal URLs use stable event IDs, and same-day ordering uses the database sequence. Calendar behavior uses America/Chicago. Ordinary form failures keep the current draft available for correction.
 
-These fixed JSON files are retained only for the separately authorized one-time import:
+These fixed JSON files are retained for one-time import reproducibility, tests and audit history:
 
 - `src/data/pens.json`: source pen inventory.
 - `src/data/inks.json`: source ink inventory, including the legacy cleaning sentinel.
@@ -60,19 +60,8 @@ Swatches use the existing `scripts/output.json` reference, with a user-recorded 
 
 ## Production delivery
 
-The new runtime is a Vite SPA on Vercel; see [production setup and release gates](docs/deployment.md). Legacy Docker publication is disabled in the workflow; Docker builds remain verification only. The separate cutover must stop old app writes and confirm the homelab updater is paused or pinned before enabling the new live collection.
+The live app is [Ink & nib](https://project-erq6t.vercel.app), a Vite SPA on Vercel backed by Supabase. GitHub Actions deploys production only after application/database checks and the exact-SHA successful Supabase integration schema check. Supabase's GitHub integration owns schema deployment from main. PRs run CI without hosted previews. See [production operations](docs/deployment.md).
 
-The following compression benchmark describes the **legacy Express deployment**, retained for the separately coordinated retirement. The Express server negotiates response compression. Vite's fingerprinted `/assets/` files are cached for one year with `immutable`; HTML revalidates, and API responses use `no-store` so inventory stays fresh. Missing assets return 404 rather than the app document. Unversioned files such as fonts and the favicon retain revalidation.
+Run `npm run check` for all application, deployment, lint, type/build, migration and database checks. Docker is needed only for the disposable PostgreSQL test harness. The retired container server, JSON write endpoints and Git synchronization are removed.
 
-To compare response-body transfer sizes using the same local build and inventory:
-
-```sh
-npm run build
-node scripts/measure-delivery.mjs
-```
-
-The benchmark runs temporary local HTTP servers and performs no saves or git operations. On the September 5 snapshot, initial JS/CSS plus inventory fell from 448,376 to 127,240 bytes with gzip (71.6%). This excludes HTML, fonts, and protocol overhead and measures transfer size, not browser paint time.
-
-Read [the application review](docs/app-review.md) for findings and implementation decisions.
-
-See the [Vercel/Supabase architecture](docs/design/client-api-postgres.md), [implemented runtime contract](supabase/RUNTIME.md), and [one-time migration guide](docs/design/supabase-migration.md). Hosted Auth/PostgREST verification, owner setup, the live import and deployed CRUD checks are separate release steps; local synthetic tests do not establish their completion.
+See the [architecture](docs/design/client-api-postgres.md), [runtime contract](supabase/RUNTIME.md), [schema](docs/design/supabase-schema.md), and [import reproducibility guide](docs/design/supabase-migration.md). Linda manually validated production login and updates after the rearchitecture; local synthetic checks still do not establish hosted Auth/PostgREST behavior for later changes.

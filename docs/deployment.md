@@ -19,11 +19,11 @@ GitHub token gets `checks: read` only in the deploy job. The native Supabase
 integration remains the sole schema deployer; this wait uses no database secrets
 and runs no migrations.
 
-Deployment is initially disabled. Repository variable
+The live app is https://project-erq6t.vercel.app. Linda manually validated production login and updates after the rearchitecture. Repository variable
 `VERCEL_PRODUCTION_ENABLED` must be exactly `true` to enable it. This switch is
 not a substitute for review or production-environment protection.
 
-## Setup before enabling
+## Configuration and release controls
 
 1. Confirm the account/team, project ID, owner, plan, limits and any costs in the
    Vercel dashboard. Use an eligible free Hobby project only after that check;
@@ -33,8 +33,7 @@ not a substitute for review or production-environment protection.
    and finish its browser/device flow. Never paste credentials into chat.
 2. Create/link the approved Vite project at repository root. Set Node.js 22.x
    (CI pins 22.16.0), output `dist`, install `npm ci`, build `npm run build`.
-   `vercel.json` supplies these build settings. Do not launch `server.js` or
-   configure Docker for this static deployment.
+   `vercel.json` supplies these build settings. This is a static deployment.
 3. Leave the Vercel Git integration disconnected, or disable its automatic
    deployments before connecting. The committed `git.deploymentEnabled: false`
    is defense in depth for all branches; do not rely on it to prevent an import
@@ -70,12 +69,11 @@ not a substitute for review or production-environment protection.
    privileged value in any `VITE_` variable. Keep production credentials out of
    PR jobs. CI pulls environment configuration only in the protected deploy job,
    never uploads `.vercel` as an artifact, and removes it on completion.
-7. Complete the application integration and separately approve/apply the
-   additive Supabase migrations, approved owner's Auth setup/allowlist, exact
-   production Auth redirect URLs, and fixed one-time JSON import. Use
-   America/Chicago for collection dates. Verify recovery and RLS against the
-   real project. Follow `supabase/README.md` and the design migration runbook;
-   deployment performs no database reset, migration, import or seed operation.
+7. Preserve the configured owner allowlist, disabled public signup, exact Auth
+   redirect URLs and America/Chicago collection dates. Supabase integration
+   applies new reviewed migrations from main; do not edit applied SQL or replay
+   the initial import. Follow `supabase/README.md`; Vercel deployment performs
+   no database reset, migration, import or seed operation.
 8. Review the exact ready commit and target project. Enable the repository
    variable only when the coordinated release is approved, then push the
    reviewed main commit (or an approved empty release commit). Re-running its
@@ -106,23 +104,11 @@ API. Inspect browser network/console errors and ensure legacy filesystem/Git
 writes are absent. Record deployment URL, SHA, target project, verification
 results and remaining limitations in the coordinated release report.
 
-## Docker cutover and recovery
+## Recovery
 
-`build_and_push.yml` now builds without publishing, including on main, tags and
-manual runs. Its package permission is read-only. This prevents an unconfigured
-Supabase frontend from replacing legacy `prod`/`latest` images while preserving
-Docker build checks. The Dockerfile does not receive Supabase browser build
-configuration; Vercel owns the configured production build.
+The legacy container deployment and filesystem/Git endpoints have been removed from this repository. External hosts and integrations are not modified by that code cleanup. Docker remains a local/CI database-test dependency only.
 
-The repository's Compose file references `:prod`; repository evidence does not
-establish whether an external updater is currently active. During coordinated
-cutover, confirm and pause/pin any homelab updater and stop old app writes before
-enabling live Supabase writes. Disabling publication does not stop an existing
-container or its JSON endpoints. Remove the legacy workflow and deployment
-artifacts once rollback needs are settled.
-
-Before the first Supabase write, the fixed JSON backup is a recovery input.
-After new writes, never restore service by pointing users at stale JSON.
+The fixed JSON is historical import evidence, not a current backup. Never restore service by pointing users at stale JSON.
 Disable `VERCEL_PRODUCTION_ENABLED` to stop new releases; use an approved,
 schema-compatible Vercel rollback if needed. A code rollback does not roll back
 the database. Prefer a reviewed fix on main, preserve data, and follow the

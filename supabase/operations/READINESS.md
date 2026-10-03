@@ -1,8 +1,10 @@
+> Historical pre-release record (2026-10-03, PR12). The pending setup/import statements below describe that point in time, not current release blockers or instructions to rerun the import. The app is now live and Linda manually validated login and updates. Keep the hashes and rehearsal evidence for audit; current operations are in [deployment.md](../../docs/deployment.md) and [RUNTIME.md](../RUNTIME.md).
+
 # Hosted release readiness
 
 Updated 2026-10-03 for merged PR12, commit `8235b955a1cdb3a0b29a01a7bd8b622ff45bd690`.
 
-## Current state
+## State at the recorded revision
 
 The application supports public collection browsing, including displayed journal notes, with Linda-only writes and no public signup. Runtime mutations are straightforward CRUD, with an atomic transaction for multi-ink refill changes. Custom writer roles, expected-version conflicts, runtime retry receipts, advisory locks and session draft recovery have been removed.
 
