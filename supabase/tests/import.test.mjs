@@ -28,3 +28,12 @@ test('future dates require review, empty links map to cleaning, real leap day ac
  const r=mapLegacy(s,'2024-02-29'); assert.equal(r.findings.length,3); assert.equal(r.events[2].kind,'cleaning');
  assert.equal(validDate('0000-01-01'),false);
 });
+
+// The committed migration is frozen, reviewable evidence of all offline inputs.
+test('reference seed is reproducible and includes every rich field and matched swatch', async () => {
+ const { seedSql, referenceRows, swatchRows } = await import('../../scripts/migration/reference-data.mjs');
+ const { readFile } = await import('node:fs/promises');
+ assert.equal(await readFile('supabase/migrations/20261003171529_seed_collection_references.sql','utf8'),seedSql());
+ assert.equal(new Set(referenceRows.map(r=>r.id)).size,36);
+ assert.equal(new Set(swatchRows.map(r=>r.id)).size,123);
+});

@@ -169,3 +169,14 @@
         padding-bottom: var(--space-sm);
     }
 }
+
+.collection-detail-fields { min-width: 0; }
+.collection-detail-fields > summary { cursor: pointer; min-height: 44px; align-content: center; color: var(--brass); font-weight: 600; }
+.detail-fields-content, .source-editor { display: grid; gap: var(--space-md); min-width: 0; }
+.detail-fields-content { padding: var(--space-md) 0; }
+.source-editor { padding-bottom: var(--space-md); border-bottom: 1px solid var(--line); }
+.detail-fields-content > button, .source-editor > button { justify-self: start; }
+.ink-story-description { white-space: pre-wrap; }
+@media (max-width: 720px) {
+    .source-editor .field-pair { grid-template-columns: minmax(0, 1fr); }
+}

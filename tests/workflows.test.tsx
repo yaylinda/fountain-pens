@@ -1,3 +1,4 @@
+import { withReferences } from './referenceFixtures';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
@@ -79,7 +80,7 @@ let failLoad = true;
 let failFavoriteSave = false;
 const state = {
     pens: source.pens.map(p => ({ ...p, archived: false, favorite: false, needsRefill: false })),
-    inks: source.inks.filter(i => i.id !== 'NONE').map(i => ({ ...i, colorHex: null, archived: false, favorite: false })),
+    inks: source.inks.filter(i => i.id !== 'NONE').map(i => ({ ...withReferences(i), colorHex: null, archived: false, favorite: false })),
     events: source.refillLog.map((e, n) => ({ ...e, id: `event-${n}`, sequence: String(n + 1), kind: 'refill', notPure: false })),
 };
 let nextSequence = 2;
@@ -126,7 +127,7 @@ globalThis.fetch = async (input: string, init?: RequestInit) => {
         const index = items.findIndex(i => i.id === body.p_id);
         if (action === 'delete') { items.splice(index, 1); result = { deletedId: body.p_id }; }
         else {
-            const item = { ...body.p_item, id: body.p_id || crypto.randomUUID() };
+            const item = { ...(items[index] || {}), ...body.p_item, id: body.p_id || crypto.randomUUID() };
             if (action === 'create') items.push(item); else items[index] = item;
             result = { item };
         }

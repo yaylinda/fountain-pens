@@ -2,6 +2,7 @@ import { useId } from 'react';
 import type { Ink } from '../../models/types';
 import { getInkReference, inkPropertyValues, referenceHex } from '../../lib/inkReference';
 import './InkStory.css';
+import { SourceLinks } from './DetailFields';
 
 export function InkStory({ ink, expanded = false }: { ink: Ink; expanded?: boolean }) {
     const headingId = useId();
@@ -86,23 +87,17 @@ export function InkStory({ ink, expanded = false }: { ink: Ink; expanded?: boole
             <details className="ink-source-details">
                 <summary>Sources & notes</summary>
                 <div>
-                    <p>Summarized from the linked sources. Screen colors are approximate.</p>
+                    <p>Screen colors are approximate. See the linked sources for product details.</p>
                     {writing ? (
                         <p>Writing observations and product details follow Vanness’s table; any differences in its prose are noted below.</p>
-                    ) : (
+                    ) : ink.reference ? (
                         <p>Only reported properties are shown. Glistening is listed as shimmer; an unlisted property is not verified.</p>
-                    )}
+                    ) : null}
                     {reference.colorGuideProperties && (
                         <p>Color guide: {reference.colorGuideProperties.join(', ')}.</p>
                     )}
                     {reference.notes?.map((note) => <p key={note}>{note}</p>)}
-                    <ul>
-                        {sources.map((source) => (
-                            <li key={source.url}>
-                                <a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a>
-                            </li>
-                        ))}
-                    </ul>
+                    <SourceLinks sources={sources} />
                 </div>
             </details>
         </div>

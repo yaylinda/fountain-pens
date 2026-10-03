@@ -1,6 +1,6 @@
 # Pilot ink reference
 
-`src/data/pilot-inks.json` contains researched details for all 15 Pilot inks in the collection: 14 Iroshizuku colors and standard Blue. Sources were retrieved on 2026-09-06 (UTC). References join the editable inventory by brand and stable `inkId`, using the same path as Wearingeul. They are bundled with the app, independent of inventory saves.
+`src/data/pilot-inks.json` contains researched details for all 15 Pilot inks in the collection: 14 Iroshizuku colors and standard Blue. Sources were retrieved on 2026-09-06 (UTC). The [collection details migration](design/collection-details.md) matches these references to inventory by brand and stable `inkId`, using the same path as Wearingeul. Runtime reads come from Supabase; this catalog remains the historical seed and provenance fixture.
 
 ## Sources and normalization
 

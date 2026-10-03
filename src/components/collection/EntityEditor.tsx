@@ -26,6 +26,7 @@ import {
 } from './EditorFields';
 import { useDraft } from '../../hooks/useDraft';
 import { InkStory } from './InkStory';
+import { DetailFields, PenDetails } from './DetailFields';
 type EntityEditorState = Extract<EditorState, { kind: 'pen' | 'ink' }>;
 
 export function EntityEditor({
@@ -44,6 +45,8 @@ export function EntityEditor({
     const pen = penMode ? (item as Pen | undefined) : undefined;
     const ink = !penMode ? (item as Ink | undefined) : undefined;
     const [initial] = useState(() => ({
+        details: item?.details || '',
+        sources: item?.sources || [],
         brand: item?.brand || '',
         model: pen?.model || '',
         color: pen?.color || '',
@@ -80,6 +83,9 @@ export function EntityEditor({
             .sort(byName)
             .map((value) => <option key={value} value={value} />);
     const previewInk: Ink = {
+        ...ink,
+        details: draft.details,
+        sources: draft.sources,
         id: ink?.id || '',
         brand: draft.brand,
         name: draft.name,
@@ -109,9 +115,15 @@ export function EntityEditor({
             );
             return;
         }
+        if (draft.sources.some(source => !source.label.trim() || !/^https?:\/\/[^\s]+$/i.test(source.url))) {
+            setError('Give each link a label and a full http:// or https:// URL, or remove it.');
+            return;
+        }
         void run(async () => {
         if (penMode) {
             const data = {
+                details: draft.details,
+                sources: draft.sources,
                 brand: draft.brand.trim(),
                 model: draft.model.trim(),
                 color: draft.color.trim(),
@@ -128,6 +140,8 @@ export function EntityEditor({
             );
         } else {
             const data = {
+                details: draft.details,
+                sources: draft.sources,
                 brand: draft.brand.trim(),
                 collection: draft.collection.trim(),
                 name: draft.name.trim(),
@@ -408,6 +422,8 @@ export function EntityEditor({
                                 </p>
                             </>
                         )}
+                        {canEdit && <DetailFields details={draft.details} sources={draft.sources}
+                            onDetails={value => change('details', value)} onSources={value => change('sources', value)} />}
                     </fieldset>
                     {canEdit && (
                         <div className="form-actions">
@@ -492,6 +508,7 @@ export function EntityEditor({
                     )}
                 </form>
                 <aside className="editor-aside">
+                    {penMode && <PenDetails details={draft.details} sources={draft.sources} />}
                     {penMode ? (
                         <section className="specimen pen-specimen">
                             <Icon name="pen" />
@@ -548,7 +565,7 @@ export function EntityEditor({
                             )}
                         </section>
                     )}
-                    {ink && <InkStory ink={ink} expanded />}
+                    {!penMode && <InkStory ink={previewInk} expanded />}
                     {item && (
                         <section className="history-section">
                             <div className="section-heading">

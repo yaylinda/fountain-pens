@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import assert from 'node:assert/strict';
 import pg from 'pg';
 import { capture, importLegacy, reconcile } from '../../scripts/migration/legacy.mjs';
+import { catalogs, referenceRows, swatchRows, watermanId, watermanSource } from '../../scripts/migration/reference-data.mjs';
 import { ownerId, strangerId } from './fixtures.mjs';
 const image='postgres@sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f';
 const name=`fountain-crud-${randomUUID()}`;
@@ -106,7 +107,42 @@ try {
  await client.query('set role migration_runner');
  await importLegacy(client,snapshot,{ownerId,targetIdentity:name}); await reconcile(client,snapshot.mapped);
  assert.equal((await importLegacy(client,snapshot,{ownerId,targetIdentity:name})).status,'already-imported');
+ // Rehearse the upgrade against the imported inventory, not just an empty install.
+ const seed = await readFile('supabase/migrations/20261003171529_seed_collection_references.sql','utf8');
+ await client.query(seed);
  await client.query('reset role');
+ const migrated = await rpc('get_collection',[],'anon',null);
+ for (const catalog of catalogs) for (const original of catalog.inks) {
+  const ink = migrated.inks.find(i => i.id === original.inkId);
+  assert.deepEqual({...ink.reference,description:ink.details,sources:ink.sources}, original,
+   `every original field retained for ${original.inkId}`);
+ }
+ for (const row of swatchRows) assert.deepEqual(migrated.inks.find(i => i.id===row.id).swatchReference,row.swatch);
+ assert.deepEqual(migrated.pens.find(p => p.id===watermanId).sources,[watermanSource]);
+ assert.equal(referenceRows.length,36); assert.equal(swatchRows.length,123);
+ const rich = migrated.inks.find(i => i.reference?.writing);
+ const { id: richId, reference: richReference, swatchReference: richSwatch, ...richInput } = rich;
+ const edited = await rpc('update_ink',[richId,{...richInput,details:'Owner description',sources:[{label:'Product',url:'https://example.com/product',supports:['description']},{label:'Review',url:'https://example.com/review'}]}]);
+ assert.deepEqual(edited.item.reference,richReference);
+ assert.deepEqual(edited.item.swatchReference,richSwatch);
+ assert.equal(edited.item.details,'Owner description'); assert.equal(edited.item.sources.length,2);
+ // Old clients omitting optional fields also preserve the new data.
+ const oldInput = {...richInput}; delete oldInput.details; delete oldInput.sources;
+ const oldSave = await rpc('update_ink',[richId,{...oldInput,favorite:true}]);
+ assert.equal(oldSave.item.details,'Owner description'); assert.deepEqual(oldSave.item.sources,edited.item.sources);
+ await assert.rejects(rpc('update_ink',[richId,{...richInput,sources:[{label:'Bad',url:'javascript:alert(1)'}]}]),e=>e.code==='22023');
+ await assert.rejects(rpc('update_ink',[richId,{...richInput,reference:{}}]),e=>e.code==='22023');
+ const cleared = await rpc('update_ink',[richId,{...richInput,details:'',sources:[]}]);
+ assert.equal(cleared.item.details,''); assert.deepEqual(cleared.item.sources,[]); assert.deepEqual(cleared.item.reference,richReference);
+ const detailPen = (await rpc('create_pen',[{...pen,details:'A pen story',sources:[watermanSource]}])).item;
+ assert.equal(detailPen.details,'A pen story'); assert.deepEqual(detailPen.sources,[watermanSource]);
+ await rpc('update_pen',[detailPen.id,{...pen,details:'Updated',sources:[]}]);
+ await rpc('delete_pen',[detailPen.id]);
+ // Wrong-brand associations must fail, without overwriting unrelated inventory.
+ await client.query("update public.inks set brand='Wrong' where id=$1",[referenceRows[0].id]);
+ await assert.rejects(client.query(seed),/Reference brand mismatch/);
+ await client.query('update public.inks set brand=$2 where id=$1',[referenceRows[0].id,referenceRows[0].brand]);
+ console.log('PASS 36 complete rich references, 123 exact swatch records, Waterman link, editable prose/links, legacy saves and brand mismatch guard');
  await client.query("insert into public.inks(owner_id,brand,collection,name) select $1,'Synthetic','','Extra '||n from generate_series(1,1100) n",[ownerId]);
  assert.equal((await rpc('get_collection',[],'anon',null)).inks.length,snapshot.mapped.inks.length+1100);
  console.log('PASS fixed-source import reconciliation and public snapshot beyond 1000 rows',JSON.stringify(snapshot.manifest.counts));

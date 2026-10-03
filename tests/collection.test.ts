@@ -1,7 +1,8 @@
+import { withReferences, pilotReferences, wearingeulReferences } from './referenceFixtures';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { getInkReference, inkReferenceSearchText, pilotReferences, referenceHex, wearingeulReferences } from '../src/lib/inkReference';
+import { getInkReference, inkReferenceSearchText, referenceHex } from '../src/lib/inkReference';
 import {
     byNibSize,
     byPenName,
@@ -217,7 +218,7 @@ test('refill purity persists on refills and clears for pure fills or cleanings',
 });
 test('recorded swatches override references and unknown inks never get invented colors', () => {
     assert.equal(
-        getSwatch({ ...ink('x'), name: 'Happy Holidays' })?.hex,
+        getSwatch(withReferences({ ...ink('x'), name: 'Happy Holidays' }))?.hex,
         '#404898',
     );
     assert.equal(
@@ -263,7 +264,7 @@ test('the real source inventory is coherent and legacy index fields do not deter
 
 test('Wearingeul references cover the owned collection with traceable, valid colors', () => {
     const owned = JSON.parse(readFileSync('src/data/inks.json', 'utf8'))
-        .filter((item: { brand: string }) => item.brand === 'Wearingeul');
+        .filter((item: { brand: string }) => item.brand === 'Wearingeul').map(withReferences);
     assert.equal(wearingeulReferences.length, 21);
     assert.equal(new Set(wearingeulReferences.map((item) => item.inkId)).size, 21);
     const validProperties = new Set(['Shading', 'Color Shading', 'Glistening', 'Sheen', 'Color Change']);
@@ -286,25 +287,25 @@ test('Wearingeul references cover the owned collection with traceable, valid col
 });
 
 test('manufacturer swatches keep custom colors, brand boundaries, and inventory identity', () => {
-    const mermaid = {
+    const mermaid = withReferences({
         id: '5400c69c-d66a-4e64-8d53-9f1b05124a15', brand: 'Wearingeul',
         name: 'The Little Mermaid', collection: '',
-    };
+    });
     assert.equal(getSwatch(mermaid)?.hex, '#64b1bf');
     assert.equal(getSwatch({ ...mermaid, colorHex: '#123456' })?.source, 'Your color');
     assert.equal(getSwatch({ ...mermaid, colorHex: '#123456' })?.hex, '#123456');
     assert.equal(getSwatch({ ...mermaid, name: 'Corrected inventory label' })?.hex, '#64b1bf');
-    assert.equal(getInkReference({ ...mermaid, brand: 'Other brand' }), undefined);
-    assert.equal(getInkReference({ ...mermaid, id: 'new-unresearched-ink' }), undefined);
+    assert.deepEqual(getInkReference({ ...mermaid, brand: 'Corrected brand' }), getInkReference(mermaid));
+    assert.equal(getInkReference({ id: 'new-unresearched-ink', name: mermaid.name, brand: mermaid.brand, collection: '' }), undefined);
     assert.match(inkReferenceSearchText(mermaid), /Hans Christian Andersen/);
     assert.match(inkReferenceSearchText(mermaid), /shimmer/);
-    assert.ok(getInkReference({ ...mermaid, id: 'ink_57' })?.properties.includes('Color Change'));
-    assert.ok(getInkReference({ ...mermaid, id: 'ink_57' })?.colorGuideProperties?.includes('Color Shading'));
+    assert.ok(getInkReference(withReferences({ ...mermaid, id: 'ink_57' }))?.properties.includes('Color Change'));
+    assert.ok(getInkReference(withReferences({ ...mermaid, id: 'ink_57' }))?.colorGuideProperties?.includes('Color Shading'));
 });
 
 test('Pilot references cover every owned ink with sourced observations and no invented swatches', () => {
     const owned = JSON.parse(readFileSync('src/data/inks.json', 'utf8'))
-        .filter((item: { brand: string }) => item.brand === 'Pilot');
+        .filter((item: { brand: string }) => item.brand === 'Pilot').map(withReferences);
     assert.equal(pilotReferences.length, 15);
     assert.deepEqual(new Set(pilotReferences.map((item) => item.inkId)), new Set(owned.map((item: { id: string }) => item.id)));
     for (const item of owned) {
@@ -321,13 +322,13 @@ test('Pilot references cover every owned ink with sourced observations and no in
         assert.match(reference.writing.testPen, /medium nib/);
         assert.equal(reference.writing.shimmer, false);
         assert.equal(reference.nameOrigin?.meaning !== undefined, item.collection === 'Iroshizuku');
-        assert.equal(getInkReference({ ...item, brand: 'Wearingeul' }), undefined);
-        assert.equal(getInkReference({ ...item, brand: 'Other' }), undefined);
-        assert.equal(getInkReference({ ...item, name: 'Renamed ink' }), reference);
+        assert.deepEqual(getInkReference({ ...item, brand: 'Wearingeul' }), reference);
+        assert.deepEqual(getInkReference({ ...item, brand: 'Other' }), reference);
+        assert.deepEqual(getInkReference({ ...item, name: 'Renamed ink' }), reference);
         assert.equal(getSwatch({ ...item, colorHex: '#123456' })?.hex, '#123456');
     }
     const firefly = owned.find((item: { name: string }) => item.name === 'Hotaru-Bi');
     assert.match(inkReferenceSearchText(firefly), /蛍火/);
     assert.match(inkReferenceSearchText(firefly), /Firefly glow/);
-    assert.equal(getInkReference({ ...firefly, id: 'unresearched-pilot' }), undefined);
+    assert.equal(getInkReference({ id: 'unresearched-pilot', name: 'Hotaru-Bi', brand: 'Pilot', collection: '' }), undefined);
 });

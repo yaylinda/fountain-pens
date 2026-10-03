@@ -1,5 +1,3 @@
-import catalogData from '../data/wearingeul-inks.json';
-import pilotCatalogData from '../data/pilot-inks.json';
 import type { Ink } from '../models/types';
 
 export interface InkReference {
@@ -39,17 +37,16 @@ export interface InkReference {
     exclusiveTo?: string;
 }
 
-export const wearingeulReferences: InkReference[] = catalogData.inks;
-export const pilotReferences: InkReference[] = pilotCatalogData.inks;
-const byBrand = new Map([
-    ['wearingeul', new Map(wearingeulReferences.map((item) => [item.inkId, item]))],
-    ['pilot', new Map(pilotReferences.map((item) => [item.inkId, item]))],
-]);
-
-// Sourced reference data is bundled separately from mutable inventory.
-// Stable IDs preserve the association through name corrections and API saves.
+// Supabase owns reference data. Never join a bundled catalog by name at runtime.
 export function getInkReference(ink?: Ink): InkReference | undefined {
-    return ink ? byBrand.get(ink.brand.trim().toLowerCase())?.get(ink.id) : undefined;
+    if (!ink || (!ink.reference && !ink.details && !ink.sources?.length)) return undefined;
+    return {
+        inkId: ink.id, name: ink.name, productCode: null,
+        inspiration: { author: null, work: null, series: '' },
+        properties: [], glitterColors: [],
+        ...ink.reference,
+        description: ink.details || '', sources: ink.sources || [],
+    };
 }
 
 export const referenceByline = (reference: InkReference) =>

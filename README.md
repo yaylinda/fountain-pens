@@ -45,7 +45,7 @@ These fixed JSON files are retained for one-time import reproducibility, tests a
 - `src/data/inks.json`: source ink inventory, including the legacy cleaning sentinel.
 - `src/data/refillLog.json`: source journal entries in original order.
 
-No build, startup or web request imports or writes those files. The importer maps `NONE` to cleaning events with no ink links; future entries remain in history but do not change today's pairing. Manufacturer catalogs and approximate swatch references remain versioned reference data. Browser storage holds layout preferences and Supabase's normal Auth session; ordinary form drafts stay in memory while editing.
+No build, startup or web request imports or writes those files. The importer maps `NONE` to cleaning events with no ink links; future entries remain in history but do not change today's pairing. Manufacturer catalogs and approximate swatch references remain versioned migration evidence; the app reads their migrated fields from Supabase. See [collection details and source links](docs/design/collection-details.md). Browser storage holds layout preferences and Supabase's normal Auth session; ordinary form drafts stay in memory while editing.
 
 ## Code organization
 

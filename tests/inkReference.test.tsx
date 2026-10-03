@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { withReferences } from './referenceFixtures';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import { deriveCollection } from '../src/lib/collection';
@@ -15,10 +16,10 @@ const { default: InkInventory } = await import('../src/components/collection/Ink
 const { InkStory } = await import('../src/components/collection/InkStory');
 const { default: Inventory } = await import('../src/components/collection/Inventory');
 const { MemoryRouter } = await import('react-router-dom');
-const mermaid = {
+const mermaid = withReferences({
     id: '5400c69c-d66a-4e64-8d53-9f1b05124a15',
     brand: 'Wearingeul', name: 'The Little Mermaid', collection: '',
-};
+});
 
 test('ink properties normalize terminology without turning missing observations into No', () => {
     const reference = getInkReference(mermaid)!;
@@ -31,7 +32,7 @@ test('ink properties normalize terminology without turning missing observations 
 
 test('table stories occupy separate rows spanning every column and expand independently', async () => {
     const user = userEvent.setup({ document: dom.window.document });
-    const rikka = { id: '0ef1725f-3c1c-4d13-a10b-f474d63e9feb', brand: 'Pilot', name: 'Rikka', collection: 'Iroshizuku' };
+    const rikka = withReferences({ id: '0ef1725f-3c1c-4d13-a10b-f474d63e9feb', brand: 'Pilot', name: 'Rikka', collection: 'Iroshizuku' });
     const inks = [mermaid, rikka, { id: 'other', brand: 'Other', name: 'Blue', collection: '' }];
     const model = deriveCollection({ inks, pens: [], entries: [] });
     try {
@@ -62,8 +63,8 @@ test('table stories occupy separate rows spanning every column and expand indepe
 
 test('Pilot meanings, Japanese names, and qualified observations appear in both layouts and search', async () => {
     const user = userEvent.setup({ document: dom.window.document });
-    const rikka = { id: '0ef1725f-3c1c-4d13-a10b-f474d63e9feb', brand: 'Pilot', name: 'Rikka', collection: 'Iroshizuku' };
-    const blue = { id: '21ebe10b-60e8-4a1a-931d-a4c9beacf17b', brand: 'Pilot', name: 'Blue', collection: '' };
+    const rikka = withReferences({ id: '0ef1725f-3c1c-4d13-a10b-f474d63e9feb', brand: 'Pilot', name: 'Rikka', collection: 'Iroshizuku' });
+    const blue = withReferences({ id: '21ebe10b-60e8-4a1a-931d-a4c9beacf17b', brand: 'Pilot', name: 'Blue', collection: '' });
     const inks = [rikka, blue, mermaid];
     const model = deriveCollection({ inks, pens: [], entries: [] });
     let opens = 0;
@@ -140,7 +141,7 @@ test('ink stories open independently of editing in both inventory layouts', asyn
         assert.ok(screen.getByRole('region', { name: 'Story & details' }));
         assert.ok(screen.getByText('195WGBU'));
         cleanup();
-        render(<InkStory ink={{ ...mermaid, id: '29e98327-ff17-4f74-a17b-4cf86d7cb160', name: 'Twelfth Night' }} expanded />);
+        render(<InkStory ink={withReferences({ ...mermaid, id: '29e98327-ff17-4f74-a17b-4cf86d7cb160', name: 'Twelfth Night' })} expanded />);
         assert.equal(screen.getAllByText('Not verified').length, 2);
         assert.ok(screen.getByText('William Shakespeare'));
         cleanup();
