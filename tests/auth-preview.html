@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Account UI — synthetic preview</title></head><body><div id="root"></div><script type="module">
+// Local visual fixture: no hosted requests, passwords, or collection writes.
+if (import.meta.env.VITE_SUPABASE_URL !== 'https://synthetic.supabase.co' || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY !== 'sb_publishable_synthetic') throw new Error('Use the synthetic preview environment described in docs/auth-ui.md.');
+let signedIn = sessionStorage.getItem('synthetic-owner') === 'true';
+const nativeFetch = window.fetch.bind(window);
+window.fetch = async (input, init) => {
+  const url = String(input);
+  if (!url.startsWith('https://synthetic.supabase.co')) return nativeFetch(input, init);
+  if (url.includes('/auth/v1/token')) {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const {email} = JSON.parse(init.body);
+    if (email.startsWith('fail')) return Response.json({msg:'Synthetic failure',error_code:'invalid_credentials'},{status:400});
+    signedIn = true; sessionStorage.setItem('synthetic-owner', 'true');
+    const id = '00000000-0000-4000-8000-000000000001';
+    const token = btoa(JSON.stringify({alg:'HS256'}))+'.'+btoa(JSON.stringify({sub:id,exp:Math.floor(Date.now()/1000)+3600}))+'.synthetic';
+    return Response.json({access_token:token,refresh_token:'synthetic',expires_in:3600,token_type:'bearer',user:{id,email,aud:'authenticated',app_metadata:{},user_metadata:{}}});
+  }
+  if (url.includes('/auth/v1/logout')) { signedIn=false; sessionStorage.removeItem('synthetic-owner'); return new Response(null,{status:204}); }
+  if (url.includes('/rest/v1/rpc/get_collection')) return Response.json({
+    pens:[{id:'p',brand:'Pilot',model:'Custom 823',color:'Amber',nibSize:'Medium',nibType:'Gold',favorite:false,archived:false,needsRefill:false}],
+    inks:[{id:'i',brand:'Pilot',collection:'Iroshizuku',name:'Yama-budo',colorHex:'#792D53',favorite:false,archived:false}],
+    events:[{id:'e',sequence:'1',penId:'p',date:'2026-10-01',kind:'refill',inkIds:['i'],notes:'A quiet afternoon of writing.',notPure:false}],
+    canEdit:signedIn,asOf:'2026-10-03'
+  });
+  throw new Error('Unsupported synthetic request');
+};
+await import('/src/main.tsx');
+</script></body></html>
