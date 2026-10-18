@@ -123,9 +123,8 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
             <button className="button primary" disabled={busy} onClick={() => void remove()}>{busy ? 'Deleting…' : 'Delete arrangement'}</button>
             <button className="button subtle" disabled={busy} onClick={() => { setConfirmDelete(false); setError(''); }}>Keep palette</button>
         </div>}
-        {!editing && <p className="small muted">Select a color to see its pens.</p>}
         {error && <p role="alert">{error} {editing ? 'Your arrangement is still here.' : ''}</p>}
-        <span className="small muted" role="status">{notice}</span>
+        <span className="palette-status" role="status">{notice}</span>
         {editing ? <DndContext accessibility={{ announcements: {
             onDragStart: ({ active }) => `Picked up ${inkLabel(byId.get(String(active.id)))}.`,
             onDragOver: ({ active, over }) => over ? `${inkLabel(byId.get(String(active.id)))} over ${inkLabel(byId.get(String(over.id)))}.` : undefined,

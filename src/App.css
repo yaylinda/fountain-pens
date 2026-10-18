@@ -2217,6 +2217,7 @@
 
 /* A personal swatch sheet: ink carries the color; labels stay on paper. */
 .custom-palette > p { max-width: 72ch; }
+.palette-status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .palette-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px 16px; padding: 0; margin: 24px 0; list-style: none; }
 .palette-color, .palette-tile { display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 0; text-align: left; }
 .palette-color { padding: 16px 12px; border: 1px solid transparent; background: transparent; border-radius: 6px; color: var(--ink); }
