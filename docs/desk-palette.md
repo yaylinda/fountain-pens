@@ -27,3 +27,9 @@ Deploy the new migration through the existing Supabase integration before servin
 Consulted the personal Impeccable skill at `~/.agents/skills/impeccable/SKILL.md`, its interaction/responsive references, and the repo's `.impeccable.md`. Retained Bodoni Moda/Figtree, warm paper and aubergine, with color reserved for actual ink swatches. Editor controls are disclosed through “Arrange palette”.
 
 Pinned dnd-kit supports pointer/touch handles and Space → arrows → Space keyboard sorting (Escape cancels). Visible earlier/later buttons provide a gesture-free alternative. Handles and move/omit controls are at least 44×44 CSS pixels. Focus indicators, named controls, ink-name drag announcements, status messages, reduced-motion CSS, and stable focus after removal are included. Labels show ink name, brand, and collection separately from color.
+
+## Local browser fixture
+
+Run `VITE_SUPABASE_URL=https://synthetic.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_synthetic npm run dev -- --host 127.0.0.1`, then open `/tests/palette-preview.html`. The fixture starts publicly; sign in using any test email and nonempty password to enable its synthetic owner. Emails beginning with `fail` simulate rejected credentials. Named palettes persist in the tab's session storage, including order, omissions, names and deletion. Set `sessionStorage.setItem('synthetic-fail', 'true')` to simulate failed palette writes; remove it to retry. No real Supabase requests or writes occur. Use `?empty` for an empty desk.
+
+This fixture verifies browser presentation and interactions only. The disposable PostgreSQL suite verifies database permissions and migration behavior; a local Supabase Auth/PostgREST instance is needed to verify those HTTP boundaries together.
