@@ -48,7 +48,9 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
     const arrangeButton = useRef<HTMLButtonElement>(null);
+    const actionsMenu = useRef<HTMLDetailsElement>(null);
     const editing = canEdit && draft !== null;
+    const creating = editing && draftId === null;
     const items = reconcilePalette(editing ? draft : active.items, inks);
     const byId = new Map(inks.map(ink => [ink.id, ink]));
     const visible = items.filter(item => !item.omitted && byId.has(item.inkId));
@@ -66,6 +68,7 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
     };
     const close = () => { setDraft(null); setError(''); requestAnimationFrame(() => arrangeButton.current?.focus()); };
     const begin = (mode: 'edit' | 'new' | 'copy') => {
+        if (actionsMenu.current) actionsMenu.current.open = false;
         setDraftId(mode === 'edit' ? active.id : null);
         setDraftName(mode === 'edit' ? active.name : mode === 'copy' ? `${active.name.slice(0, 73)} (copy)` : '');
         setDraft(reconcilePalette(mode === 'new' ? [] : active.items, inks));
@@ -91,18 +94,28 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
     };
     return <section className="desk-palette custom-palette" aria-label="Current ink palette">
         <div className="palette-library">
-            <label htmlFor="palette-select">Saved palette
-                <select id="palette-select" value={active.id} disabled={editing || busy || confirmDelete} onChange={e => { onPaletteChange(e.target.value); setNotice(''); setError(''); }}>
-                    {arrangements.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-            </label>
-            <span className="palette-color-count">{visible.length} colors</span>
-            {canEdit && !editing && <div className="palette-library-actions">
-                <button ref={arrangeButton} className="button secondary small-button" disabled={busy || confirmDelete} onClick={() => begin('edit')}>Arrange palette</button>
-                <button className="button subtle small-button" disabled={busy || confirmDelete} onClick={() => begin('new')}>New palette</button>
-                <button className="button subtle small-button" disabled={busy || confirmDelete} onClick={() => begin('copy')}>Duplicate</button>
-                {palettes.some(p => p.id === active.id) && <button className="text-link" disabled={busy || confirmDelete} onClick={() => { setConfirmDelete(true); setError(''); }}>Delete palette</button>}
-            </div>}
+            {editing ? <>
+                <div className="palette-draft-context"><h2 className="palette-draft-heading">{creating ? 'New palette' : 'Edit palette'}</h2><span className="small muted">Unsaved · {visible.length} colors</span></div>
+                <div className="palette-save-actions"><button id="palette-save" className="button primary" disabled={busy || !draftName.trim()} onClick={() => void save()}>{busy ? 'Saving…' : 'Save palette'}</button><button className="button secondary" disabled={busy} onClick={close}>Cancel</button></div>
+            </> : <>
+                <div className="palette-selection">
+                    <label htmlFor="palette-select">Saved palette</label>
+                    <div><select id="palette-select" value={active.id} disabled={busy || confirmDelete} onChange={e => { onPaletteChange(e.target.value); setNotice(''); setError(''); }}>
+                        {arrangements.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select><span className="palette-color-count">{visible.length} colors</span></div>
+                </div>
+                {canEdit && <div className="palette-library-actions">
+                    <button ref={arrangeButton} className="button primary small-button" disabled={busy || confirmDelete} onClick={() => begin('edit')}>Arrange palette</button>
+                    <button className="button secondary small-button" disabled={busy || confirmDelete} onClick={() => begin('new')}>New palette</button>
+                    <details className="palette-actions-menu" ref={actionsMenu} onKeyDown={e => { if (e.key === 'Escape') { e.currentTarget.open = false; e.currentTarget.querySelector('summary')?.focus(); } }} onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.open = false; }}>
+                        <summary aria-label="More palette actions">•••</summary>
+                        <div className="palette-actions-popover">
+                            <button disabled={busy || confirmDelete} onClick={() => begin('copy')}>Duplicate</button>
+                            {palettes.some(p => p.id === active.id) && <button className="palette-delete-action" disabled={busy || confirmDelete} onClick={() => { if (actionsMenu.current) actionsMenu.current.open = false; setConfirmDelete(true); setError(''); }}>Delete palette</button>}
+                        </div>
+                    </details>
+                </div>}
+            </>}
         </div>
         {confirmDelete && <div className="palette-delete" role="group" aria-label="Delete palette confirmation">
             <p>Delete “{active.name}”? Only this arrangement will be removed.</p>
@@ -115,7 +128,6 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
                 <input id="palette-name" value={draftName} maxLength={80} disabled={busy} placeholder="Palette name" onChange={e => setDraftName(e.target.value)} />
             </label>
             <p id="palette-help">Drag a handle or use the arrow buttons to reorder. With a keyboard, press Space on a handle, use arrow keys, then Space to drop or Escape to cancel.</p>
-            <div className="palette-save-actions"><button id="palette-save" className="button primary" disabled={busy || !draftName.trim()} onClick={() => void save()}>{busy ? 'Saving…' : 'Save palette'}</button><button className="button subtle" disabled={busy} onClick={close}>Cancel</button></div>
         </div>}
         {error && <p role="alert">{error} {editing ? 'Your arrangement is still here.' : ''}</p>}
         <span className="small muted" role="status">{notice}</span>

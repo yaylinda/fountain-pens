@@ -4,7 +4,7 @@ The desk opens on a compact swatch sheet. Saved palettes are the main workspace;
 
 ## Saved arrangements
 
-- Create a named palette, duplicate an existing arrangement, or use Arrange palette to rename and reorder it. Save commits the name, order and omissions together. Cancel discards the edit; failed saves retain it. Switching palettes is disabled while arranging.
+- Create a named palette with New palette, use More palette actions to duplicate or delete, or use Arrange palette to rename and reorder it. Creation and duplication show a new unsaved draft instead of the saved-palette selector. Save and Cancel appear together only while editing. Cancel restores the prior saved selection; Save selects the new arrangement. Save commits the name, order and omissions together. Cancel discards the edit; failed saves retain it. Switching palettes is disabled while arranging.
 - Arrangements are stored in Supabase, publicly readable and editable only by the owner. Palette selection is in the URL and survives opening and returning from pen/ink details. Deletion asks for confirmation and affects only that arrangement.
 - The original saved arrangement migrates to “My palette”. Duplicate copies both visible and dormant preferences. A new palette starts with all current inks in rainbow order.
 - Each arrangement tracks currently inked colors, one swatch per ink ID. A mixed refill contributes each component without inventing a blended color. New current colors append in rainbow order; dormant positions and omissions survive until that ink is current again.

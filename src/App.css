@@ -2237,7 +2237,7 @@
 .palette-tile button { min-width: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 4px; background: transparent; color: inherit; }
 .palette-tile-actions { margin-top: auto; gap: 4px; }
 .palette-tile-actions button:last-child { flex: 1; }
-.palette-edit-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 16px 0; border-block: 1px solid var(--line); }
+.palette-edit-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 16px 32px; padding: 4px 0 16px; }
 .palette-edit-toolbar p { flex: 1 1 320px; max-width: 65ch; margin: 0; font-size: .875rem; }
 .palette-omitted { margin: 24px 0; }
 .palette-omitted summary { cursor: pointer; padding: 12px 0; }
@@ -2251,21 +2251,35 @@
 
 /* The desk opens on color; inventory and maintenance are secondary. */
 .custom-palette { padding-top: 0; border-bottom: 0; }
-.palette-library { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin: 0 0 16px; padding: 20px 0; border-block: 1px solid var(--line); }
-.palette-library > label { display: flex; flex-direction: row; align-items: center; gap: 12px; }
+.palette-library { display: flex; align-items: center; flex-wrap: wrap; gap: 16px 24px; margin: 0 0 16px; padding: 20px 0; border-block: 1px solid var(--line); }
+.palette-draft-heading { margin: 0; font-family: inherit; font-size: 1.125rem; font-weight: 600; }
+.palette-selection { display: grid; gap: 6px; min-width: 0; }
+.palette-selection > label { font-size: .8125rem; color: var(--muted); }
+.palette-selection > div { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.palette-draft-context { display: grid; gap: 4px; }
+.palette-library .palette-save-actions { margin-left: auto; }
+.palette-actions-menu { position: relative; }
+.palette-actions-menu > summary { list-style: none; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+.palette-actions-menu > summary::-webkit-details-marker { display: none; }
+.palette-actions-menu[open] > summary, .palette-actions-menu > summary:hover { background: var(--sidebar); }
+.palette-actions-popover { position: absolute; z-index: 10; top: calc(100% + 8px); right: 0; width: 180px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); box-shadow: 0 8px 24px rgb(35 25 30 / .1); }
+.palette-actions-popover button { display: block; width: 100%; min-height: 44px; padding: 10px 8px; border: 0; background: transparent; text-align: left; font-size: .875rem; }
+.palette-actions-popover button:hover { background: var(--sidebar); }
+.palette-actions-popover .palette-delete-action { color: var(--danger); border-top: 1px solid var(--line); }
 .palette-color-count { color: var(--muted); font-size: .8125rem; }
 .palette-name-label { display: grid; gap: 6px; font-size: .8125rem; color: var(--muted); }
 .palette-library select, .palette-name-label input { min-height: 44px; border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; background: var(--paper); color: var(--ink); font: inherit; }
 .palette-library select { width: 200px; min-width: 0; font-weight: 600; }
-.palette-library-actions { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; }
-.palette-library-actions .text-link { min-height: 44px; color: var(--muted); }
+.palette-library-actions > .button { min-height: 44px; }
+.palette-library-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
 .palette-delete { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px; border: 1px solid var(--line); }
 .palette-delete p { flex: 1 1 100%; margin: 0; }
 .palette-pen-count { font-size: .6875rem; color: var(--muted); }
 .palette-view .small { font-size: .6875rem; }
 .palette-tile-actions { flex-wrap: wrap; }
 .palette-tile-actions button:last-child { flex-basis: 100%; }
-.palette-edit-toolbar .palette-name-label { flex: 1 1 100%; }
+.palette-edit-toolbar .palette-name-label { flex: 0 1 320px; }
 .palette-name-label input { width: min(100%, 360px); }
 .palette-grid .palette-tile { padding: 8px; gap: 6px; }
 .desk-refill-queue { margin-top: 12px; }
@@ -2274,8 +2288,6 @@
 .desk-pairing { padding: 16px 0; }
 @media (max-width: 480px) {
     .palette-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 8px; }
-    .palette-library > label { width: 100%; }
-    .palette-library select { width: 100%; }
     .palette-save-actions { width: 100%; }
     .palette-save-actions > button { flex: 1; }
 }
@@ -2337,9 +2349,11 @@
     .desk-page h1 { font-size: 2rem; }
     .desk-page .page-header { padding-bottom: 24px; }
     .palette-library { gap: 12px; }
-    .palette-library > label { flex: 1; }
+    .palette-selection { width: 100%; }
     .palette-library select { flex: 1; width: auto; }
-    .palette-library-actions { margin-left: 0; width: 100%; gap: 4px 8px; }
+    .palette-library-actions { margin-left: 0; width: 100%; gap: 8px; }
+    .palette-library-actions > .button { flex: 1; }
+    .palette-edit-toolbar .palette-name-label { flex-basis: 100%; }
     .palette-library-actions .button { padding-inline: 10px; }
     .desk-page .palette-grid { gap: 16px 8px; margin-inline: -8px; }
     .desk-page .palette-view { grid-template-columns: repeat(2, minmax(0, 1fr)); }

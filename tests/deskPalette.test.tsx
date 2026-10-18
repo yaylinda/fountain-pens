@@ -87,8 +87,9 @@ test('named palettes retain independent orders through duplicate, rename, reload
     palettes=[{id:'default',name:'My palette',items:persisted}];
     await service.loadData(true);
     let ui=render(<Library/>);
+    await user.click(screen.getByLabelText('More palette actions'));
     await user.click(screen.getByRole('button',{name:'Duplicate',exact:true}));
-    assert.equal(screen.getByLabelText('Saved palette').disabled,true);
+    assert.equal(screen.queryByLabelText('Saved palette'),null);
     await user.clear(screen.getByLabelText('Palette name'));
     await user.type(screen.getByLabelText('Palette name'),'Cool colors');
     await user.click(screen.getByRole('button',{name:'Move Maker Blue earlier'}));
@@ -122,9 +123,11 @@ test('named palettes retain independent orders through duplicate, rename, reload
     await user.type(screen.getByLabelText('Palette name'),'Unfinished');
     await user.click(screen.getByRole('button',{name:'Cancel',exact:true}));
     assert.equal(writes,before);
+    await user.click(screen.getByLabelText('More palette actions'));
     await user.click(screen.getByRole('button',{name:'Delete palette',exact:true}));
     await user.click(screen.getByRole('button',{name:'Keep palette'}));
     assert.equal(writes,before);
+    await user.click(screen.getByLabelText('More palette actions'));
     await user.click(screen.getByRole('button',{name:'Delete palette',exact:true}));
     fail=true;
     await user.click(screen.getByRole('button',{name:'Delete arrangement'}));
@@ -136,5 +139,33 @@ test('named palettes retain independent orders through duplicate, rename, reload
     assert.equal(screen.queryByRole('option',{name:'Evening inks'}),null);
     assert.deepEqual(visible(),['Copper','Green','Blue']);
     assert.equal(palettes.length,1);
+    cleanup();
+});
+
+test('new palette is an unsaved draft; cancel restores selection and save selects the new arrangement', async () => {
+    fail=false;
+    persisted=[{inkId:'2',omitted:false},{inkId:'0',omitted:true},{inkId:'1',omitted:false}];
+    palettes=[{id:'default',name:'Saved blues',items:persisted}];
+    await service.loadData(true);
+    render(<Library/>);
+    const before=writes;
+    await user.click(screen.getByRole('button',{name:'New palette'}));
+    assert.ok(screen.getByRole('heading',{name:'New palette'}));
+    assert.ok(screen.getByText(/Unsaved · 3 colors/));
+    assert.equal(screen.queryByLabelText('Saved palette'),null);
+    assert.equal(screen.queryByText('Saved blues'),null);
+    assert.equal(screen.getByLabelText('Palette name').value,'');
+    assert.deepEqual([...document.querySelectorAll('.palette-tile strong')].map(el=>el.textContent),['Copper','Green','Blue']);
+    await user.click(screen.getByRole('button',{name:'Cancel',exact:true}));
+    assert.equal(writes,before);
+    assert.equal(screen.getByLabelText('Saved palette').value,'default');
+    assert.deepEqual([...document.querySelectorAll('.palette-color strong')].map(el=>el.textContent),['Blue','Green']);
+    await user.click(screen.getByRole('button',{name:'New palette'}));
+    await user.type(screen.getByLabelText('Palette name'),'Daily colors');
+    await user.click(screen.getByRole('button',{name:'Save palette'}));
+    await screen.findByRole('button',{name:'Arrange palette'});
+    assert.notEqual(screen.getByLabelText('Saved palette').value,'default');
+    assert.equal(screen.getByLabelText('Saved palette').selectedOptions[0].textContent,'Daily colors');
+    assert.deepEqual(palettes.find(p=>p.id==='default').items,persisted);
     cleanup();
 });
