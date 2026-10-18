@@ -35,7 +35,7 @@ try {
  set role migration_runner;`);
  assert.equal((await client.query("select rolsuper from pg_roles where rolname=current_user")).rows[0].rolsuper,false);
  assert.equal((await client.query("select has_schema_privilege(current_user,'auth','USAGE WITH GRANT OPTION') as allowed")).rows[0].allowed,false);
- for(const file of (await readdir('supabase/migrations')).filter(x=>x.endsWith('.sql') && x!=='20261018000000_named_palettes.sql').sort()) await client.query(await readFile(`supabase/migrations/${file}`,'utf8'));
+ for(const file of (await readdir('supabase/migrations')).filter(x=>x.endsWith('.sql') && x<'20261018000000_named_palettes.sql').sort()) await client.query(await readFile(`supabase/migrations/${file}`,'utf8'));
  await client.query('insert into private.collection_owner(user_id,time_zone) values($1,$2)',[ownerId,'America/Chicago']);
  await client.query('reset role');
  assert.equal((await client.query("select count(*)::int n from pg_roles where rolname='collection_writer'")).rows[0].n,0);
@@ -85,6 +85,25 @@ try {
  // Apply the new migration over a real saved legacy arrangement.
  await client.query('set role migration_runner');
  await client.query(await readFile('supabase/migrations/20261018000000_named_palettes.sql','utf8'));
+ for(const file of (await readdir('supabase/migrations')).filter(x=>x.endsWith('.sql') && x>'20261018000000_named_palettes.sql').sort()) await client.query(await readFile(`supabase/migrations/${file}`,'utf8'));
+
+ const writing=(await rpc('save_writing_log',[null,event.id,'2026-01-03'])).item;
+ assert.equal((await rpc('save_writing_log',[null,event.id,'2026-01-03'])).item.id,writing.id);
+ assert.equal((await rpc('get_collection',[],'anon',null)).writingLogs[0].refillId,event.id);
+ for(const [who,uid] of [['anon',null],['authenticated',strangerId]]) {
+  for(const [name,args] of [['save_writing_log',[null,event.id,'2026-01-04']],['save_writing_log',[writing.id,event.id,'2026-01-04']],['delete_writing_log',[writing.id]]])
+   await assert.rejects(rpc(name,args,who,uid),e=>e.code==='42501');
+ }
+ await assert.rejects(rpc('save_writing_log',[null,event.id,'2026-01-01']),e=>e.code==='23514');
+ await assert.rejects(rpc('save_writing_log',[null,event.id,'2099-01-01']),e=>e.code==='23514');
+ await assert.rejects(rpc('delete_refill_event',[event.id]),e=>e.code==='23503');
+ await assert.rejects(rpc('update_refill_event',[event.id,{...entry,kind:'cleaning',inkIds:[],notPure:false}]),e=>e.code==='23514');
+ await assert.rejects(rpc('update_refill_event',[event.id,{...entry,date:'2026-01-05'}]),e=>e.code==='23514');
+ assert.equal((await rpc('save_writing_log',[writing.id,event.id,'2026-01-04'])).item.writtenOn,'2026-01-04');
+ await rpc('delete_writing_log',[writing.id]);
+ assert.equal((await rpc('get_collection')).writingLogs.length,0);
+ console.log('PASS writing days: explicit recording, repeat today, backdating, correction, deletion and owner/public access');
+
  await client.query('reset role');
  assert.deepEqual((await rpc('get_collection',[],'anon',null)).palettes,[{id:'default',name:'My palette',items:arrangement}]);
  assert.deepEqual((await rpc('get_collection',[],'anon',null)).palette,arrangement);

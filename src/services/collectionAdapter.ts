@@ -1,5 +1,5 @@
 import { arrangementsDto, paletteDto } from '../lib/deskPalette';
-import type { Ink, Pen, RefillLog, SourceLink, SwatchReference } from '../models/types';
+import type { Ink, Pen, RefillLog, WritingLog, SourceLink, SwatchReference } from '../models/types';
 import type { Collection } from '../lib/collection';
 
 // Explicit versioned RPC boundary; no untyped table data reaches the UI.
@@ -55,13 +55,17 @@ export function eventDto(value: unknown): EventDto {
     if ((x.kind === 'cleaning' && inkIds.length) || (x.kind === 'refill' && !inkIds.length)) throw new Error('Invalid event links.');
     return { id: string(x.id), sequence: decimal(x.sequence), date: string(x.date), penId: string(x.penId), notes: string(x.notes), notPure: bool(x.notPure), kind: x.kind, inkIds };
 }
+export function writingLogDto(value: unknown): WritingLog {
+    const x = object(value);
+    return { id: string(x.id), refillId: string(x.refillId), writtenOn: string(x.writtenOn) };
+}
 export function collectionDto(value: unknown): Collection {
     const x = object(value);
     const pens = array(x.pens).map(penDto), inks = array(x.inks).map(inkDto);
     const events = array(x.events).map(eventDto).sort((a, b) => BigInt(a.sequence) < BigInt(b.sequence) ? -1 : 1);
     const penIds = new Set(pens.map(p => p.id)), inkIds = new Set(inks.map(i => i.id));
     if (penIds.size !== pens.length || inkIds.size !== inks.length || new Set(events.map(e => e.id)).size !== events.length || events.some(e => !penIds.has(e.penId) || e.inkIds.some(id => !inkIds.has(id)))) throw new Error('Invalid collection relationships.');
-    return { palettes: arrangementsDto(x.palettes ?? []), palette: paletteDto(x.palette ?? []), canEdit: bool(x.canEdit), pens, inks, entries: events.map((e, index) => ({ ...e, index })), asOf: string(x.asOf) };
+    return { writingLogs: array(x.writingLogs ?? []).map(writingLogDto), palettes: arrangementsDto(x.palettes ?? []), palette: paletteDto(x.palette ?? []), canEdit: bool(x.canEdit), pens, inks, entries: events.map((e, index) => ({ ...e, index })), asOf: string(x.asOf) };
 }
 
 function inkReferences(x: Record<string, unknown>): Pick<Ink, 'reference' | 'swatchReference'> {

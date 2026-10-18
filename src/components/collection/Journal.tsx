@@ -1,3 +1,4 @@
+import WritingHistory from './WritingHistory';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -237,6 +238,7 @@ export default function Journal({ model, onOpen, canEdit }: Props) {
                                                 entry={entry}
                                                 model={model}
                                             />
+                                            {!isCleaning(entry) && <WritingHistory entry={entry} logs={model.writingLogs} canEdit={canEdit} label={`${penLabel(pen)} ${pen?.color || ''}`} />}
                                             {entry.notes && (
                                                 <p className="journal-notes">
                                                     {entry.notes}

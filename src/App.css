@@ -2353,3 +2353,22 @@
     .palette-color { padding: 12px 8px; }
     .palette-color-count { margin-left: auto; }
 }
+
+/* Writing stays attached to the selected pen and refill, below the ink identity. */
+.desk-pairing { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: start; align-content: start; }
+.desk-pairing > .writing-history { grid-column: 2 / -1; grid-row: 2; width: 100%; margin-top: 0; }
+.desk-pairing > .button { grid-column: 3; grid-row: 1; margin-left: 0; }
+.writing-history { margin-top: 12px; min-width: 0; }
+.writing-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.writing-history summary { cursor: pointer; font-size: .8125rem; padding: 10px 0; width: fit-content; }
+.writing-context { margin: 0 0 12px; }
+.writing-date-form { display: flex; align-items: end; gap: 8px; flex-wrap: wrap; }
+.writing-date-form label { display: grid; gap: 6px; font-size: .8125rem; }
+.writing-date-form input { min-height: 40px; max-width: 100%; }
+.writing-dates { list-style: none; margin: 12px 0 0; padding: 0; }
+.writing-dates li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: .8125rem; }
+.writing-dates li > span { display: flex; gap: 16px; }
+.writing-dates button { min-height: 32px; }
+.writing-notice:empty { display: none; }
+.writing-notice { display: block; padding-top: 8px; }
+@media (max-width: 600px) { .desk-pairing > .writing-history { grid-column: 1 / -1; } }

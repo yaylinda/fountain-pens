@@ -14,6 +14,7 @@ import {
 import { FavoriteMark, EmptyState, Icon, InkNames, RefillPurityMark, Swatch } from './Primitives';
 import RefillQueue from './RefillQueue';
 import DeskPalette from './DeskPalette';
+import WritingHistory from './WritingHistory';
 
 interface Props {
     model: CollectionModel;
@@ -177,6 +178,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                                         <InkNames entry={entry} model={model} />
                                     )}
                                 </div>
+                                <WritingHistory entry={entry} logs={model.writingLogs} canEdit={canEdit} label={`${pen.brand} ${pen.model} ${pen.color}`} />
                                 {canEdit && (
                                     <button
                                         className="button subtle small-button"

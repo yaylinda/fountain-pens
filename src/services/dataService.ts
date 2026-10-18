@@ -2,7 +2,7 @@ import { arrangementDto, paletteDto, type DeskArrangement, type PaletteItem } fr
 import type { MutationName, MutationPayload } from './database.types';
 import type { Ink, Pen, RefillLog } from '../models/types';
 import { isCleaning, realInkIds, type Collection, type JournalEntry } from '../lib/collection';
-import { collectionDto, eventDto, inkDto, object, penDto } from './collectionAdapter';
+import { collectionDto, eventDto, writingLogDto, inkDto, object, penDto } from './collectionAdapter';
 import { getSupabase } from './supabaseClient';
 import { captureSaveOrigin, celebrateSave } from '../lib/saveCelebration';
 
@@ -14,6 +14,8 @@ export function safeError(error: unknown): CollectionError {
         PGRST301: 'Your session has expired. Sign in again.',
         '22023': 'Check the fields and try again.',
         P0002: 'This item is no longer available.',
+        '23505': 'Writing is already logged for this refill on that date.',
+        '23514': 'Use a date on or after the refill and no later than today. Refills with writing history must remain refills.',
         '23503': 'This item has journal history. Archive it instead.',
     };
     return new CollectionError(messages[code] || 'Could not save. Check your connection and try again.');
@@ -113,6 +115,7 @@ async function saveRefill(entry: RefillLog, existing?: RefillLog, queue?: boolea
 export const addRefillLog = (entry: RefillLog, queue?: boolean) => saveRefill(entry, undefined, queue);
 export const updateRefillLog = (entry: RefillLog, expected: RefillLog) => saveRefill(entry, expected);
 export async function deleteRefillLog(expected: RefillLog) {
+    if (collection.writingLogs?.some(log => log.refillId === expected.id)) throw new CollectionError('Remove this refill’s writing history before deleting it.');
     await command('delete_refill_event', { p_event_id: expected.id! }, () => { collection = { ...collection, entries: collection.entries.filter(e => e.id !== expected.id) }; });
 }
 export async function setFavorite(kind: 'pen' | 'ink', id: string, favorite: boolean): Promise<boolean> {
@@ -147,5 +150,17 @@ export async function deleteNamedPalette(id: string) {
     await command('delete_named_palette', { p_id: id }, () => {
         collection = { ...collection, palettes: (collection.palettes || []).filter(p => p.id !== id),
             ...(id === 'default' ? { palette: [] } : {}) };
+    });
+}
+
+export async function saveWritingLog(refillId: string, writtenOn: string, id: string | null = null) {
+    await command('save_writing_log', { p_id: id, p_refill_id: refillId, p_written_on: writtenOn }, result => {
+        const log = writingLogDto(result.item);
+        collection = { ...collection, writingLogs: [...(collection.writingLogs || []).filter(x => x.id !== log.id), log] };
+    });
+}
+export async function deleteWritingLog(id: string) {
+    await command('delete_writing_log', { p_id: id }, () => {
+        collection = { ...collection, writingLogs: (collection.writingLogs || []).filter(x => x.id !== id) };
     });
 }
