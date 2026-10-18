@@ -14,7 +14,7 @@ The desk opens on a compact swatch sheet. Saved palettes are the main workspace;
 
 ## Presentation
 
-The desk uses one compact palette toolbar, an open swatch sheet, and swatch-selected pen details plus the collapsed refill queue. Following visual review, it retains main’s rectangular tab silhouette (`border-radius: 3px 12px 3px 3px`) and inset outline, now 60px tall and filling each card’s inner width while respecting its padding. This treatment is scoped to the desk palette; other swatches retain their existing shapes. The earlier historical oval trial came from `0eb4797`; Linda preferred the main tab treatment introduced by `b80149b`.
+The desk uses one compact palette toolbar, an open swatch sheet, and swatch-selected pen details plus the collapsed refill queue. Following visual review, it retains main’s rectangular tab silhouette (`border-radius: 3px 12px 3px 3px`) and inset outline, now filling each card’s inner width while respecting its padding, with height derived from a 1.618:1 width-to-height ratio. This treatment is scoped to the desk palette; other swatches retain their existing shapes. The earlier historical oval trial came from `0eb4797`; Linda preferred the main tab treatment introduced by `b80149b`.
 
 Names, brand/collection and pen counts sit below each swatch. Phones retain two columns and 44px arrangement controls. Only My Desk receives layout and typography changes; global navigation and other pages lose decorative copy while keeping functional instructions, reference descriptions and user data. Save-animation copy is reduced to “Saved.”
 
