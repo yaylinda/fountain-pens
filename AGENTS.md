@@ -2,6 +2,10 @@
 
 Guidance for contributors and coding agents working in this repository.
 
+## Collaboration preferences
+
+Prefer CLI workflows for setup, authentication, configuration, and deployment. Check installed tools and existing sessions, and perform authorized work directly instead of asking Linda to copy settings or carry out dashboard steps. Use browser interaction only when required, such as completing an interactive sign-in; start the flow and provide its direct link. Keep credentials out of chat and tracked files. Follow the existing deployment pipeline rather than bypassing its release checks.
+
 ## Build & Development Commands
 
 ```bash
