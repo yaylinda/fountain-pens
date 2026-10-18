@@ -14,6 +14,7 @@ import {
 export type IconName =
     | 'star'
     | 'desk'
+    | 'collection'
     | 'list'
     | 'pen'
     | 'ink'
@@ -27,6 +28,7 @@ export type IconName =
     | 'edit'
     | 'archive';
 const paths: Record<IconName, ReactNode> = {
+    collection: <><rect x="3" y="4" width="7" height="16" rx="1" /><path d="M3 9h7M3 16h7m3-11 5-1 3 15-5 1-3-15Z" /></>,
     star: <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z" />,
     list: <path d="M8 5h13M8 12h13M8 19h13M3 5h.01M3 12h.01M3 19h.01" />,
     desk: (

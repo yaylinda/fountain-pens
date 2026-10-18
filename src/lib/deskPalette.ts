@@ -1,5 +1,19 @@
 import type { Ink } from '../models/types';
 export interface PaletteItem { inkId: string; omitted: boolean }
+export interface DeskArrangement { id: string; name: string; items: PaletteItem[] }
+export function arrangementDto(value: unknown): DeskArrangement {
+    if (!value || typeof value !== 'object' || !('id' in value) || !('name' in value) || !('items' in value)
+        || typeof value.id !== 'string' || !value.id || typeof value.name !== 'string' || !value.name.trim()) {
+        throw new Error('Invalid palette response.');
+    }
+    return { id: value.id, name: value.name, items: paletteDto(value.items) };
+}
+export function arrangementsDto(value: unknown): DeskArrangement[] {
+    if (!Array.isArray(value)) throw new Error('Invalid palette response.');
+    const result = value.map(arrangementDto);
+    if (new Set(result.map(item => item.id)).size !== result.length) throw new Error('Invalid palette response.');
+    return result;
+}
 export function paletteDto(value: unknown): PaletteItem[] {
     if (!Array.isArray(value)) throw new Error('Invalid palette response.');
     const seen = new Set<string>();

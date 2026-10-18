@@ -35,7 +35,7 @@ try {
  set role migration_runner;`);
  assert.equal((await client.query("select rolsuper from pg_roles where rolname=current_user")).rows[0].rolsuper,false);
  assert.equal((await client.query("select has_schema_privilege(current_user,'auth','USAGE WITH GRANT OPTION') as allowed")).rows[0].allowed,false);
- for(const file of (await readdir('supabase/migrations')).filter(x=>x.endsWith('.sql')).sort()) await client.query(await readFile(`supabase/migrations/${file}`,'utf8'));
+ for(const file of (await readdir('supabase/migrations')).filter(x=>x.endsWith('.sql') && x!=='20261018000000_named_palettes.sql').sort()) await client.query(await readFile(`supabase/migrations/${file}`,'utf8'));
  await client.query('insert into private.collection_owner(user_id,time_zone) values($1,$2)',[ownerId,'America/Chicago']);
  await client.query('reset role');
  assert.equal((await client.query("select count(*)::int n from pg_roles where rolname='collection_writer'")).rows[0].n,0);
@@ -82,6 +82,12 @@ try {
  const arrangement = [{inkId:b.id,omitted:true},{inkId:a.id,omitted:false}];
  assert.deepEqual((await rpc('save_desk_palette',[JSON.stringify(arrangement)])).items,arrangement);
  assert.deepEqual((await rpc('get_collection',[],'anon',null)).palette,arrangement);
+ // Apply the new migration over a real saved legacy arrangement.
+ await client.query('set role migration_runner');
+ await client.query(await readFile('supabase/migrations/20261018000000_named_palettes.sql','utf8'));
+ await client.query('reset role');
+ assert.deepEqual((await rpc('get_collection',[],'anon',null)).palettes,[{id:'default',name:'My palette',items:arrangement}]);
+ assert.deepEqual((await rpc('get_collection',[],'anon',null)).palette,arrangement);
  assert.deepEqual((await rpc('get_collection')).events,paletteBefore.events);
  assert.deepEqual((await rpc('get_collection')).pens,paletteBefore.pens);
  for(const [who,uid] of [['anon',null],['authenticated',strangerId],['authenticated',null]]) {
@@ -97,6 +103,34 @@ try {
  await rpc('save_desk_palette',[JSON.stringify([...arrangement].reverse().map(i=>({...i,omitted:false})))]);
  await rpc('save_desk_palette',['[]']);
  assert.deepEqual((await rpc('get_collection')).palette,[]);
+ const namedBefore = await rpc('get_collection');
+ const first = (await rpc('save_named_palette',[null,'Warm colors',JSON.stringify(arrangement)])).palette;
+ const second = (await rpc('save_named_palette',[null,'Cool colors',JSON.stringify([...arrangement].reverse())])).palette;
+ assert.notEqual(first.id,second.id);
+ const namedPublic = (await rpc('get_collection',[],'anon',null)).palettes;
+ assert.deepEqual(namedPublic.find(p=>p.id===first.id),first);
+ assert.deepEqual(namedPublic.find(p=>p.id===second.id),second);
+ await rpc('save_named_palette',[first.id,'Renamed','[]']);
+ assert.deepEqual((await rpc('get_collection')).palettes.find(p=>p.id===second.id),second);
+ for(const [who,uid] of [['anon',null],['authenticated',strangerId],['authenticated',null]]) {
+  await assert.rejects(rpc('save_named_palette',[second.id,'Forbidden','[]'],who,uid),e=>e.code==='42501');
+  await assert.rejects(rpc('delete_named_palette',[second.id],who,uid),e=>e.code==='42501');
+ }
+ assert.equal((await role('authenticated',strangerId,()=>client.query('delete from public.desk_palettes'))).rowCount,0);
+ assert.equal((await role('authenticated',strangerId,()=>client.query("update public.desk_palettes set name='Forbidden'"))).rowCount,0);
+ for(const name of ['', '  ', 'x'.repeat(81), null])
+  await assert.rejects(rpc('save_named_palette',[second.id,name,'[]']),e=>e.code==='22023');
+ await assert.rejects(rpc('save_named_palette',[second.id,'Invalid',JSON.stringify([arrangement[0],arrangement[0]])]),e=>e.code==='22023');
+ await assert.rejects(rpc('save_named_palette',['missing','Missing','[]']),e=>e.code==='P0002');
+ assert.deepEqual((await rpc('get_collection')).palettes.find(p=>p.id===second.id),second);
+ await rpc('delete_named_palette',[first.id]);
+ assert.equal((await rpc('get_collection')).palettes.some(p=>p.id===first.id),false);
+ assert.deepEqual((await rpc('get_collection')).palettes.find(p=>p.id===second.id),second);
+ assert.equal((await client.query('select count(*)::int n from public.desk_palette where palette_id=$1',[first.id])).rows[0].n,0);
+ await rpc('delete_named_palette',[second.id]);
+ assert.deepEqual((await rpc('get_collection')).events,namedBefore.events);
+ assert.deepEqual((await rpc('get_collection')).pens,namedBefore.pens);
+ console.log('PASS named palettes: independent saves, rename/delete, public reads, owner authorization and atomic invalid-save rollback');
  console.log('PASS palette round trip, public reads, owner-only writes, validation rollback and unchanged inventory/history');
  console.log('PASS public collection/journal reads, anonymous/stranger write denial and owner inventory CRUD');
  await rpc('update_pen',[p.id,{...pen,archived:true}]);

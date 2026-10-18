@@ -36,10 +36,28 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
         nextParams.set('desk', JSON.stringify(next));
         setParams(nextParams, { replace });
     };
-    const setSelectedInk = (value: string) => update({ selectedInk: value });
+    const browsePens = params.get('pens') === '1';
+    const setSelectedInk = (value: string) => {
+        const next = new URLSearchParams(params);
+        next.set('desk', JSON.stringify({ ...state, selectedInk: value }));
+        next.delete('pens');
+        setParams(next);
+    };
+    const setPalette = (id: string) => {
+        const next = new URLSearchParams(params);
+        next.set('palette', id);
+        next.set('desk', JSON.stringify({ ...state, selectedInk: '' }));
+        setParams(next, { replace: true });
+    };
+    const togglePens = () => {
+        const next = new URLSearchParams(params);
+        if (browsePens) next.delete('pens'); else next.set('pens', '1');
+        next.set('desk', JSON.stringify({ ...state, selectedInk: '' }));
+        setParams(next);
+    };
     const colorRanks = useMemo(() => deskColorRanks(model), [model]);
     const base = deskRows(model, { brands: {}, nib: '', inkBrand: '' }, 'color', 'none', '', colorRanks);
-    const groups = deskRows(model, filters, order, group, selectedInk, colorRanks);
+    const groups = deskRows(model, browsePens ? filters : { brands: {}, nib: '', inkBrand: '' }, browsePens ? order : 'pen', browsePens ? group : 'none', selectedInk, colorRanks);
     const count = groups.reduce((n, [, rows]) => n + rows.length, 0);
     const refillCount = groups.reduce(
         (n, [, rows]) => n + rows.filter(({ pen }) => pen.needsRefill).length,
@@ -103,7 +121,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     <p className="eyebrow">Ready to write</p>
                     <h1>The writing desk</h1>
                     <p className="page-intro">
-                        Arrange your pens for a little time on paper.
+                        Find a color, explore a pairing, make it your own.
                     </p>
                 </div>
                 {canEdit && (
@@ -116,7 +134,15 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     </button>
                 )}
             </header>
-            <RefillQueue model={model} onOpen={onOpen} canEdit={canEdit} />
+            <DeskPalette key={canEdit ? 'owner' : 'public'} inks={palette} saved={model.palette} palettes={model.palettes}
+                activeId={params.get('palette') || ''} onPaletteChange={setPalette}
+                penCounts={new Map(palette.map(ink => [ink.id, model.currentPens(ink.id).length]))}
+                canEdit={canEdit} selectedInk={selectedInk} onSelect={setSelectedInk} refills={paletteRefills} />
+            {!selectedInk && <button className="desk-browse-toggle" aria-expanded={browsePens} aria-controls="desk-pen-browser" onClick={togglePens}>
+                <span>{browsePens ? 'Hide inked pens' : 'Browse inked pens'} <span className="count">{model.inked.length}</span></span>
+                <span aria-hidden="true">{browsePens ? '−' : '+'}</span>
+            </button>}
+            {browsePens && <div id="desk-pen-browser">
             <div className="desk-presets" aria-label="Quick views">
                 {[
                     'All pens',
@@ -261,17 +287,18 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     </div>
                 )}
             </div>
-            <DeskPalette key={canEdit ? 'owner' : 'public'} inks={palette} saved={model.palette} canEdit={canEdit} selectedInk={selectedInk} onSelect={setSelectedInk} refills={paletteRefills} />
+            </div>}
+            {(browsePens || selectedInk || !model.inked.length) && <>
             <div className="desk-results-summary" aria-live="polite">
                 <span>
-                    {count} of {model.inked.length} inked pens
+                    {browsePens ? `${count} of ${model.inked.length} inked pens` : `${count} ${count === 1 ? 'pen' : 'pens'}`}
                     {refillCount > 0 && ` · ${refillCount} need${refillCount === 1 ? 's' : ''} refill`}
                     {selectedInk && model.inkById.get(selectedInk)
                         ? ` · ${inkLabel(model.inkById.get(selectedInk))}`
                         : ''}
                 </span>
                 <span>
-                    {Object.entries(filters.brands)
+                    {browsePens && Object.entries(filters.brands)
                         .map(
                             ([b, mode]) =>
                                 `${mode === 'exclude' ? 'Without' : 'Only'} ${b}`,
@@ -306,7 +333,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
             {groups.map(([name, rows]) => (
                 <section className="desk-group" key={name}>
                     <h2>
-                        {name} <span className="count">{rows.length}</span>
+                        {!browsePens && selectedInk ? `Pens with ${model.inkById.get(selectedInk)?.name || 'this ink'}` : name} <span className="count">{rows.length}</span>
                     </h2>
                     <div className="desk-pairings">
                         {rows.map(({ pen, entry, inks }) => (
@@ -389,6 +416,8 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     </div>
                 </section>
             ))}
+            </>}
+            <RefillQueue model={model} onOpen={onOpen} canEdit={canEdit} />
         </>
     );
 }

@@ -12,6 +12,8 @@ export interface Database {
         Enums: Record<string, never>;
         CompositeTypes: Record<string, never>;
         Functions: {
+            save_named_palette: Rpc<{ p_id: string | null; p_name: string; p_items: Json }>;
+            delete_named_palette: Rpc<Target>;
             save_desk_palette: Rpc<{ p_items: Json }>;
             get_collection: Rpc<Record<string, never>>;
             create_pen: Rpc<{ p_item: Json }>;

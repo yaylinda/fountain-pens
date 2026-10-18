@@ -1,9 +1,9 @@
 <!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Desk palette — synthetic preview</title></head><body><div id="root"></div><script type="module">
 // Local visual fixture: no hosted requests, passwords, or collection writes.
-if (import.meta.env.VITE_SUPABASE_URL !== 'https://synthetic.supabase.co' || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY !== 'sb_publishable_synthetic') throw new Error('Use the synthetic preview environment described in docs/auth-ui.md.');
+if (import.meta.env.VITE_SUPABASE_URL !== 'https://synthetic.supabase.co' || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY !== 'sb_publishable_synthetic') throw new Error('Use the synthetic preview environment described in docs/desk-palette.md.');
 const options = new URLSearchParams(location.search);
-let signedIn = options.get('mode') !== 'public';
-let palette = JSON.parse(sessionStorage.getItem('synthetic-palette') || '[]');
+let signedIn = sessionStorage.getItem('synthetic-owner') === 'true';
+let palettes = JSON.parse(sessionStorage.getItem('synthetic-palettes') || '[{"id":"default","name":"My palette","items":[]}]');
 const inkNames = ['Ancient Copper', 'Honey Burst', 'Chiku-rin', 'Syo-ro', 'Kon-peki', 'Yama-budo'];
 const colors = ['#A45532','#C4A348','#80A348','#287D7D','#2574AA','#792D53'];
 const inks = inkNames.map((name,i)=>({id:'i'+i,brand:i<2?'Diamine':'Pilot',collection:i<2?'':'Iroshizuku',name,colorHex:colors[i],favorite:false,archived:false}));
@@ -23,14 +23,25 @@ window.fetch = async (input, init) => {
     return Response.json({access_token:token,refresh_token:'synthetic',expires_in:3600,token_type:'bearer',user:{id,email,aud:'authenticated',app_metadata:{},user_metadata:{}}});
   }
   if (url.includes('/auth/v1/logout')) { signedIn=false; sessionStorage.removeItem('synthetic-owner'); return new Response(null,{status:204}); }
-  if (url.includes('/rest/v1/rpc/save_desk_palette')) {
+  if (url.includes('/rest/v1/rpc/save_named_palette')) {
     if (!signedIn) return Response.json({code:'42501'},{status:403});
     if (sessionStorage.getItem('synthetic-fail')==='true') return Response.json({code:'offline'},{status:503});
-    palette = JSON.parse(init.body).p_items;
-    sessionStorage.setItem('synthetic-palette', JSON.stringify(palette));
-    return Response.json({items:palette});
+    const {p_id,p_name,p_items} = JSON.parse(init.body);
+    const palette = {id:p_id || crypto.randomUUID(),name:p_name,items:p_items};
+    const index = palettes.findIndex(p => p.id === palette.id);
+    if (index < 0) palettes.push(palette); else palettes[index] = palette;
+    sessionStorage.setItem('synthetic-palettes', JSON.stringify(palettes));
+    return Response.json({palette});
   }
-  if (url.includes('/rest/v1/rpc/get_collection')) return Response.json({pens,inks,events:options.has('empty')?[]:events,palette,canEdit:signedIn,asOf:'2026-10-03'});
+  if (url.includes('/rest/v1/rpc/delete_named_palette')) {
+    if (!signedIn) return Response.json({code:'42501'},{status:403});
+    if (sessionStorage.getItem('synthetic-fail')==='true') return Response.json({code:'offline'},{status:503});
+    const {p_id} = JSON.parse(init.body);
+    palettes = palettes.filter(p => p.id !== p_id);
+    sessionStorage.setItem('synthetic-palettes', JSON.stringify(palettes));
+    return Response.json({deletedId:p_id});
+  }
+  if (url.includes('/rest/v1/rpc/get_collection')) return Response.json({pens,inks,events:options.has('empty')?[]:events,palettes,palette:palettes.find(p=>p.id==='default')?.items || [],canEdit:signedIn,asOf:'2026-10-03'});
   throw new Error('Unsupported synthetic request');
 };
 await import('/src/main.tsx');
