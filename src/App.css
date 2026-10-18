@@ -2224,8 +2224,8 @@
 .palette-color:hover { background: var(--sidebar); }
 .palette-color[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
 .palette-color .desk-palette-swatch { display: inline-flex; align-self: stretch; margin-bottom: 12px; }
-/* Main’s tab silhouette scales with the padded card width at a balanced 2:1 ratio. */
-.palette-grid .swatch-large { width: 100%; height: auto; aspect-ratio: 2 / 1; border-radius: 3px 12px 3px 3px; }
+/* Main’s tab silhouette fills the padded card width at a consistent height. */
+.palette-grid .swatch-large { width: 100%; height: 60px; border-radius: 3px 12px 3px 3px; }
 .palette-grid strong { font-size: .875rem; line-height: 1.3; overflow-wrap: anywhere; }
 .palette-grid .small { line-height: 1.4; overflow-wrap: anywhere; }
 .palette-tile { padding: 12px; border: 1px solid var(--line); background: var(--paper); border-radius: 4px; }
