@@ -68,11 +68,7 @@ export default function Journal({ model, onOpen, canEdit }: Props) {
         <>
             <header className="page-header">
                 <div>
-                    <p className="eyebrow">One fill at a time</p>
-                    <h1>The refill journal</h1>
-                    <p className="page-intro">
-                        The colors you’ve used and the pens you’ve reached for.
-                    </p>
+                    <h1>Refill journal</h1>
                 </div>
                 {canEdit && (
                     <button
@@ -174,13 +170,13 @@ export default function Journal({ model, onOpen, canEdit }: Props) {
                 <EmptyState
                     title={
                         filtered
-                            ? 'No entries match just yet'
-                            : 'Your journal starts here'
+                            ? 'No matching entries'
+                            : 'No journal entries'
                     }
                 >
                     {filtered
                         ? 'Try another pen, date range, or search.'
-                        : 'Record your first refill and keep the details worth remembering.'}
+                        : 'Log a refill to record its pen, inks, and date.'}
                 </EmptyState>
             )}
             <div className="journal">

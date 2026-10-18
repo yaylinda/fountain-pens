@@ -115,14 +115,10 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
             },
         });
     return (
-        <>
+        <div className="desk-page">
             <header className="page-header">
                 <div>
-                    <p className="eyebrow">Ready to write</p>
-                    <h1>The writing desk</h1>
-                    <p className="page-intro">
-                        Find a color, explore a pairing, make it your own.
-                    </p>
+                    <h1>My Desk</h1>
                 </div>
                 {canEdit && (
                     <button
@@ -315,7 +311,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     title={
                         model.inked.length
                             ? 'No pens match this selection'
-                            : 'A fresh page awaits'
+                            : 'No inked pens'
                     }
                 >
                     {model.inked.length ? (
@@ -326,7 +322,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                             Show all inked pens
                         </button>
                     ) : (
-                        'Log a refill to bring your pens and colors to the desk.'
+                        'Log a refill to add an inked pen.'
                     )}
                 </EmptyState>
             )}
@@ -418,6 +414,6 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
             ))}
             </>}
             <RefillQueue model={model} onOpen={onOpen} canEdit={canEdit} />
-        </>
+        </div>
     );
 }

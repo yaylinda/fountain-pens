@@ -19,7 +19,7 @@ test('reduced motion has a quiet status, no canvas, and complete idempotent clea
     const { playInkCeremony } = await import('../src/lib/inkCeremony');
     const stop = playInkCeremony({ x: 140, y: 220 });
     assert.equal(document.querySelectorAll('canvas').length, 0);
-    assert.match(document.querySelector('[role=status]')!.textContent!, /Saved. Signed & sealed/);
+    assert.match(document.querySelector('[role=status]')!.textContent!, /^Saved\.$/);
     window.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape' }));
     assert.equal(document.querySelector('[role=status]'), null);
     stop();

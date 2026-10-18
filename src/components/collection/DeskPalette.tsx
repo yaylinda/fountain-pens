@@ -90,17 +90,15 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
         finally { setBusy(false); }
     };
     return <section className="desk-palette custom-palette" aria-label="Current ink palette">
-        <div className="section-heading">
-            <div><p className="eyebrow">A little color, your way</p><h2>Your palettes <span className="count">{visible.length} colors</span></h2></div>
-            {canEdit && !editing && <button ref={arrangeButton} className="button subtle" disabled={busy || confirmDelete} onClick={() => begin('edit')}>Arrange palette</button>}
-        </div>
         <div className="palette-library">
             <label htmlFor="palette-select">Saved palette
                 <select id="palette-select" value={active.id} disabled={editing || busy || confirmDelete} onChange={e => { onPaletteChange(e.target.value); setNotice(''); setError(''); }}>
                     {arrangements.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                 </select>
             </label>
+            <span className="palette-color-count">{visible.length} colors</span>
             {canEdit && !editing && <div className="palette-library-actions">
+                <button ref={arrangeButton} className="button secondary small-button" disabled={busy || confirmDelete} onClick={() => begin('edit')}>Arrange palette</button>
                 <button className="button subtle small-button" disabled={busy || confirmDelete} onClick={() => begin('new')}>New palette</button>
                 <button className="button subtle small-button" disabled={busy || confirmDelete} onClick={() => begin('copy')}>Duplicate</button>
                 {palettes.some(p => p.id === active.id) && <button className="text-link" disabled={busy || confirmDelete} onClick={() => { setConfirmDelete(true); setError(''); }}>Delete palette</button>}
@@ -111,10 +109,10 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
             <button className="button primary" disabled={busy} onClick={() => void remove()}>{busy ? 'Deleting…' : 'Delete arrangement'}</button>
             <button className="button subtle" disabled={busy} onClick={() => { setConfirmDelete(false); setError(''); }}>Keep palette</button>
         </div>}
-        {!editing && <p className="small muted">Your currently inked colors, arranged by you. Select a swatch to explore its pens.</p>}
+        {!editing && <p className="small muted">Select a color to see its pens.</p>}
         {editing && <div className="palette-edit-toolbar">
             <label className="palette-name-label" htmlFor="palette-name">Palette name
-                <input id="palette-name" value={draftName} maxLength={80} disabled={busy} placeholder="e.g. Quiet blues" onChange={e => setDraftName(e.target.value)} />
+                <input id="palette-name" value={draftName} maxLength={80} disabled={busy} placeholder="Palette name" onChange={e => setDraftName(e.target.value)} />
             </label>
             <p id="palette-help">Drag a handle or use the arrow buttons to reorder. With a keyboard, press Space on a handle, use arrow keys, then Space to drop or Escape to cancel.</p>
             <div className="palette-save-actions"><button id="palette-save" className="button primary" disabled={busy || !draftName.trim()} onClick={() => void save()}>{busy ? 'Saving…' : 'Save palette'}</button><button className="button subtle" disabled={busy} onClick={close}>Cancel</button></div>

@@ -139,14 +139,8 @@ export default function App() {
                     </span>
                     <span>
                         Ink <em>&</em> nib
-                        <span className="wordmark-caption">
-                            A collection, well kept.
-                        </span>
                     </span>
                 </Link>
-                <span className="nav-caption overline">
-                    Your writing corner
-                </span>
                 <nav aria-label="Main navigation">
                     {navItems.map((item) => item.to === '/collection' ? (
                         <Link key={item.to} to={collectionNavigation.home}
@@ -161,23 +155,10 @@ export default function App() {
                     ))}
                 </nav>
                 <div className="sidebar-bottom">
-                    <div className="sidebar-note">
-                        <span className="sidebar-flourish" aria-hidden="true">
-                            Aa
-                        </span>
-                        <p>
-                            For the love of
-                            <br />
-                            putting pen to paper.
-                        </p>
-                    </div>
                     <div className="profile">
                         <span className="profile-monogram">L</span>
                         <span>
                             Linda’s collection
-                            <span className="small muted block">
-                                Pens, inks & possibilities
-                            </span>
                         </span>
                     </div>
                     <OwnerControls canEdit={canEdit} />
@@ -216,7 +197,7 @@ export default function App() {
                     <div className="loading-state" role="status">
                         <Icon name="pen" />
                         <h1>Opening your collection…</h1>
-                        <p>A moment to find your place.</p>
+
                     </div>
                 ) : error ? (
                     <EmptyState
@@ -304,7 +285,7 @@ export default function App() {
                                 path="*"
                                 element={
                                     <EmptyState
-                                        title="A page out of place"
+                                        title="Page not found"
                                         action={
                                             <Link
                                                 className="button primary"
@@ -321,10 +302,6 @@ export default function App() {
                         </Routes>
                     </div>
                 )}
-                <footer className="page-footer">
-                    <span>Ink & nib</span>
-                    <span>A little order. More room to write.</span>
-                </footer>
             </main>
             <div className="live-notice" role="status" aria-live="polite">
                 {message && (

@@ -36,21 +36,8 @@
     height: 46px;
     stroke-width: 1;
 }
-.wordmark-caption {
-    display: block;
-    margin-top: 8px;
-    font:
-        400 0.6875rem 'Figtree',
-        sans-serif;
-    letter-spacing: 0.045em;
-    color: var(--muted);
-}
-.nav-caption {
-    padding: 52px 12px 16px;
-    font-size: 0.6875rem;
-    letter-spacing: 0.14em;
-}
 .sidebar nav {
+    margin-top: 40px;
     display: grid;
     gap: 6px;
 }
@@ -81,22 +68,6 @@
 .sidebar-bottom {
     margin-top: auto;
     padding-top: 40px;
-}
-.sidebar-note {
-    padding: 24px 12px 36px;
-    color: var(--muted);
-}
-.sidebar-flourish {
-    font-family: var(--display);
-    font-size: 3.5rem;
-    line-height: 1;
-    font-style: italic;
-    color: color-mix(in oklch, var(--brass) 55%, var(--sidebar));
-}
-.sidebar-note p {
-    font-size: 0.75rem;
-    line-height: 1.7;
-    margin-top: 10px;
 }
 .data-tools {
     padding: 10px 12px;
@@ -1810,11 +1781,7 @@
         gap: 7px;
         width: fit-content;
     }
-    .wordmark-caption {
-        font-size: 0.6875rem;
-        margin-top: 4px;
-    }
-    .brand-mark .icon {
+        .brand-mark .icon {
         width: 29px;
         height: 38px;
     }
@@ -2273,16 +2240,15 @@
 }
 
 /* A personal swatch sheet: ink carries the color; labels stay on paper. */
-.custom-palette .section-heading { align-items: center; flex-wrap: wrap; gap: 16px; }
-.custom-palette .eyebrow { margin: 0 0 8px; }
-.custom-palette h2 { margin: 0; }
 .custom-palette > p { max-width: 72ch; }
-.palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 128px), 1fr)); gap: 16px 12px; padding: 0; margin: 24px 0; list-style: none; }
+.palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 136px), 1fr)); gap: 24px 16px; padding: 0; margin: 24px 0; list-style: none; }
 .palette-color, .palette-tile { display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 0; text-align: left; }
-.palette-color { padding: 8px; border: 1px solid transparent; background: transparent; border-radius: 4px; color: var(--ink); }
-.palette-color[aria-pressed="true"] { border-color: var(--accent); background: var(--paper); }
-.palette-color .desk-palette-swatch { display: block; }
-.palette-grid .swatch-large { width: 100%; height: 48px; border-radius: 3px 12px 3px 3px; }
+.palette-color { padding: 16px 12px; border: 1px solid transparent; background: transparent; border-radius: 6px; color: var(--ink); }
+.palette-color:hover { background: var(--sidebar); }
+.palette-color[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.palette-color .desk-palette-swatch { display: inline-flex; align-self: flex-start; margin-bottom: 12px; }
+/* Original oval silhouette from 0eb4797, at its original 59 × 69 size. */
+.palette-grid .swatch-large { width: 59px; height: 69px; border-radius: 43% 48% 44% 46%; }
 .palette-grid strong { font-size: .875rem; line-height: 1.3; overflow-wrap: anywhere; }
 .palette-grid .small { line-height: 1.4; }
 .palette-tile { padding: 12px; border: 1px solid var(--line); background: var(--paper); border-radius: 4px; }
@@ -2309,11 +2275,13 @@
 
 /* The desk opens on color; inventory and maintenance are secondary. */
 .custom-palette { padding-top: 0; border-bottom: 0; }
-.palette-library { display: flex; align-items: end; flex-wrap: wrap; gap: 12px 24px; margin: 20px 0 12px; }
-.palette-library label, .palette-name-label { display: grid; gap: 6px; font-size: .8125rem; color: var(--muted); }
+.palette-library { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin: 0 0 16px; padding: 20px 0; border-block: 1px solid var(--line); }
+.palette-library > label { display: flex; flex-direction: row; align-items: center; gap: 12px; }
+.palette-color-count { color: var(--muted); font-size: .8125rem; }
+.palette-name-label { display: grid; gap: 6px; font-size: .8125rem; color: var(--muted); }
 .palette-library select, .palette-name-label input { min-height: 44px; border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; background: var(--paper); color: var(--ink); font: inherit; }
-.palette-library select { width: min(320px, 100%); min-width: 200px; }
-.palette-library-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; }
+.palette-library select { width: 200px; min-width: 0; font-weight: 600; }
+.palette-library-actions { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; }
 .palette-library-actions .text-link { min-height: 44px; color: var(--muted); }
 .palette-delete { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px; border: 1px solid var(--line); }
 .palette-delete p { flex: 1 1 100%; margin: 0; }
@@ -2372,4 +2340,36 @@
     .sidebar .account-button { min-height: 44px; }
     .sidebar .access-note { display: none; }
     .sidebar .access-error { position: absolute; top: 100%; right: 0; width: min(280px, calc(100vw - 40px)); padding: 12px; background: var(--surface); border: 1px solid var(--line); z-index: 5; }
+}
+
+/* My Desk: one working surface, with the ink colors as the visual focus. */
+.desk-page { padding-top: 12px; }
+.desk-page .page-header { padding: 0 0 32px; align-items: center; }
+.desk-page h1 { font-size: 2.5rem; letter-spacing: -.035em; }
+.desk-page .page-header .button { min-height: 44px; padding: 10px 16px; }
+.desk-page .custom-palette { padding-bottom: 24px; }
+.desk-page .palette-grid { margin: 24px -12px 32px; }
+.desk-page .palette-view { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.desk-page .palette-pen-count { margin-top: auto; padding-top: 4px; }
+.desk-page .desk-results-summary { margin: 16px 0; }
+.desk-page .desk-group > h2 { font-family: 'Figtree', sans-serif; font-size: 1.125rem; font-weight: 600; }
+.desk-page .desk-pairing .name-link { font-family: 'Figtree', sans-serif; font-size: 1rem; font-weight: 600; }
+.desk-page .desk-ink-details .name-link { font-size: .875rem; font-weight: 400; }
+.desk-page .desk-pairing-swatches .swatch-large { width: 32px; height: 38px; }
+.desk-page .desk-browse-toggle { font-size: .875rem; font-weight: 600; }
+.desk-page .desk-refill-queue { margin-top: 0; border-top: 0; }
+@media (max-width: 720px) {
+    .sidebar nav { margin-top: 0; }
+    .desk-page { padding-top: 0; }
+    .desk-page h1 { font-size: 2rem; }
+    .desk-page .page-header { padding-bottom: 24px; }
+    .palette-library { gap: 12px; }
+    .palette-library > label { flex: 1; }
+    .palette-library select { flex: 1; width: auto; }
+    .palette-library-actions { margin-left: 0; width: 100%; gap: 4px 8px; }
+    .palette-library-actions .button { padding-inline: 10px; }
+    .desk-page .palette-grid { gap: 16px 8px; margin-inline: -8px; }
+    .desk-page .palette-view { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .palette-color { padding: 12px 8px; }
+    .palette-color-count { margin-left: auto; }
 }

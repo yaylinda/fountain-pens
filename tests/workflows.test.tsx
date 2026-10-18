@@ -240,7 +240,7 @@ test('collection workflows work against isolated API fixtures without touching r
         });
         failLoad = false;
         await user.click(screen.getByRole('button', { name: 'Try again' }));
-        await screen.findByRole('heading', { name: 'The writing desk' });
+        await screen.findByRole('heading', { name: 'My Desk' });
         assert.ok(
             screen.getByRole('button', { name: /Browse inked pens 1/ }),
         );
@@ -306,7 +306,7 @@ test('collection workflows work against isolated API fixtures without touching r
         // Saved favorites are visible after remounting, including in view-only mode.
         cleanup();
         mountApp(['/journal']);
-        await screen.findByRole('heading', { name: 'The refill journal' });
+        await screen.findByRole('heading', { name: 'Refill journal' });
         assert.ok(screen.getByRole('img', { name: 'Favorite' }));
         cleanup();
         mountApp(['/inks?status=all']);
@@ -318,12 +318,12 @@ test('collection workflows work against isolated API fixtures without touching r
         await user.click(screen.getByRole('button', { name: 'Remove Diamine Happy Holidays from favorites' }));
         await waitFor(() => assert.equal(latestWrite('inks').data.find((item) => item.id === 'ink-a')?.favorite, false));
         await user.click(screen.getByRole('button', { name: 'Favorites', exact: true }));
-        assert.ok(screen.getByRole('heading', { name: 'Your favorites belong here' }));
+        assert.ok(screen.getByRole('heading', { name: 'No favorites yet' }));
         assert.equal(await service.setFavorite('ink', 'NONE', true), false);
         document.querySelectorAll('.save-notification').forEach((notice) => notice.remove());
         cleanup();
         mountApp();
-        await screen.findByRole('heading', { name: 'The writing desk' });
+        await screen.findByRole('heading', { name: 'My Desk' });
     });
 
     await t.test('desk opens on palettes, with pens disclosed on demand and URL state preserved', async () => {
@@ -342,7 +342,7 @@ test('collection workflows work against isolated API fixtures without touching r
         await user.selectOptions(screen.getByLabelText('Order by'), 'recent');
         await user.click(screen.getByRole('button', { name: 'Falcon · Sapphire', exact: true }));
         await user.click(screen.getByRole('button', { name: 'Cancel', exact: true }));
-        await screen.findByRole('heading', { name: 'The writing desk' });
+        await screen.findByRole('heading', { name: 'My Desk' });
         assert.equal((screen.getByLabelText('Group by') as HTMLSelectElement).value, 'ink');
         assert.equal((screen.getByLabelText('Order by') as HTMLSelectElement).value, 'recent');
         assert.equal((screen.getByLabelText('Nib material') as HTMLSelectElement).value, 'Gold');
@@ -354,7 +354,7 @@ test('collection workflows work against isolated API fixtures without touching r
         await user.click(screen.getByRole('button', { name: 'View Diamine Happy Holidays' }));
         assert.equal(screen.getByLabelText('Ink name').value, 'Happy Holidays');
         await act(async () => { await appRouter.navigate(-1); });
-        await screen.findByRole('heading', { name: 'The writing desk' });
+        await screen.findByRole('heading', { name: 'My Desk' });
         assert.equal(appRouter.state.location.search, deskUrl);
         assert.equal(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }).getAttribute('aria-pressed'), 'true');
         await user.click(screen.getByRole('button', { name: 'Close pen details' }));
@@ -611,7 +611,7 @@ test('collection workflows work against isolated API fixtures without touching r
             ]);
             await user.click(screen.getByRole('link', { name: 'The desk' }));
             assert.ok(
-                screen.getByRole('heading', { name: 'A fresh page awaits' }),
+                screen.getByRole('heading', { name: 'No inked pens' }),
             );
             await user.click(
                 screen.getByRole('link', { name: 'Refill journal' }),

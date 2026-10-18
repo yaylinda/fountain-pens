@@ -170,7 +170,7 @@ export function RefillEditor({
                 title={
                     editing
                         ? `${canEdit ? 'Edit' : 'View'} journal entry`
-                        : 'A fresh fill'
+                        : 'Log a refill'
                 }
                 onClose={onClose}
             />
@@ -572,7 +572,7 @@ export function RefillEditor({
                 <aside className="editor-aside">
                     <section className="refill-preview">
                         <p className="eyebrow">
-                            {cleaning ? 'A little care' : 'The pairing'}
+                            {cleaning ? 'Cleaning' : 'Pairing'}
                         </p>
                         <div className="preview-mark">
                             {cleaning ? (
@@ -592,7 +592,7 @@ export function RefillEditor({
                         <h2>
                             {selectedPen
                                 ? penLabel(selectedPen)
-                                : 'A pen, an ink, a fresh page.'}
+                                : 'Select a pen'}
                         </h2>
                         {selectedPen && (
                             <p className="muted small">
@@ -609,7 +609,7 @@ export function RefillEditor({
                                             (ink) => ink?.name || 'Missing ink',
                                         )
                                         .join(' + ')
-                                  : 'Your ink goes here'}
+                                  : 'Select an ink'}
                         </h3>
                         <p className="small muted">
                             {cleaning
@@ -651,7 +651,7 @@ export function RefillEditor({
                         </section>
                     )}
                     {!collection.pens.length && (
-                        <EmptyState title="Make it yours">
+                        <EmptyState title="Add a pen first">
                             Add a pen using “New pen”, then come right back to
                             this refill.
                         </EmptyState>

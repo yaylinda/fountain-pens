@@ -145,7 +145,7 @@ test('ink stories open independently of editing in the list and support author s
         assert.ok(screen.getByRole('button', { name: 'View Wearingeul The Little Mermaid' }));
         await user.clear(search);
         await user.type(search, 'unmatched author');
-        assert.ok(screen.getByRole('heading', { name: 'No matches on this shelf' }));
+        assert.ok(screen.getByRole('heading', { name: 'No matches' }));
     } finally {
         cleanup();
         dom.window.close();

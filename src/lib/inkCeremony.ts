@@ -12,7 +12,7 @@ export function playInkCeremony(origin: SaveOrigin): () => void {
     Object.assign(layer.style, { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '1600', overflow: 'hidden' });
     const receipt = document.createElement('div');
     receipt.setAttribute('role', 'status');
-    receipt.textContent = 'Saved. Signed, sealed, spectacular.';
+    receipt.textContent = 'Saved.';
     Object.assign(receipt.style, { position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: '#263f38', color: '#fff6dc', padding: '12px 20px', borderRadius: '8px', font: '14px Georgia, serif', textAlign: 'center', maxWidth: '80vw' });
     layer.append(receipt);
     document.body.append(layer);
@@ -32,7 +32,6 @@ export function playInkCeremony(origin: SaveOrigin): () => void {
     window.addEventListener('resize', stop, { once: true });
     reduced.addEventListener('change', stop, { once: true });
     if (reduced.matches) {
-        receipt.textContent = 'Saved. Signed & sealed.';
         timer = window.setTimeout(stop, 2200);
         return stop;
     }
@@ -53,14 +52,10 @@ export function playInkCeremony(origin: SaveOrigin): () => void {
     ic.translate(200, 200);
     const print = (c: CanvasRenderingContext2D, signed: number, stamped: boolean) => {
         c.fillStyle = '#201e19'; c.strokeStyle = '#201e19';
-        c.textAlign = 'center'; c.font = '11px Georgia'; c.fillText('THE PERSONAL STATIONERY ARCHIVE', 0, -115);
-        c.font = 'bold 29px Georgia'; c.fillText('An inky agreement', 0, -74);
-        c.font = 'italic 13px Georgia'; c.fillText('Let it be indelibly known:', 0, -42);
-        c.font = '12px Georgia'; c.fillText('This collection is ridiculously well kept.', 0, -16);
-        c.fillText('No nib shall be left behind.', 0, 5);
+        c.textAlign = 'center';
+        c.font = 'bold 29px Georgia'; c.fillText('Saved', 0, -74);
         c.lineWidth = .6; c.strokeRect(-154, -141, 308, 278);
         c.beginPath(); c.moveTo(-126, 105); c.lineTo(116, 105); c.stroke();
-        c.font = '9px Georgia'; c.fillText('SIGNED WITH ENTIRELY UNNECESSARY CEREMONY', 0, 123);
         c.save(); c.beginPath(); c.rect(-120, 22, 225 * signed, 82); c.clip();
         c.lineWidth = 2.6; c.lineCap = 'round'; c.stroke(signature); c.restore();
         if (stamped) {
@@ -203,8 +198,6 @@ export function playInkCeremony(origin: SaveOrigin): () => void {
         ctx.fillStyle = '#263f38'; ctx.beginPath(); ctx.roundRect(target.x - 53, target.y - 19, 106, 38, 8); ctx.fill();
         ctx.strokeStyle = '#c7a35c'; ctx.lineWidth = 1.5; ctx.stroke();
         ctx.font = '15px Georgia'; ctx.textAlign = 'center'; ctx.fillStyle = '#fff6df'; ctx.fillText('✓ Saved', target.x, target.y + 5);
-        const caption = t < 1800 ? 'Saved. Making it unnecessarily official…' : t < 3100 ? 'The seal of extremely good taste.' : 'Signed, sealed, spectacular.';
-        if (receipt.textContent !== caption) receipt.textContent = caption;
         frame = requestAnimationFrame(draw);
     }
     frame = requestAnimationFrame(draw);

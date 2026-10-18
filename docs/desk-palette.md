@@ -14,7 +14,9 @@ The desk opens on a compact swatch sheet. Saved palettes are the main workspace;
 
 ## Presentation
 
-Swatches are 48px high (previously 76px) with a 128px minimum column width (previously 168px), giving more colors per row. Labels remain on paper, with ink name, brand/collection and current pen count. On phones the grid has two columns. Drag handles and earlier/later controls retain 44px hit targets.
+The desk uses one compact palette toolbar, an open swatch sheet, and disclosed pen/refill lists. The oval silhouette (`border-radius: 43% 48% 44% 46%`) and 59×69px large-swatch dimensions come from `0eb4797` (the original writing-desk redesign). That commit's small sidebar palette used the same silhouette at 40×46px; the labeled main workspace uses the original large size so colors stay readable without stretching. The pre-palette desk later used 44×44px variants, while `b80149b` introduced stretched rectangular tabs and `af25601` reduced their height. The restored oval deliberately retains the historical inset outline.
+
+Names, brand/collection and pen counts sit below each swatch. Phones retain two columns and 44px arrangement controls. Only My Desk receives layout and typography changes; global navigation and other pages lose decorative copy while keeping functional instructions, reference descriptions and user data. Save-animation copy is reduced to “Saved.”
 
 ## Database migration
 
