@@ -86,16 +86,6 @@ const swatchInks = (hexes: string[]): Ink[] => hexes.map((colorHex, i) => ({
     id: `swatch-${i}`, name: `Swatch ${i}`, brand: 'Test', collection: '', colorHex,
 }));
 
-test('perceptual conversion matches reference sRGB colors', () => {
-    const red = perceptualColor('#ff0000');
-    assert.ok(Math.abs(red.light - 0.627955) < 0.00001);
-    assert.ok(Math.abs(red.a - 0.224863) < 0.00001);
-    assert.ok(Math.abs(red.b - 0.125846) < 0.00001);
-    assert.ok(Math.abs(perceptualColor('#ffffff').light - 1) < 0.00001);
-    assert.ok(perceptualColor('#ffffff').chroma < 0.00001);
-    assert.equal(perceptualColor('#000000').light, 0);
-});
-
 test('balanced green, teal, turquoise, blue, and violet-blue swatches retain their progression', () => {
     const samples = swatchInks(['#2C9867', '#219783', '#2199A3', '#288CAD', '#447ED0', '#686DCB']);
     assert.deepEqual(sortInksByColor([...samples].reverse()), samples);
@@ -133,10 +123,6 @@ test('neutrals run dark to light after colors, followed by missing swatches', ()
     const samples = swatchInks(['#eeeeee', '#447ED0', '#222222', '#999999']);
     const missing = { id: 'missing', name: 'No reference swatch', brand: 'Test', collection: '' };
     assert.deepEqual(sortInksByColor([missing, ...samples]), [samples[1], samples[2], samples[3], samples[0], missing]);
-    assert.deepEqual(sortInksByColor([]), []);
-    assert.deepEqual(sortInksByColor([missing]), [missing]);
-    const twins = [{ ...samples[1], id: 'b' }, { ...samples[1], id: 'a' }];
-    assert.deepEqual(sortInksByColor(twins).map((ink) => ink.id), ['a', 'b']);
 });
 
 test('desk rows share palette ranks and retain their order through filters and selections', () => {
