@@ -148,6 +148,5 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
             const ink = byId.get(item.inkId)!;
             return <li key={ink.id}><Swatch ink={ink} /><span>{inkLabel(ink)}</span>{editing ? <button className="button subtle" disabled={busy} onClick={() => toggle(ink.id, false)}>Restore {ink.name}</button> : <button className="text-link" onClick={() => onSelect(ink.id)}>See pens</button>}</li>;
         })}</ul></details>}
-        {selectedInk && <button className="text-link" onClick={() => onSelect('')}>Close pen details</button>}
     </section>;
 }
