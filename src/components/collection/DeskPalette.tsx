@@ -20,12 +20,12 @@ interface Props {
     onSelect: (id: string) => void;
     refills: Map<string, number>;
 }
-function SortableInk({ ink, index, omit, disabled }: {
-    ink: Ink; index: number; omit: () => void; disabled: boolean;
+function SortableInk({ ink, omit, disabled }: {
+    ink: Ink; omit: () => void; disabled: boolean;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: ink.id, disabled });
     return <li ref={setNodeRef} className={`palette-tile ${isDragging ? 'is-dragging' : ''}`} style={{ transform: CSS.Transform.toString(transform), transition }}>
-        <div className="palette-tile-top"><span className="palette-position">{index + 1}</span>
+        <div className="palette-tile-top">
             <button className="palette-handle" {...attributes} {...listeners} disabled={disabled} aria-label={`Drag ${inkLabel(ink)}`}>⠿</button>
         </div>
         <Swatch ink={ink} large />
@@ -133,7 +133,7 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
             onDragCancel: () => 'Move canceled.',
         } }} sensors={sensors} collisionDetection={closestCenter} onDragEnd={({ active, over }) => { if (over && active.id !== over.id) move(String(active.id), String(over.id)); }}>
             <SortableContext items={visible.map(item => item.inkId)} strategy={rectSortingStrategy}>
-                <ol className="palette-grid" aria-label="Palette order">{visible.map((item, index) => <SortableInk key={item.inkId} ink={byId.get(item.inkId)!} index={index} disabled={busy} omit={() => toggle(item.inkId, true)} />)}</ol>
+                <ol className="palette-grid" aria-label="Palette order">{visible.map(item => <SortableInk key={item.inkId} ink={byId.get(item.inkId)!} disabled={busy} omit={() => toggle(item.inkId, true)} />)}</ol>
             </SortableContext>
         </DndContext> : <div className="palette-grid palette-view">{visible.map(item => {
             const ink = byId.get(item.inkId)!;

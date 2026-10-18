@@ -2231,8 +2231,7 @@
 .palette-tile > .swatch-large { align-self: center; }
 .palette-tile.is-dragging { z-index: 2; outline: 2px solid var(--accent); opacity: .85; }
 .palette-tile-top, .palette-tile-actions, .palette-save-actions { display: flex; align-items: center; gap: 8px; }
-.palette-tile-top { justify-content: space-between; }
-.palette-position { font-variant-numeric: tabular-nums; color: var(--muted); }
+.palette-tile-top { justify-content: flex-end; }
 .palette-handle { touch-action: none; cursor: grab; font-size: 1.5rem; }
 .palette-handle:active { cursor: grabbing; }
 .palette-tile button { min-width: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 4px; background: transparent; color: inherit; }
