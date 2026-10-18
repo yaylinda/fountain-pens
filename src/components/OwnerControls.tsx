@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { Session } from '@supabase/supabase-js';
 import { getSupabase } from '../services/supabaseClient';
 import { activateCollection, isCollectionSaving } from '../services/dataService';
@@ -31,7 +32,18 @@ export function OwnerControls({ canEdit }: { canEdit: boolean }) {
         } catch { setReady(true); setError('The collection connection is not configured.'); }
     }, []);
     useEffect(() => {
-        if (open) emailInput.current?.focus();
+        if (open) {
+            if (busy) form.current?.focus();
+            else emailInput.current?.focus();
+        }
+    }, [open, busy]);
+    useEffect(() => {
+        if (!open) return;
+        const shell = document.querySelector<HTMLElement>('.app-shell');
+        if (!shell) return;
+        const previous = shell.inert;
+        shell.inert = true;
+        return () => { shell.inert = previous; };
     }, [open]);
     useEffect(() => {
         if (!busy && restoreFocus.current && (!open || error)) {
@@ -76,22 +88,35 @@ export function OwnerControls({ canEdit }: { canEdit: boolean }) {
     return <section className="owner-controls" aria-label="Collection access">
         <div className="access-bar">
             <p className={`access-mode${canEdit ? ' is-owner' : ''}`} role="status">
-                <strong>{!ready ? 'Checking access…' : canEdit ? 'Owner mode' : session ? 'Signed in' : 'Public view'}</strong>
-                <span>{canEdit ? 'Editing enabled' : 'View only'}</span>
+                <strong>{!ready ? 'Checking access…' : canEdit ? 'Editing' : session ? 'View only' : 'Public view'}</strong>
             </p>
             <button ref={accountButton} className="text-link account-button" disabled={busy || !ready}
                 aria-expanded={session ? undefined : open} aria-controls={session ? undefined : 'owner-sign-in'}
                 onClick={session ? signOut : () => open ? close() : setOpen(true)}>
-                {session ? (busy ? 'Signing out…' : 'Sign out') : open ? 'Close sign in' : 'Owner sign in'}
+                {session ? (busy ? 'Signing out…' : 'Sign out') : 'Owner sign in'}
             </button>
         </div>
         {session && !canEdit && <p className="access-note">This account can view the collection only. Editing is reserved for Linda.</p>}
         {error && !open && <p className="access-error" role="alert">{error}</p>}
-        {open && !session && <form ref={form} id="owner-sign-in" className="owner-sign-in" onSubmit={signIn}
+        {open && !session && createPortal(<div className="owner-dialog-backdrop" onClick={event => { if (event.target === event.currentTarget) close(); }}>
+            <form ref={form} id="owner-sign-in" className="owner-sign-in" onSubmit={signIn}
+            role="dialog" aria-modal="true" tabIndex={-1}
             aria-labelledby="owner-sign-in-title" aria-describedby="owner-sign-in-note" aria-busy={busy}
-            onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); close(); } }}>
+            onKeyDown={event => {
+                if (event.key === 'Escape') { event.preventDefault(); close(); }
+                if (event.key !== 'Tab') return;
+                const controls = [...event.currentTarget.querySelectorAll<HTMLElement>('input, button')].filter(element => !element.matches(':disabled'));
+                const first = controls[0], last = controls[controls.length - 1];
+                if (!first) { event.preventDefault(); return; }
+                if (event.shiftKey && (document.activeElement === first || document.activeElement === form.current)) {
+                    event.preventDefault(); last?.focus();
+                } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === form.current)) {
+                    event.preventDefault(); first.focus();
+                }
+            }}>
             <div>
-                <h2 id="owner-sign-in-title">A place for the collection keeper.</h2>
+                <button type="button" className="owner-dialog-close" aria-label="Close sign in" disabled={busy} onClick={close}>×</button>
+                <h2 id="owner-sign-in-title">Owner sign in</h2>
                 <p id="owner-sign-in-note" className="muted small">Sign in to edit Linda’s collection. Everyone is welcome to browse.</p>
             </div>
             <fieldset disabled={busy} className="owner-sign-in-fields">
@@ -104,6 +129,6 @@ export function OwnerControls({ canEdit }: { canEdit: boolean }) {
                     <button className="text-link account-button" type="button" onClick={close}>Cancel</button>
                 </div>
             </fieldset>
-        </form>}
+        </form></div>, document.body)}
     </section>;
 }

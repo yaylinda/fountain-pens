@@ -180,20 +180,10 @@ export default function App() {
                             </span>
                         </span>
                     </div>
+                    <OwnerControls canEdit={canEdit} />
                 </div>
             </aside>
             <main id="main-content" tabIndex={-1} className="main-content">
-                <div className="topline">
-                    <span>THE PERSONAL STATIONERY ARCHIVE</span>
-                    <span className="topline-date">
-                        {new Intl.DateTimeFormat('en-US', {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric',
-                        }).format(new Date())}
-                    </span>
-                </div>
-                <OwnerControls canEdit={canEdit} />
                 {warning && <p role="alert">{warning} <button className="text-link" onClick={retry}>Refresh collection</button></p>}
                 {pending && (
                     <div className="draft-notice" role="alert">
