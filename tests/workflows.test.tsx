@@ -195,6 +195,31 @@ test('collection workflows work against isolated API fixtures without touching r
         assert.equal(screen.queryByRole('button', { name: 'Not pure' }), null);
         cleanup();
     });
+    await t.test('refill chooser puts marked pens first, retaining name/finish order and selection through search', async () => {
+        const { RefillEditor } = await import('../src/components/collection/RefillEditor');
+        const { deriveCollection } = await import('../src/lib/collection');
+        const pens = [
+            { id: 'other-z', model: 'Falcon', color: 'Zinc', needsRefill: false },
+            { id: 'marked-z', model: 'Falcon', color: 'Zinc', needsRefill: true },
+            { id: 'other-a', model: 'Falcon', color: 'Amber', needsRefill: false },
+            { id: 'marked-a', model: 'Falcon', color: 'Amber', needsRefill: true },
+            { id: 'archived', model: 'Falcon', color: 'Archived', needsRefill: true, archived: true },
+        ].map(pen => ({ ...source.pens[0], ...pen }));
+        const collection = { pens, inks: source.inks, entries: [] };
+        render(<RefillEditor editor={{ kind: 'refill' }} collection={collection} model={deriveCollection(collection)} canEdit
+            onClose={() => {}} onDirty={() => {}} onSaved={() => {}} onOpen={() => {}} backLabel="the desk" />);
+        const chooser = screen.getByRole('group', { name: 'Choose a pen' });
+        const order = () => within(chooser).getAllByRole('radio').map(input => (input as HTMLInputElement).value);
+        assert.deepEqual(order(), ['marked-a', 'marked-z', 'other-a', 'other-z']);
+        await user.click(within(chooser).getAllByRole('radio')[1]);
+        const search = screen.getByPlaceholderText('Find a pen by brand, model, finish, or nib…');
+        await user.type(search, 'Zinc');
+        assert.deepEqual(order(), ['marked-z', 'other-z']);
+        assert.equal((within(chooser).getAllByRole('radio')[0] as HTMLInputElement).checked, true);
+        await user.clear(search);
+        assert.deepEqual(order(), ['marked-a', 'marked-z', 'other-a', 'other-z']);
+        cleanup();
+    });
     await t.test('desk refill queue includes empty pens and opens usable refill drafts', async () => {
         const { default: RefillQueue } = await import('../src/components/collection/RefillQueue');
         const { deriveCollection } = await import('../src/lib/collection');

@@ -82,6 +82,7 @@ export function RefillEditor({
         )
         .sort(
             (a, b) =>
+                Number(!!b.needsRefill) - Number(!!a.needsRefill) ||
                 byName(penLabel(a), penLabel(b)) ||
                 byName(penDescription(a), penDescription(b)),
         );
@@ -295,7 +296,8 @@ export function RefillEditor({
                                             }
                                         />
                                         <span>
-                                            <strong>{penLabel(pen)}<FavoriteMark item={pen} /></strong>
+                                            <strong>{penLabel(pen)}<FavoriteMark item={pen} /></strong>{' '}
+                                            {pen.needsRefill && <span className="badge refill-badge">Needs refill</span>}
                                             <span className="small muted block">
                                                 {penDescription(pen)}
                                                 {pen.archived
