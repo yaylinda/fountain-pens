@@ -31,6 +31,12 @@ export interface Pen {
     needsRefill?: boolean;
 }
 
+export interface WritingLog {
+    id: string;
+    refillId: string;
+    writtenOn: string;
+}
+
 export interface RefillLog {
     id?: string;
     sequence?: string;

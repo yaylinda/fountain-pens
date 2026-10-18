@@ -12,6 +12,8 @@ export interface Database {
         Enums: Record<string, never>;
         CompositeTypes: Record<string, never>;
         Functions: {
+            save_writing_log: Rpc<{ p_id: string | null; p_refill_id: string; p_written_on: string }>;
+            delete_writing_log: Rpc<Target>;
             save_named_palette: Rpc<{ p_id: string | null; p_name: string; p_items: Json }>;
             delete_named_palette: Rpc<Target>;
             save_desk_palette: Rpc<{ p_items: Json }>;
