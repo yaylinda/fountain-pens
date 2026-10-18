@@ -17,7 +17,7 @@ export default function RefillQueue({ model, onOpen, canEdit }: {
     if (!pens.length) return null;
 
     return (
-        <details className="desk-refill-queue" open>
+        <details className="desk-refill-queue">
             <summary>
                 Needs refill <span className="count">{pens.length}</span>
             </summary>

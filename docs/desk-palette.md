@@ -1,49 +1,29 @@
-# My Desk personal palette
+# Desk palettes
 
-One saved arrangement belongs to Linda and is publicly readable. The palette sits in the existing My Desk palette position above pen results. Its labelled, paper-backed swatches retain color-to-pen filtering, favorites, and refill badges. The existing pen presets, filters, grouping, ordering, queue, and editor navigation remain available.
+The desk opens on a compact swatch sheet. Saved palettes are the main workspace; selecting a color reveals its pens and their detail/refill actions. “Browse inked pens” discloses the existing presets, filters, grouping and ordering. The refill queue lives below the workspace and starts collapsed. Fountain pens and Ink cabinet continue to own full inventory management; the journal owns history.
 
-## Predictable rules
+## Saved arrangements
 
-- One swatch per ink ID, regardless of how many pens use it. A mixed refill contributes each component ink; no blended color is invented. The pen list still identifies mixed refills.
-- The palette uses all currently inked pens, independent of temporary pen filters. Selecting a swatch filters the pen list within those filters; “Show all colors” clears that selection. Pen ordering remains separate from palette ordering.
-- On first use colors follow the existing rainbow order. Newly inked colors append in rainbow order when first encountered. Save captures their positions; there is no background write when a visitor opens the page.
-- An ink that stops being current disappears from the palette, but its saved position and omission preference remain. Re-inking restores that preference. Archived pens follow the existing definition of currently inked; an archived ink still used by a current pen remains represented, as before.
-- Omit affects only the palette. Omitted current inks remain available in an expandable list with “See pens” for readers and “Restore” while arranging. Restore retains the ink's relative saved position. Deleting an ink removes its palette preference through the foreign key cascade.
-- Save commits the complete arrangement; Cancel discards the current edit. Errors retain the draft. Concurrent tabs use ordinary last-successful-save behavior, with no conflict/recovery infrastructure. Leaving My Desk discards unsaved local edits.
+- Create a named palette, duplicate an existing arrangement, or use Arrange palette to rename and reorder it. Save commits the name, order and omissions together. Cancel discards the edit; failed saves retain it. Switching palettes is disabled while arranging.
+- Arrangements are stored in Supabase, publicly readable and editable only by the owner. Palette selection is in the URL and survives opening and returning from pen/ink details. Deletion asks for confirmation and affects only that arrangement.
+- The original saved arrangement migrates to “My palette”. Duplicate copies both visible and dormant preferences. A new palette starts with all current inks in rainbow order.
+- Each arrangement tracks currently inked colors, one swatch per ink ID. A mixed refill contributes each component without inventing a blended color. New current colors append in rainbow order; dormant positions and omissions survive until that ink is current again.
+- Omit hides a color only in that arrangement. Its pens and history remain intact. Omitted colors can be restored or used to inspect their pens.
+- Selecting a swatch shows all of its current pens, independently of the secondary pen browser’s filters. Returning to the pen browser restores its filters.
+- The empty library offers a fresh “My palette” workspace. It writes nothing until Save. Leaving the desk discards an unsaved palette edit, as before.
+
+## Presentation
+
+Swatches are 48px high (previously 76px) with a 128px minimum column width (previously 168px), giving more colors per row. Labels remain on paper, with ink name, brand/collection and current pen count. On phones the grid has two columns. Drag handles and earlier/later controls retain 44px hit targets.
+
+## Database migration
+
+`20261018000000_named_palettes.sql` adds owner-scoped palette metadata and extends the existing items table with a palette ID. Existing positions migrate under `default`; the old RPC still reads/writes that arrangement for older clients. New `save_named_palette` and `delete_named_palette` RPCs use invoker rights, forced owner RLS, atomic validation, and cascading item cleanup. The collection snapshot includes all named arrangements. Applied migration files are unchanged.
+
+Deploy the new migration through the existing Supabase integration before serving the new frontend. No hosted schema or production data is changed by this implementation. Local checks cover upgrade preservation, public reads, owner-only changes, independent saves, rename/delete, rollback, and unchanged inventory/history.
 
 ## UI and accessibility
 
 Consulted the personal Impeccable skill at `~/.agents/skills/impeccable/SKILL.md`, its interaction/responsive references, and the repo's `.impeccable.md`. Retained Bodoni Moda/Figtree, warm paper and aubergine, with color reserved for actual ink swatches. Editor controls are disclosed through “Arrange palette”.
 
 Pinned dnd-kit supports pointer/touch handles and Space → arrows → Space keyboard sorting (Escape cancels). Visible earlier/later buttons provide a gesture-free alternative. Handles and move/omit controls are at least 44×44 CSS pixels. Focus indicators, named controls, ink-name drag announcements, status messages, reduced-motion CSS, and stable focus after removal are included. Labels show ink name, brand, and collection separately from color.
-
-## Persistence and deployment
-
-`public.desk_palette` stores ink ID, position and omission under the existing sole owner. Forced RLS, explicit grants, and the existing `private.is_owner()` predicate protect writes; public reads follow existing collection policy. `save_desk_palette` is an invoker RPC that validates and replaces the arrangement atomically. `get_collection` includes the palette in its existing snapshot. Inventory and refill commands are unchanged.
-
-Migration: `20261003190907_desk_palette.sql`. No live writes, schema deployment, new credentials, auth configuration or project changes were performed. Live read-only inspection confirmed the current `get_collection` definition and ink policies match the checked-in contract. GitHub's Supabase integration remains the only schema deployer; production remains gated by main and the exact-SHA check. This PR is draft and has no hosted preview.
-
-## Verification (2026-10-03)
-
-`npm run check` passes: 69 application/behavior tests, 8 deployment tests, lint, TypeScript/Vite production build, 13 importer tests and the disposable PostgreSQL 17.11 database harness. New coverage checks repeated move/omit/restore, cancellation, failed-save drafts, empty palette, public controls, stable dormant preferences/new arrivals, public DB reads, anonymous/non-owner denial, owner round trips, invalid-save rollback, and unchanged pens/refill events. Existing Vite chunk-size warning remains; npm reports existing dependency advisories (no broad dependency upgrade in this feature).
-
-Browser QA used agent-browser with a fully synthetic fetch fixture. Desktop (1440×1100) and emulated iPhone 15 (393 CSS px) were visually inspected. Mouse drag, keyboard drag, earlier/later controls, repeated omit/restore, cancellation, failed save/retry, reload persistence, owner/public modes, duplicate ink across pens, mixed component inks, no-current-ink and all-omitted states were exercised. CDP touchStart/touchMove/touchEnd verified touch sorting and touch fallback actions. Mobile showed no horizontal overflow and 44px controls. This is Chromium/device emulation, not a physical iOS/Android or hosted Auth/PostgREST test.
-
-Reproduce locally:
-
-```sh
-VITE_SUPABASE_URL=https://synthetic.supabase.co VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_synthetic npm run dev -- --host 127.0.0.1 --port 5180
-```
-
-Open `/tests/palette-preview.html`. Use any non-`fail` email and any password in its synthetic sign-in to exercise saves. `?mode=public` hides all owner controls; `?empty` supplies no current refills. The fixture intercepts all synthetic Supabase calls, rejects other operations, and stores mock preferences only in sessionStorage. `sessionStorage.setItem('synthetic-fail','true')` forces save failure; remove it to retry. None of these switches are in the production entry point.
-
-| Evidence | Screenshot |
-| --- | --- |
-| Desktop palette | [View](qa/desk-palette/desktop.png) |
-| Desktop arrangement | [View](qa/desk-palette/desktop-edit.png) |
-| Mobile arrangement | [View](qa/desk-palette/mobile-edit.png) |
-| Mobile public palette | [View](qa/desk-palette/mobile-public.png) |
-| All colors omitted, reversible | [View](qa/desk-palette/all-omitted.png) |
-| No currently inked colors | [View](qa/desk-palette/empty.png) |
-
-Read-only hosted security advisors reported existing findings outside this feature: private allowlist/import tables with intentionally no public policies, grants on the provider's `public.rls_auto_enable()` definer function ([anonymous](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable), [authenticated](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable)), and [leaked-password protection disabled](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). No new definer function or auth change is included here.

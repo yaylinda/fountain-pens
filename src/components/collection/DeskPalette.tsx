@@ -4,13 +4,17 @@ import { SortableContext, rectSortingStrategy, sortableKeyboardCoordinates, useS
 import { CSS } from '@dnd-kit/utilities';
 import type { Ink } from '../../models/types';
 import { inkLabel } from '../../lib/collection';
-import { movePalette, reconcilePalette, type PaletteItem } from '../../lib/deskPalette';
-import { saveDeskPalette } from '../../services/dataService';
+import { movePalette, reconcilePalette, type DeskArrangement, type PaletteItem } from '../../lib/deskPalette';
+import { deleteNamedPalette, saveNamedPalette } from '../../services/dataService';
 import { FavoriteMark, Swatch } from './Primitives';
 
 interface Props {
     inks: Ink[];
     saved: PaletteItem[];
+    palettes: DeskArrangement[];
+    activeId: string;
+    onPaletteChange: (id: string) => void;
+    penCounts: Map<string, number>;
     canEdit: boolean;
     selectedInk: string;
     onSelect: (id: string) => void;
@@ -33,14 +37,19 @@ function SortableInk({ ink, index, count, move, omit, disabled }: {
         </div>
     </li>;
 }
-export default function DeskPalette({ inks, saved, canEdit, selectedInk, onSelect, refills }: Props) {
+export default function DeskPalette({ inks, saved, palettes, activeId, onPaletteChange, penCounts, canEdit, selectedInk, onSelect, refills }: Props) {
+    const arrangements = palettes.length ? palettes : [{ id: 'default', name: 'My palette', items: saved }];
+    const active = arrangements.find(p => p.id === activeId) || arrangements[0];
+    const [draftName, setDraftName] = useState('');
+    const [draftId, setDraftId] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState(false);
     const [draft, setDraft] = useState<PaletteItem[] | null>(null);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
     const arrangeButton = useRef<HTMLButtonElement>(null);
     const editing = canEdit && draft !== null;
-    const items = reconcilePalette(editing ? draft : saved, inks);
+    const items = reconcilePalette(editing ? draft : active.items, inks);
     const byId = new Map(inks.map(ink => [ink.id, ink]));
     const visible = items.filter(item => !item.omitted && byId.has(item.inkId));
     const omitted = items.filter(item => item.omitted && byId.has(item.inkId));
@@ -56,23 +65,61 @@ export default function DeskPalette({ inks, saved, canEdit, selectedInk, onSelec
         requestAnimationFrame(() => document.getElementById('palette-save')?.focus());
     };
     const close = () => { setDraft(null); setError(''); requestAnimationFrame(() => arrangeButton.current?.focus()); };
+    const begin = (mode: 'edit' | 'new' | 'copy') => {
+        setDraftId(mode === 'edit' ? active.id : null);
+        setDraftName(mode === 'edit' ? active.name : mode === 'copy' ? `${active.name.slice(0, 73)} (copy)` : '');
+        setDraft(reconcilePalette(mode === 'new' ? [] : active.items, inks));
+        setError(''); setNotice(''); setConfirmDelete(false); onSelect('');
+        requestAnimationFrame(() => document.getElementById('palette-name')?.focus());
+    };
     const save = async () => {
         setBusy(true); setError('');
-        try { await saveDeskPalette(items); close(); setNotice('Palette saved.'); }
+        try { const result = await saveNamedPalette(draftId, draftName.trim(), items); close(); onPaletteChange(result.id); setNotice('Palette saved.'); }
         catch (e) { setError(e instanceof Error ? e.message : 'Could not save the palette. Try again.'); }
+        finally { setBusy(false); }
+    };
+    const remove = async () => {
+        setBusy(true); setError('');
+        try {
+            await deleteNamedPalette(active.id);
+            setConfirmDelete(false);
+            onPaletteChange(arrangements.find(p => p.id !== active.id)?.id || 'default');
+            setNotice('Palette deleted. Your inks and pens are unchanged.');
+            requestAnimationFrame(() => document.getElementById('palette-select')?.focus());
+        } catch (e) { setError(e instanceof Error ? e.message : 'Could not delete the palette. Try again.'); }
         finally { setBusy(false); }
     };
     return <section className="desk-palette custom-palette" aria-label="Current ink palette">
         <div className="section-heading">
-            <div><p className="eyebrow">Currently inked · personally arranged</p><h2>Your palette <span className="count">{visible.length}</span></h2></div>
-            {canEdit && !editing && <button ref={arrangeButton} className="button subtle" onClick={() => { setDraft(reconcilePalette(saved, inks)); setNotice(''); requestAnimationFrame(() => document.getElementById('palette-save')?.focus()); }}>Arrange palette</button>}
+            <div><p className="eyebrow">A little color, your way</p><h2>Your palettes <span className="count">{visible.length} colors</span></h2></div>
+            {canEdit && !editing && <button ref={arrangeButton} className="button subtle" disabled={busy || confirmDelete} onClick={() => begin('edit')}>Arrange palette</button>}
         </div>
-        <p className="small muted">A color arrangement, separate from your inked pens. Omitting a color keeps its pens and refill history intact.</p>
-        {editing && <div className="palette-edit-toolbar">
-            <p id="palette-help">Drag a handle or use the arrow buttons to reorder. With a keyboard, press Space on a handle, use arrow keys, then Space to drop or Escape to cancel.</p>
-            <div className="palette-save-actions"><button id="palette-save" className="button primary" disabled={busy} onClick={() => void save()}>{busy ? 'Saving…' : 'Save palette'}</button><button className="button subtle" disabled={busy} onClick={close}>Cancel</button></div>
+        <div className="palette-library">
+            <label htmlFor="palette-select">Saved palette
+                <select id="palette-select" value={active.id} disabled={editing || busy || confirmDelete} onChange={e => { onPaletteChange(e.target.value); setNotice(''); setError(''); }}>
+                    {arrangements.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+            </label>
+            {canEdit && !editing && <div className="palette-library-actions">
+                <button className="button subtle small-button" disabled={busy || confirmDelete} onClick={() => begin('new')}>New palette</button>
+                <button className="button subtle small-button" disabled={busy || confirmDelete} onClick={() => begin('copy')}>Duplicate</button>
+                {palettes.some(p => p.id === active.id) && <button className="text-link" disabled={busy || confirmDelete} onClick={() => { setConfirmDelete(true); setError(''); }}>Delete palette</button>}
+            </div>}
+        </div>
+        {confirmDelete && <div className="palette-delete" role="group" aria-label="Delete palette confirmation">
+            <p>Delete “{active.name}”? Only this arrangement will be removed.</p>
+            <button className="button primary" disabled={busy} onClick={() => void remove()}>{busy ? 'Deleting…' : 'Delete arrangement'}</button>
+            <button className="button subtle" disabled={busy} onClick={() => { setConfirmDelete(false); setError(''); }}>Keep palette</button>
         </div>}
-        {error && <p role="alert">{error} Your arrangement is still here.</p>}
+        {!editing && <p className="small muted">Your currently inked colors, arranged by you. Select a swatch to explore its pens.</p>}
+        {editing && <div className="palette-edit-toolbar">
+            <label className="palette-name-label" htmlFor="palette-name">Palette name
+                <input id="palette-name" value={draftName} maxLength={80} disabled={busy} placeholder="e.g. Quiet blues" onChange={e => setDraftName(e.target.value)} />
+            </label>
+            <p id="palette-help">Drag a handle or use the arrow buttons to reorder. With a keyboard, press Space on a handle, use arrow keys, then Space to drop or Escape to cancel.</p>
+            <div className="palette-save-actions"><button id="palette-save" className="button primary" disabled={busy || !draftName.trim()} onClick={() => void save()}>{busy ? 'Saving…' : 'Save palette'}</button><button className="button subtle" disabled={busy} onClick={close}>Cancel</button></div>
+        </div>}
+        {error && <p role="alert">{error} {editing ? 'Your arrangement is still here.' : ''}</p>}
         <span className="small muted" role="status">{notice}</span>
         {editing ? <DndContext accessibility={{ announcements: {
             onDragStart: ({ active }) => `Picked up ${inkLabel(byId.get(String(active.id)))}.`,
@@ -85,18 +132,19 @@ export default function DeskPalette({ inks, saved, canEdit, selectedInk, onSelec
             </SortableContext>
         </DndContext> : <div className="palette-grid palette-view">{visible.map(item => {
             const ink = byId.get(item.inkId)!;
+            const penCount = penCounts.get(ink.id) || 0;
             const refillCount = refills.get(ink.id) || 0;
             return <button key={ink.id} className="palette-color" aria-pressed={selectedInk === ink.id} aria-label={`Filter to ${inkLabel(ink)}${refillCount ? ` · ${refillCount} ${refillCount === 1 ? 'pen needs' : 'pens need'} refill` : ''}`} onClick={() => onSelect(selectedInk === ink.id ? '' : ink.id)}>
                 <span className="desk-palette-swatch"><Swatch ink={ink} large />{refillCount > 0 && <span className="badge refill-badge desk-palette-refill">{refillCount}</span>}</span>
-                <strong>{ink.name}<FavoriteMark item={ink} /></strong><span className="small muted">{[ink.brand, ink.collection].filter(Boolean).join(' · ')}</span>
+                <strong>{ink.name}<FavoriteMark item={ink} /></strong><span className="small muted">{[ink.brand, ink.collection].filter(Boolean).join(' · ')}</span><span className="palette-pen-count">{penCount} {penCount === 1 ? 'pen' : 'pens'}</span>
             </button>;
         })}</div>}
-        {!visible.length && <p className="palette-empty">{inks.length ? 'Every current color is omitted. Your inked pens are still listed below.' : 'Log a refill to bring colors to your palette.'}</p>}
+        {!visible.length && <p className="palette-empty">{inks.length ? 'Every current color is omitted. Restore colors below to bring them back.' : 'Log a refill to bring colors to your palette.'}</p>}
         {!!omitted.length && <details className="palette-omitted" open={editing || undefined}><summary>Omitted colors · {omitted.length}</summary><ul>{omitted.map(item => {
             const ink = byId.get(item.inkId)!;
             return <li key={ink.id}><Swatch ink={ink} /><span>{inkLabel(ink)}</span>{editing ? <button className="button subtle" disabled={busy} onClick={() => toggle(ink.id, false)}>Restore {ink.name}</button> : <button className="text-link" onClick={() => onSelect(ink.id)}>See pens</button>}</li>;
         })}</ul></details>}
-        {!editing && <p className="small muted">Select a color to see its pens. Swatches are approximate; mixed refills show their component inks.</p>}
-        {selectedInk && <button className="text-link" onClick={() => onSelect('')}>Show all colors</button>}
+        {!editing && <p className="small muted">Swatches are approximate. Mixed refills show their component inks.</p>}
+        {selectedInk && <button className="text-link" onClick={() => onSelect('')}>Close pen details</button>}
     </section>;
 }

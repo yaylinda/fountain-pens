@@ -1,4 +1,4 @@
-import { paletteDto, type PaletteItem } from '../lib/deskPalette';
+import { arrangementDto, paletteDto, type DeskArrangement, type PaletteItem } from '../lib/deskPalette';
 import type { MutationName, MutationPayload } from './database.types';
 import type { Ink, Pen, RefillLog } from '../models/types';
 import { isCleaning, realInkIds, type Collection, type JournalEntry } from '../lib/collection';
@@ -128,5 +128,24 @@ export async function setFavorite(kind: 'pen' | 'ink', id: string, favorite: boo
 export async function saveDeskPalette(items: PaletteItem[]) {
     await command('save_desk_palette', { p_items: items.map(item => ({ ...item })) }, result => {
         collection = { ...collection, palette: paletteDto(result.items) };
+    });
+}
+
+export async function saveNamedPalette(id: string | null, name: string, items: PaletteItem[]) {
+    let saved!: DeskArrangement;
+    await command('save_named_palette', { p_id: id, p_name: name, p_items: items.map(item => ({ ...item })) }, result => {
+        saved = arrangementDto(result.palette);
+        const palettes = collection.palettes || [];
+        collection = { ...collection, palettes: palettes.some(p => p.id === saved.id)
+            ? palettes.map(p => p.id === saved.id ? saved : p) : [...palettes, saved],
+            ...(saved.id === 'default' ? { palette: saved.items } : {}) };
+    });
+    return saved;
+}
+
+export async function deleteNamedPalette(id: string) {
+    await command('delete_named_palette', { p_id: id }, () => {
+        collection = { ...collection, palettes: (collection.palettes || []).filter(p => p.id !== id),
+            ...(id === 'default' ? { palette: [] } : {}) };
     });
 }
