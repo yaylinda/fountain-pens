@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import type { Ink, Pen } from './models/types';
 import type { JournalEntry } from './lib/collection';
 import { useCollection } from './hooks/useCollection';
+import { useCollectionNavigation } from './hooks/useCollectionNavigation';
+import CollectionTabs from './components/collection/CollectionTabs';
 import { useEditorNavigation } from './hooks/useEditorNavigation';
 import Overview from './components/collection/Overview';
 import Inventory from './components/collection/Inventory';
@@ -22,8 +24,7 @@ import { SAVE_CELEBRATION, type SaveOrigin } from './lib/saveCelebration';
 import { OwnerControls } from './components/OwnerControls';
 const navItems: { to: string; label: string; icon: IconName }[] = [
     { to: '/', label: 'The desk', icon: 'desk' },
-    { to: '/pens', label: 'Fountain pens', icon: 'pen' },
-    { to: '/inks', label: 'Ink cabinet', icon: 'ink' },
+    { to: '/collection', label: 'Collection', icon: 'collection' },
     { to: '/journal', label: 'Refill journal', icon: 'journal' },
 ];
 
@@ -65,6 +66,7 @@ export default function App() {
     const [message, setMessage] = useState('');
     const [favoriteBusy, setFavoriteBusy] = useState(false);
     const location = useLocation();
+    const collectionNavigation = useCollectionNavigation();
     const canEdit = collection.canEdit === true;
     useEffect(() => {
         window.scrollTo({ top: 0 });
@@ -75,7 +77,7 @@ export default function App() {
         return () => window.clearTimeout(timeout);
     }, [message]);
     useEffect(() => {
-        document.title = `${editor ? (editor.kind === 'refill' ? 'Refill' : editor.kind === 'pen' ? 'Pen details' : 'Ink details') : navItems.find((item) => item.to === location.pathname)?.label || 'Collection'} · Ink & nib`;
+        document.title = `${editor ? (editor.kind === 'refill' ? 'Refill' : editor.kind === 'pen' ? 'Pen details' : 'Ink details') : (location.pathname === '/pens' ? 'Pens · Collection' : location.pathname === '/inks' ? 'Inks · Collection' : navItems.find((item) => item.to === location.pathname)?.label) || 'Collection'} · Ink & nib`;
     }, [editor, location.pathname]);
     const onSaved = (
         text: string,
@@ -146,24 +148,15 @@ export default function App() {
                     Your writing corner
                 </span>
                 <nav aria-label="Main navigation">
-                    {navItems.map((item) => (
-                        <NavLink
-                            end={item.to === '/'}
-                            key={item.to}
-                            to={item.to}
-                        >
-                            <Icon name={item.icon} />
-                            <span>{item.label}</span>
-                            {!loading && item.to === '/pens' && (
-                                <span className="nav-count">
-                                    {model.activePens.length}
-                                </span>
-                            )}
-                            {!loading && item.to === '/inks' && (
-                                <span className="nav-count">
-                                    {model.activeInks.length}
-                                </span>
-                            )}
+                    {navItems.map((item) => item.to === '/collection' ? (
+                        <Link key={item.to} to={collectionNavigation.home}
+                            className={collectionNavigation.active ? 'active' : undefined}
+                            aria-current={collectionNavigation.active ? 'page' : undefined}>
+                            <Icon name={item.icon} /><span>{item.label}</span>
+                        </Link>
+                    ) : (
+                        <NavLink end={item.to === '/'} key={item.to} to={item.to}>
+                            <Icon name={item.icon} /><span>{item.label}</span>
                         </NavLink>
                     ))}
                 </nav>
@@ -227,6 +220,8 @@ export default function App() {
                         </div>
                     </div>
                 )}
+                {collectionNavigation.active && !loading && !error && <CollectionTabs
+                    targets={collectionNavigation.targets} pens={model.activePens.length} inks={model.activeInks.length} />}
                 {loading ? (
                     <div className="loading-state" role="status">
                         <Icon name="pen" />
@@ -270,6 +265,7 @@ export default function App() {
                 ) : (
                     <div className="page-enter" key={location.pathname}>
                         <Routes>
+                            <Route path="/collection" element={<Navigate to={collectionNavigation.home} replace />} />
                             <Route
                                 path="/"
                                 element={

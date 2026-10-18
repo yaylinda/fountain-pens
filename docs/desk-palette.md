@@ -1,6 +1,6 @@
 # Desk palettes
 
-The desk opens on a compact swatch sheet. Saved palettes are the main workspace; selecting a color reveals its pens and their detail/refill actions. “Browse inked pens” discloses the existing presets, filters, grouping and ordering. The refill queue lives below the workspace and starts collapsed. Fountain pens and Ink cabinet continue to own full inventory management; the journal owns history.
+The desk opens on a compact swatch sheet. Saved palettes are the main workspace; selecting a color reveals its pens and their detail/refill actions. “Browse inked pens” discloses the existing presets, filters, grouping and ordering. The refill queue lives below the workspace and starts collapsed. Collection’s Pens and Inks subtabs own full inventory management; the journal owns history.
 
 ## Saved arrangements
 

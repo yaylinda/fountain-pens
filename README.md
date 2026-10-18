@@ -5,8 +5,9 @@ A personal writing desk for fountain pens, ink inventory, and refill history. Bu
 ## The collection
 
 - **The desk** shows the latest pen-and-ink pairings, recent journal entries, and inks you have yet to try.
-- **Fountain pens** keeps finish, nib, latest ink, and refill counts together. Search by pen details or current ink; filter by brand, nib, and status.
-- **Ink cabinet** presents the collection with reference swatches, usage counts, brand filters, and untried/in-use views.
+- **Collection** brings together **Pens** and **Inks** subtabs. Each shelf keeps its own search and filters while you switch; existing `/pens` and `/inks` links still work.
+- **Pens** keeps finish, nib, latest ink, and refill counts together. Search by pen details or current ink; filter by brand, nib, and status.
+- **Inks** presents the collection with reference swatches, usage counts, brand filters, and untried/in-use views.
 - **Refill journal** groups entries by month. Search pen details, ink names, and notes; filter by pen, date range, or entry type.
 
 Both inventory pages offer **List** and **Grid** layouts. Each page remembers its choice in this browser, and switching layouts keeps your search, filters, and sorting.

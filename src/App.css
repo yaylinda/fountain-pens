@@ -1842,7 +1842,7 @@
     }
     .sidebar nav {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 4px;
         margin-top: 20px;
     }
@@ -2366,4 +2366,16 @@
     .palette-library select { width: 100%; }
     .palette-save-actions { width: 100%; }
     .palette-save-actions > button { flex: 1; }
+}
+
+/* One collection, two shelves; counts and switching belong beside the inventory. */
+.collection-tabs { display: flex; gap: 28px; border-bottom: 1px solid var(--line); margin: 0 0 28px; }
+.collection-tabs a { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 8px 4px 12px; border-bottom: 2px solid transparent; color: var(--muted); text-decoration: none; font-size: .9375rem; }
+.collection-tabs a.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.collection-tabs a:hover { color: var(--accent); }
+.collection-tabs a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.collection-tabs .icon { width: 18px; height: 18px; }
+@media (max-width: 600px) {
+    .collection-tabs { gap: 24px; margin-bottom: 20px; }
+    .collection-tabs a { flex: 1; justify-content: center; }
 }
