@@ -2217,7 +2217,7 @@
 
 /* A personal swatch sheet: ink carries the color; labels stay on paper. */
 .custom-palette > p { max-width: 72ch; }
-.palette-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 136px), 1fr)); gap: 24px 16px; padding: 0; margin: 24px 0; list-style: none; }
+.palette-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 24px 16px; padding: 0; margin: 24px 0; list-style: none; }
 .palette-color, .palette-tile { display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 0; text-align: left; }
 .palette-color { padding: 16px 12px; border: 1px solid transparent; background: transparent; border-radius: 6px; color: var(--ink); }
 .palette-color:hover { background: var(--sidebar); }
@@ -2226,7 +2226,7 @@
 /* Main’s tab silhouette fills the padded card width at a consistent height. */
 .palette-grid .swatch-large { width: 100%; height: 60px; border-radius: 3px 12px 3px 3px; }
 .palette-grid strong { font-size: .875rem; line-height: 1.3; overflow-wrap: anywhere; }
-.palette-grid .small { line-height: 1.4; }
+.palette-grid .small { line-height: 1.4; overflow-wrap: anywhere; }
 .palette-tile { padding: 12px; border: 1px solid var(--line); background: var(--paper); border-radius: 4px; }
 .palette-tile.is-dragging { z-index: 2; outline: 2px solid var(--accent); opacity: .85; }
 .palette-tile-top, .palette-tile-actions, .palette-save-actions { display: flex; align-items: center; gap: 8px; }
@@ -2277,7 +2277,10 @@
 .desk-refill-queue summary { font-size: .875rem; color: var(--muted); }
 .desk-group { margin: 20px 0; }
 .desk-pairing { padding: 16px 0; }
-@media (max-width: 480px) {
+@media (max-width: 1200px) {
+    .palette-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
     .palette-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 8px; }
     .palette-save-actions { width: 100%; }
     .palette-save-actions > button { flex: 1; }
@@ -2326,7 +2329,6 @@
 .desk-page .page-header .button { min-height: 44px; padding: 10px 16px; }
 .desk-page .custom-palette { padding-bottom: 24px; }
 .desk-page .palette-grid { margin: 24px -12px 32px; }
-.desk-page .palette-view { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 .desk-page .palette-pen-count { margin-top: auto; padding-top: 4px; }
 .desk-page .desk-results-summary { margin: 16px 0; }
 .desk-page .desk-group > h2 { font-family: 'Figtree', sans-serif; font-size: 1.125rem; font-weight: 600; }
@@ -2346,7 +2348,6 @@
     .palette-library-actions > .button { flex: 1; }
     .palette-library-actions .button { padding-inline: 10px; }
     .desk-page .palette-grid { gap: 16px 8px; margin-inline: -8px; }
-    .desk-page .palette-view { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .palette-color { padding: 12px 8px; }
     .palette-color-count { margin-left: auto; }
 }
