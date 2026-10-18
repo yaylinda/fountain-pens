@@ -140,7 +140,7 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
             const refillCount = refills.get(ink.id) || 0;
             return <button key={ink.id} className="palette-color" aria-pressed={selectedInk === ink.id} aria-label={`Filter to ${inkLabel(ink)}${refillCount ? ` · ${refillCount} ${refillCount === 1 ? 'pen needs' : 'pens need'} refill` : ''}`} onClick={() => onSelect(selectedInk === ink.id ? '' : ink.id)}>
                 <span className="desk-palette-swatch"><Swatch ink={ink} large />{refillCount > 0 && <span className="badge refill-badge desk-palette-refill">{refillCount}</span>}</span>
-                <strong>{ink.name}<FavoriteMark item={ink} /></strong><span className="small muted">{[ink.brand, ink.collection].filter(Boolean).join(' · ')}</span><span className="palette-pen-count">{penCount} {penCount === 1 ? 'pen' : 'pens'}</span>
+                <span className="palette-identity"><strong>{ink.name}<FavoriteMark item={ink} /></strong><span className="palette-brand">{[ink.brand, ink.collection].filter(Boolean).join(' · ')}</span></span><span className="palette-pen-count">{penCount} {penCount === 1 ? 'pen' : 'pens'}</span>
             </button>;
         })}</div>}
         {!visible.length && <p className="palette-empty">{inks.length ? 'Every current color is omitted. Restore colors below to bring them back.' : 'Log a refill to bring colors to your palette.'}</p>}

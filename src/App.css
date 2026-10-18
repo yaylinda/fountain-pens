@@ -2270,7 +2270,8 @@
 .palette-delete { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px; border: 1px solid var(--line); }
 .palette-delete p { flex: 1 1 100%; margin: 0; }
 .palette-pen-count { font-size: .6875rem; color: var(--muted); }
-.palette-view .small { font-size: .6875rem; }
+.palette-identity { display: flex; flex-direction: column; gap: 3px; }
+.palette-brand { font-size: .75rem; line-height: 1.4; color: var(--ink); overflow-wrap: anywhere; }
 .palette-tile-actions { flex-wrap: wrap; }
 .palette-tile-actions button:last-child { flex-basis: 100%; }
 .palette-grid .palette-tile { padding: 8px; gap: 6px; }
@@ -2330,7 +2331,7 @@
 .desk-page .page-header .button { min-height: 44px; padding: 10px 16px; }
 .desk-page .custom-palette { padding-bottom: 24px; }
 .desk-page .palette-grid { margin: 24px -12px 32px; }
-.desk-page .palette-pen-count { margin-top: auto; padding-top: 4px; }
+.desk-page .palette-pen-count { margin-top: auto; padding-top: 12px; line-height: 1.4; }
 .desk-page .desk-results-summary { margin: 16px 0; }
 .desk-page .desk-group > h2 { font-family: 'Figtree', sans-serif; font-size: 1.125rem; font-weight: 600; }
 .desk-page .desk-pairing .name-link { font-family: 'Figtree', sans-serif; font-size: 1rem; font-weight: 600; }
