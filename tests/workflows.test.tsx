@@ -242,7 +242,7 @@ test('collection workflows work against isolated API fixtures without touching r
         await user.click(screen.getByRole('button', { name: 'Try again' }));
         await screen.findByRole('heading', { name: 'My Desk' });
         assert.ok(
-            screen.getByRole('button', { name: /Browse inked pens 1/ }),
+            screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }),
         );
     });
     await t.test('Collection unifies the inventories and preserves independent filters and history', async () => {
@@ -326,31 +326,19 @@ test('collection workflows work against isolated API fixtures without touching r
         await screen.findByRole('heading', { name: 'My Desk' });
     });
 
-    await t.test('desk opens on palettes, with pens disclosed on demand and URL state preserved', async () => {
+    await t.test('desk reveals pens only through swatches and preserves selection on return', async () => {
         const before = writes.length;
-        assert.equal(document.querySelectorAll('.desk-pairing').length,0);
-        assert.equal(screen.queryByRole('button',{name:'Lamy',exact:true}),null);
-        assert.equal(document.querySelector('.desk-refill-queue')?.hasAttribute('open') || false,false);
-        await user.click(screen.getByRole('button', { name: /Browse inked pens/ }));
-        await user.click(screen.getByRole('button', { name: 'Lamy', exact: true }));
-        assert.ok(screen.getByText('No pens match this selection'));
-        await user.click(screen.getByRole('button', { name: 'Gold nibs', exact: true }));
-        assert.ok(screen.getByText('1 of 1 inked pens'));
-        await user.selectOptions(screen.getByLabelText('Group by'), 'ink');
-        assert.ok(screen.getByRole('heading', { name: 'Diamine 1' }));
-        await user.click(screen.getByRole('button', { name: 'Filter pens · active', exact: true }));
-        await user.selectOptions(screen.getByLabelText('Order by'), 'recent');
+        assert.equal(document.querySelectorAll('.desk-pairing').length, 0);
+        assert.equal(screen.queryByRole('button', { name: /Browse inked pens/ }), null);
+        assert.equal(screen.queryByLabelText('Group by'), null);
+        assert.equal(document.querySelector('.desk-refill-queue')?.hasAttribute('open') || false, false);
+        await user.click(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }));
+        assert.ok(screen.getByRole('heading', { name: 'Pens with Happy Holidays 1' }));
+        const deskUrl = appRouter.state.location.search;
         await user.click(screen.getByRole('button', { name: 'Falcon · Sapphire', exact: true }));
         await user.click(screen.getByRole('button', { name: 'Cancel', exact: true }));
         await screen.findByRole('heading', { name: 'My Desk' });
-        assert.equal((screen.getByLabelText('Group by') as HTMLSelectElement).value, 'ink');
-        assert.equal((screen.getByLabelText('Order by') as HTMLSelectElement).value, 'recent');
-        assert.equal((screen.getByLabelText('Nib material') as HTMLSelectElement).value, 'Gold');
-        await user.click(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }));
-        assert.ok(screen.getByRole('button', { name: 'Close pen details' }));
-        assert.equal(screen.queryByLabelText('Group by'),null);
-        assert.ok(screen.getByRole('heading',{name:'Pens with Happy Holidays 1'}));
-        const deskUrl = appRouter.state.location.search;
+        assert.equal(appRouter.state.location.search, deskUrl);
         await user.click(screen.getByRole('button', { name: 'View Diamine Happy Holidays' }));
         assert.equal(screen.getByLabelText('Ink name').value, 'Happy Holidays');
         await act(async () => { await appRouter.navigate(-1); });
@@ -358,18 +346,7 @@ test('collection workflows work against isolated API fixtures without touching r
         assert.equal(appRouter.state.location.search, deskUrl);
         assert.equal(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }).getAttribute('aria-pressed'), 'true');
         await user.click(screen.getByRole('button', { name: 'Close pen details' }));
-        assert.equal(document.querySelectorAll('.desk-pairing').length,0);
-        await user.click(screen.getByRole('button', { name: /Browse inked pens/ }));
-        assert.equal((screen.getByLabelText('Order by') as HTMLSelectElement).value, 'recent');
-        await user.click(screen.getByRole('button', { name: 'Reset', exact: true }));
-        await user.click(screen.getByRole('button', { name: 'Lamy', exact: true }));
-        await user.click(screen.getByRole('button', { name: 'Gold nibs', exact: true }));
-        await act(async () => { await appRouter.navigate(-1); });
-        assert.equal(screen.getByRole('button', { name: 'Lamy', exact: true }).getAttribute('aria-pressed'), 'true');
-        assert.ok(screen.getByText('No pens match this selection'));
-        await act(async () => { await appRouter.navigate(1); });
-        assert.equal(screen.getByRole('button', { name: 'Gold nibs', exact: true }).getAttribute('aria-pressed'), 'true');
-        await user.click(screen.getByRole('button', { name: 'Reset', exact: true }));
+        assert.equal(document.querySelectorAll('.desk-pairing').length, 0);
         assert.equal(writes.length, before);
     });
     await t.test(
@@ -635,7 +612,7 @@ test('collection workflows work against isolated API fixtures without touching r
                 }),
             );
             await user.click(screen.getByRole('link', { name: 'The desk' }));
-            await user.click(screen.getByRole('button', { name: /Browse inked pens/ }));
+            await user.click(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }));
             assert.equal(document.querySelectorAll('.desk-pairing').length, 1);
             assert.match(
                 document.querySelector('.desk-pairing')!.textContent!,

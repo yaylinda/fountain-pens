@@ -2145,18 +2145,6 @@
     .desk-refill-ink { grid-column: 1; grid-row: 2; }
     .desk-refill-queue li > .button { grid-column: 2; grid-row: 1 / 3; }
 }
-.desk-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-.desk-presets button[aria-pressed='true'] { background: var(--accent); color: var(--paper, #faf6f0); }
-.desk-controls { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 24px; padding: 20px 0; border-block: 1px solid var(--line); }
-.desk-controls label { display: grid; gap: 8px; font-size: .8125rem; }
-.desk-controls select { font: inherit; color: var(--ink); background: var(--surface, #faf6f0); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; min-height: 44px; }
-.desk-controls > .text-link { align-self: center; margin-left: auto; }
-.desk-filter-panel { flex: 1; min-width: 180px; }
-.desk-filter-panel summary { cursor: pointer; padding: 12px 0; min-height: 44px; }
-.desk-filter-content { display: grid; gap: 16px; padding: 16px 0; }
-.desk-filter-content fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
-.desk-filter-content legend { font-size: .8125rem; margin-bottom: 12px; }
-.desk-filter-content fieldset label { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .desk-palette { padding: 32px 0 24px; border-bottom: 1px solid var(--line); }
 .desk-color-list { display: flex; flex-wrap: wrap; gap: 12px 8px; margin: 20px 0; }
 .desk-color-list button { display: grid; justify-items: center; align-content: start; gap: 8px; width: 88px; padding: 8px 4px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: inherit; cursor: pointer; }
@@ -2178,24 +2166,12 @@
 .desk-pairing > .button { flex-shrink: 0; }
 @media (max-width: 1100px) { .desk-pairings { grid-template-columns: 1fr; } }
 @media (max-width: 600px) {
-    .desk-controls { gap: 16px; }
-    .desk-filter-panel { flex-basis: 100%; }
-    .desk-controls > label { flex: 1; min-width: 140px; }
     .desk-color-list { gap: 8px 4px; }
     .desk-color-list button { width: 72px; }
     .desk-pairing { flex-wrap: wrap; gap: 12px; }
     .desk-pairing > .button { margin-left: 60px; }
 }
 
-/* Keep the toolbar anchored while the compact desktop filters expand below it. */
-@media (min-width: 900px) {
-    .desk-controls { display: grid; grid-template-columns: minmax(160px, 1fr) 200px 220px auto; align-items: end; }
-    .desk-controls > .text-link { align-self: end; min-height: 44px; margin-left: 0; }
-    .desk-filter-content { grid-column: 1 / -1; grid-template-columns: minmax(320px, 2fr) minmax(160px, 1fr) minmax(220px, 1fr); align-items: start; gap: 24px; padding: 20px 0 4px; border-top: 1px solid var(--line); }
-    .desk-filter-content fieldset { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
-    .desk-filter-content fieldset label { display: grid; grid-template-columns: minmax(60px, 1fr) 100px; gap: 8px; }
-}
-.desk-filter-toggle { justify-self: start; align-self: end; min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--ink); font: inherit; cursor: pointer; text-align: left; }
 .desk-ink-details, .desk-ink-details > div { display: grid; gap: 4px; }
 .desk-ink-details { gap: 12px; margin-top: 4px; }
 
@@ -2292,8 +2268,6 @@
 .palette-edit-toolbar .palette-name-label { flex: 1 1 100%; }
 .palette-name-label input { width: min(100%, 360px); }
 .palette-grid .palette-tile { padding: 8px; gap: 6px; }
-.desk-browse-toggle { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 12px; min-height: 56px; padding: 12px 0; background: transparent; border: 0; border-top: 1px solid var(--line); color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
-#desk-pen-browser { padding-top: 16px; }
 .desk-refill-queue { margin-top: 12px; }
 .desk-refill-queue summary { font-size: .875rem; color: var(--muted); }
 .desk-group { margin: 20px 0; }
@@ -2356,8 +2330,7 @@
 .desk-page .desk-pairing .name-link { font-family: 'Figtree', sans-serif; font-size: 1rem; font-weight: 600; }
 .desk-page .desk-ink-details .name-link { font-size: .875rem; font-weight: 400; }
 .desk-page .desk-pairing-swatches .swatch-large { width: 32px; height: 38px; }
-.desk-page .desk-browse-toggle { font-size: .875rem; font-weight: 600; }
-.desk-page .desk-refill-queue { margin-top: 0; border-top: 0; }
+.desk-page .desk-refill-queue { margin-top: 0; }
 @media (max-width: 720px) {
     .sidebar nav { margin-top: 0; }
     .desk-page { padding-top: 0; }

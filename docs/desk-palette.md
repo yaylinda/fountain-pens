@@ -1,6 +1,6 @@
 # Desk palettes
 
-The desk opens on a compact swatch sheet. Saved palettes are the main workspace; selecting a color reveals its pens and their detail/refill actions. “Browse inked pens” discloses the existing presets, filters, grouping and ordering. The refill queue lives below the workspace and starts collapsed. Collection’s Pens and Inks subtabs own full inventory management; the journal owns history.
+The desk opens on a compact swatch sheet. Saved palettes are the main workspace; selecting a color reveals its pens and their detail/refill actions. The refill queue lives below the workspace and starts collapsed. Collection’s Pens and Inks subtabs own full inventory management; the journal owns history.
 
 ## Saved arrangements
 
@@ -9,12 +9,12 @@ The desk opens on a compact swatch sheet. Saved palettes are the main workspace;
 - The original saved arrangement migrates to “My palette”. Duplicate copies both visible and dormant preferences. A new palette starts with all current inks in rainbow order.
 - Each arrangement tracks currently inked colors, one swatch per ink ID. A mixed refill contributes each component without inventing a blended color. New current colors append in rainbow order; dormant positions and omissions survive until that ink is current again.
 - Omit hides a color only in that arrangement. Its pens and history remain intact. Omitted colors can be restored or used to inspect their pens.
-- Selecting a swatch shows all of its current pens, independently of the secondary pen browser’s filters. Returning to the pen browser restores its filters.
+- Selecting a swatch shows its current pens. Closing the details returns to the palette; there is no standalone pen browser on My Desk.
 - The empty library offers a fresh “My palette” workspace. It writes nothing until Save. Leaving the desk discards an unsaved palette edit, as before.
 
 ## Presentation
 
-The desk uses one compact palette toolbar, an open swatch sheet, and disclosed pen/refill lists. The oval silhouette (`border-radius: 43% 48% 44% 46%`) and 59×69px large-swatch dimensions come from `0eb4797` (the original writing-desk redesign). That commit's small sidebar palette used the same silhouette at 40×46px; the labeled main workspace uses the original large size so colors stay readable without stretching. The pre-palette desk later used 44×44px variants, while `b80149b` introduced stretched rectangular tabs and `af25601` reduced their height. The restored oval deliberately retains the historical inset outline.
+The desk uses one compact palette toolbar, an open swatch sheet, and swatch-selected pen details plus the collapsed refill queue. The oval silhouette (`border-radius: 43% 48% 44% 46%`) and 59×69px large-swatch dimensions come from `0eb4797` (the original writing-desk redesign). That commit's small sidebar palette used the same silhouette at 40×46px; the labeled main workspace uses the original large size so colors stay readable without stretching. The pre-palette desk later used 44×44px variants, while `b80149b` introduced stretched rectangular tabs and `af25601` reduced their height. The restored oval deliberately retains the historical inset outline.
 
 Names, brand/collection and pen counts sit below each swatch. Phones retain two columns and 44px arrangement controls. Only My Desk receives layout and typography changes; global navigation and other pages lose decorative copy while keeping functional instructions, reference descriptions and user data. Save-animation copy is reduced to “Saved.”
 
