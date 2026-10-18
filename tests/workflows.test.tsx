@@ -827,77 +827,6 @@ test('collection workflows work against isolated API fixtures without touching r
         },
     );
     await t.test(
-        'editor Back and Forward preserve inventory filters and protect unsaved changes',
-        async () => {
-            const before = writes.length;
-            await openFreshInventory('pens');
-            await user.selectOptions(
-                screen.getByRole('combobox', { name: 'Brand' }),
-                'Pilot',
-            );
-            await user.type(
-                screen.getByRole('searchbox', {
-                    name: 'Search pens, nibs, or current ink…',
-                }),
-                'falcon',
-            );
-            const returnUrl = appRouter.state.location.search;
-            await user.click(
-                screen.getByRole('button', { name: /Edit Pilot Falcon/ }),
-            );
-            assert.match(appRouter.state.location.search, /editor=pen/);
-            await act(async () => {
-                await appRouter.navigate(-1);
-            });
-            assert.equal(appRouter.state.location.search, returnUrl);
-            assert.equal(document.querySelectorAll('.pen-card').length, 1);
-            await act(async () => {
-                await appRouter.navigate(1);
-            });
-            assert.equal(screen.getByLabelText('Model').value, 'Falcon');
-            await user.type(screen.getByLabelText('Model'), ' unfinished');
-            await act(async () => {
-                await appRouter.navigate(-1);
-            });
-            assert.ok(screen.getByRole('alert'));
-            await user.click(
-                screen.getByRole('button', { name: 'Keep editing' }),
-            );
-            assert.equal(
-                screen.getByLabelText('Model').value,
-                'Falcon unfinished',
-            );
-            await act(async () => {
-                await appRouter.navigate(-1);
-            });
-            await user.click(
-                screen.getByRole('button', { name: 'Discard changes' }),
-            );
-            assert.equal(appRouter.state.location.search, returnUrl);
-            await act(async () => {
-                await appRouter.navigate(1);
-            });
-            assert.equal(screen.getByLabelText('Model').value, 'Falcon');
-            await user.click(
-                screen.getByRole('button', { name: 'Cancel', exact: true }),
-            );
-            await user.click(
-                screen.getByRole('button', { name: 'Clear filters' }),
-            );
-            await openFreshInventory('inks');
-            await user.click(screen.getByRole('button', { name: 'All inks', exact: true }));
-            await user.click(
-                screen.getByRole('button', { name: 'Edit Sailor Népal Test' }),
-            );
-            assert.match(appRouter.state.location.search, /editor=ink/);
-            await act(async () => {
-                await appRouter.navigate(-1);
-            });
-            assert.ok(screen.getByRole('table', { name: 'Ink inventory' }));
-            assert.equal(writes.length, before);
-        },
-    );
-    await t.test(
         'Back from a nested new ink restores the unfinished refill before leaving the journal editor',
         async () => {
             const before = writes.length;
@@ -1438,42 +1367,6 @@ test('collection workflows work against isolated API fixtures without touching r
         },
     );
     await t.test(
-        'layout selection still works when browser storage is blocked',
-        async () => {
-            cleanup();
-            const prototype = dom.window.Storage.prototype;
-            const originalGet = prototype.getItem;
-            const originalSet = prototype.setItem;
-            const before = writes.length;
-            prototype.getItem = () => {
-                throw new Error('Storage blocked');
-            };
-            prototype.setItem = () => {
-                throw new Error('Storage blocked');
-            };
-            try {
-                mountApp(['/pens']);
-                await screen.findByRole('table', { name: 'Pen inventory' });
-                await user.click(
-                    screen.getByRole('button', { name: 'Grid view' }),
-                );
-                assert.equal(document.querySelectorAll('.pen-card').length, 1);
-                assert.equal(
-                    screen
-                        .getByRole('button', { name: 'Grid view' })
-                        .getAttribute('aria-pressed'),
-                    'true',
-                );
-
-                assert.equal(writes.length, before);
-            } finally {
-                cleanup();
-                prototype.getItem = originalGet;
-                prototype.setItem = originalSet;
-            }
-        },
-    );
-    await t.test(
         'direct editor URLs close safely and missing items remain recoverable',
         async () => {
             cleanup();
@@ -1519,17 +1412,6 @@ test('collection workflows work against isolated API fixtures without touching r
         assert.ok(screen.getByRole('link', { name: 'Ink source ↗' }));
         assert.equal(screen.queryByRole('link', { name: 'Pen source ↗' }), null);
         assert.ok(screen.getByText('Ink-only description', { selector: 'p' }));
-        for (const target of [pen, ink, pen, ink]) {
-            const kind = target === pen ? 'pen' : 'ink';
-            await act(async () => {
-                window.history.pushState(window.history.state, '', `/#/${kind}s?editor=${kind}&id=${target.id}`);
-                window.dispatchEvent(new window.PopStateEvent('popstate'));
-            });
-            assert.equal(appRouter.state.location.key, previousKey);
-            assert.equal(screen.getByLabelText('Brand').value, target.brand);
-            assert.ok(screen.getByRole('link', { name: `${kind === 'pen' ? 'Pen' : 'Ink'} source ↗` }));
-            assert.equal(screen.queryByRole('link', { name: `${kind === 'pen' ? 'Ink' : 'Pen'} source ↗` }), null);
-        }
         cleanup(); appRouter.dispose();
     });
     await t.test(

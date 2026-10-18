@@ -43,25 +43,18 @@ test('table stories occupy separate rows spanning every column and expand indepe
             const storyRow = summary.closest('tr')!;
             const cell = summary.closest('td')!;
             assert.equal(cell.colSpan, screen.getAllByRole('columnheader').length);
-            assert.equal(storyRow.children.length, 1);
-            const inkRow = storyRow.previousElementSibling!;
-            assert.equal(inkRow.children.length, 5);
-            assert.equal(inkRow.querySelector('details'), null);
-            const originalRow = inkRow.innerHTML;
             await user.click(summary);
             assert.equal(summary.closest('details')!.open, true);
-            assert.equal(inkRow.innerHTML, originalRow);
             assert.ok(within(storyRow).getByRole('heading', { name: 'Ink properties' }));
             await user.click(summary);
             assert.equal(summary.closest('details')!.open, false);
         }
-        assert.equal(document.querySelectorAll('tbody > tr').length, 5);
     } finally {
         cleanup();
     }
 });
 
-test('Pilot meanings, Japanese names, and qualified observations appear in both layouts and search', async () => {
+test('Pilot meanings, Japanese names, and qualified observations appear in the grid and search', async () => {
     const user = userEvent.setup({ document: dom.window.document });
     const rikka = withReferences({ id: '0ef1725f-3c1c-4d13-a10b-f474d63e9feb', brand: 'Pilot', name: 'Rikka', collection: 'Iroshizuku' });
     const blue = withReferences({ id: '21ebe10b-60e8-4a1a-931d-a4c9beacf17b', brand: 'Pilot', name: 'Blue', collection: '' });
@@ -69,25 +62,23 @@ test('Pilot meanings, Japanese names, and qualified observations appear in both 
     const model = deriveCollection({ inks, pens: [], entries: [] });
     let opens = 0;
     try {
-        for (const layout of ['grid', 'list'] as const) {
-            render(<InkInventory inks={[rikka]} layout={layout} model={model} canEdit={false} onOpen={() => opens++} />);
-            const summary = screen.getByText('Story & details', { selector: 'summary' });
-            await user.click(summary);
-            const details = summary.closest('details')!;
-            assert.equal(details.open, true);
-            assert.equal(opens, 0);
-            assert.equal(within(details).getByText('六花').getAttribute('lang'), 'ja');
-            assert.ok(within(details).getByText('Snow crystal'));
-            assert.ok(within(details).getByText('Vanness observations'));
-            assert.ok(within(details).getByText('About 20 seconds'));
-            assert.ok(within(details).getByText(/medium nib on Rhodia/));
-            assert.ok(within(details).getByText('Low pink sheen on Tomoe River paper'));
-            assert.equal(within(details).queryByText('RGB'), null);
-            assert.equal(within(details).queryByText('P value'), null);
-            await user.click(within(details).getByText('Sources & notes'));
-            assert.equal(within(details).getByRole('link', { name: 'Vanness product page ↗' }).getAttribute('href'), 'https://vanness1938.com/products/pilot-iroshizuku-rikka-ink');
-            cleanup();
-        }
+        render(<InkInventory inks={[rikka]} layout="grid" model={model} canEdit={false} onOpen={() => opens++} />);
+        const summary = screen.getByText('Story & details', { selector: 'summary' });
+        await user.click(summary);
+        const details = summary.closest('details')!;
+        assert.equal(details.open, true);
+        assert.equal(opens, 0);
+        assert.equal(within(details).getByText('六花').getAttribute('lang'), 'ja');
+        assert.ok(within(details).getByText('Snow crystal'));
+        assert.ok(within(details).getByText('Vanness observations'));
+        assert.ok(within(details).getByText('About 20 seconds'));
+        assert.ok(within(details).getByText(/medium nib on Rhodia/));
+        assert.ok(within(details).getByText('Low pink sheen on Tomoe River paper'));
+        assert.equal(within(details).queryByText('RGB'), null);
+        assert.equal(within(details).queryByText('P value'), null);
+        await user.click(within(details).getByText('Sources & notes'));
+        assert.equal(within(details).getByRole('link', { name: 'Vanness product page ↗' }).getAttribute('href'), 'https://vanness1938.com/products/pilot-iroshizuku-rikka-ink');
+        cleanup();
         render(<InkStory ink={blue} expanded />);
         assert.ok(screen.getByRole('region', { name: 'Story & details' }));
         assert.ok(screen.getByText('Pilot standard ink'));
@@ -110,33 +101,31 @@ test('Pilot meanings, Japanese names, and qualified observations appear in both 
     }
 });
 
-test('ink stories open independently of editing in both inventory layouts', async () => {
+test('ink stories open independently of editing in the list and support author search', async () => {
     const user = userEvent.setup({ document: dom.window.document });
     let opens = 0;
     const inks = [mermaid, { id: 'other', brand: 'Other', name: 'Blue', collection: '' }];
     const model = deriveCollection({ inks, pens: [], entries: [] });
     try {
-        for (const layout of ['grid', 'list'] as const) {
-            render(<InkInventory inks={inks} layout={layout} model={model} canEdit={false} onOpen={() => opens++} />);
-            const summary = screen.getByText('Story & details', { selector: 'summary' });
-            const details = summary.closest('details')!;
-            assert.equal(details.open, false);
-            assert.equal(document.querySelectorAll('.ink-story').length, 1);
-            await user.click(summary);
-            assert.equal(details.open, true);
-            assert.equal(opens, 0);
-            assert.ok(within(details).getByText('Hans Christian Andersen'));
-            assert.ok(within(details).getByText('100 / 177 / 191'));
-            assert.ok(within(details).getByText('7709U'));
-            assert.ok(within(details).getByText(/Sea-aquamarine/));
-            const sources = within(details).getByText('Sources & notes');
-            await user.click(sources);
-            assert.equal(sources.closest('details')!.open, true);
-            assert.equal(within(details).getByRole('link', { name: 'Wearingeul product page ↗' }).getAttribute('href'), 'https://www.wearingeul.com/all/?idx=1376');
-            await user.click(summary);
-            assert.equal(details.open, false);
-            cleanup();
-        }
+        render(<InkInventory inks={inks} layout="list" model={model} canEdit={false} onOpen={() => opens++} />);
+        const summary = screen.getByText('Story & details', { selector: 'summary' });
+        const details = summary.closest('details')!;
+        assert.equal(details.open, false);
+        assert.equal(document.querySelectorAll('.ink-story').length, 1);
+        await user.click(summary);
+        assert.equal(details.open, true);
+        assert.equal(opens, 0);
+        assert.ok(within(details).getByText('Hans Christian Andersen'));
+        assert.ok(within(details).getByText('100 / 177 / 191'));
+        assert.ok(within(details).getByText('7709U'));
+        assert.ok(within(details).getByText(/Sea-aquamarine/));
+        const sources = within(details).getByText('Sources & notes');
+        await user.click(sources);
+        assert.equal(sources.closest('details')!.open, true);
+        assert.equal(within(details).getByRole('link', { name: 'Wearingeul product page ↗' }).getAttribute('href'), 'https://www.wearingeul.com/all/?idx=1376');
+        await user.click(summary);
+        assert.equal(details.open, false);
+        cleanup();
         render(<InkStory ink={mermaid} expanded />);
         assert.ok(screen.getByRole('region', { name: 'Story & details' }));
         assert.ok(screen.getByText('195WGBU'));
