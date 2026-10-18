@@ -20,19 +20,17 @@ interface Props {
     onSelect: (id: string) => void;
     refills: Map<string, number>;
 }
-function SortableInk({ ink, index, count, move, omit, disabled }: {
-    ink: Ink; index: number; count: number; move: (offset: number) => void; omit: () => void; disabled: boolean;
+function SortableInk({ ink, omit, disabled }: {
+    ink: Ink; omit: () => void; disabled: boolean;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: ink.id, disabled });
     return <li ref={setNodeRef} className={`palette-tile ${isDragging ? 'is-dragging' : ''}`} style={{ transform: CSS.Transform.toString(transform), transition }}>
-        <div className="palette-tile-top"><span className="palette-position">{index + 1}</span>
+        <div className="palette-tile-top">
             <button className="palette-handle" {...attributes} {...listeners} disabled={disabled} aria-label={`Drag ${inkLabel(ink)}`}>⠿</button>
         </div>
         <Swatch ink={ink} large />
         <strong>{ink.name}</strong><span className="small muted">{[ink.brand, ink.collection].filter(Boolean).join(' · ')}</span>
         <div className="palette-tile-actions">
-            <button disabled={disabled || index === 0} onClick={() => move(-1)} aria-label={`Move ${inkLabel(ink)} earlier`}>←</button>
-            <button disabled={disabled || index === count - 1} onClick={() => move(1)} aria-label={`Move ${inkLabel(ink)} later`}>→</button>
             <button disabled={disabled} onClick={omit} aria-label={`Omit ${inkLabel(ink)}`}>Omit</button>
         </div>
     </li>;
@@ -48,7 +46,9 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
     const [error, setError] = useState('');
     const [notice, setNotice] = useState('');
     const arrangeButton = useRef<HTMLButtonElement>(null);
+    const actionsMenu = useRef<HTMLDetailsElement>(null);
     const editing = canEdit && draft !== null;
+    const creating = editing && draftId === null;
     const items = reconcilePalette(editing ? draft : active.items, inks);
     const byId = new Map(inks.map(ink => [ink.id, ink]));
     const visible = items.filter(item => !item.omitted && byId.has(item.inkId));
@@ -66,6 +66,7 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
     };
     const close = () => { setDraft(null); setError(''); requestAnimationFrame(() => arrangeButton.current?.focus()); };
     const begin = (mode: 'edit' | 'new' | 'copy') => {
+        if (actionsMenu.current) actionsMenu.current.open = false;
         setDraftId(mode === 'edit' ? active.id : null);
         setDraftName(mode === 'edit' ? active.name : mode === 'copy' ? `${active.name.slice(0, 73)} (copy)` : '');
         setDraft(reconcilePalette(mode === 'new' ? [] : active.items, inks));
@@ -90,37 +91,40 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
         finally { setBusy(false); }
     };
     return <section className="desk-palette custom-palette" aria-label="Current ink palette">
-        <div className="section-heading">
-            <div><p className="eyebrow">A little color, your way</p><h2>Your palettes <span className="count">{visible.length} colors</span></h2></div>
-            {canEdit && !editing && <button ref={arrangeButton} className="button subtle" disabled={busy || confirmDelete} onClick={() => begin('edit')}>Arrange palette</button>}
-        </div>
         <div className="palette-library">
-            <label htmlFor="palette-select">Saved palette
-                <select id="palette-select" value={active.id} disabled={editing || busy || confirmDelete} onChange={e => { onPaletteChange(e.target.value); setNotice(''); setError(''); }}>
-                    {arrangements.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-            </label>
-            {canEdit && !editing && <div className="palette-library-actions">
-                <button className="button subtle small-button" disabled={busy || confirmDelete} onClick={() => begin('new')}>New palette</button>
-                <button className="button subtle small-button" disabled={busy || confirmDelete} onClick={() => begin('copy')}>Duplicate</button>
-                {palettes.some(p => p.id === active.id) && <button className="text-link" disabled={busy || confirmDelete} onClick={() => { setConfirmDelete(true); setError(''); }}>Delete palette</button>}
-            </div>}
+            {editing ? <>
+                <div className="palette-selection">
+                    <label htmlFor="palette-name">Palette name</label>
+                    <div><input id="palette-name" value={draftName} maxLength={80} disabled={busy} placeholder={creating ? 'New palette name' : 'Palette name'} onChange={e => setDraftName(e.target.value)} /><span className="palette-color-count">Unsaved · {visible.length} colors</span></div>
+                </div>
+                <div className="palette-save-actions"><button id="palette-save" className="button primary" disabled={busy || !draftName.trim()} onClick={() => void save()}>{busy ? 'Saving…' : 'Save palette'}</button><button className="button secondary" disabled={busy} onClick={close}>Cancel</button></div>
+            </> : <>
+                <div className="palette-selection">
+                    <label htmlFor="palette-select">Saved palette</label>
+                    <div><select id="palette-select" value={active.id} disabled={busy || confirmDelete} onChange={e => { onPaletteChange(e.target.value); setNotice(''); setError(''); }}>
+                        {arrangements.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select><span className="palette-color-count">{visible.length} colors</span></div>
+                </div>
+                {canEdit && <div className="palette-library-actions">
+                    <button ref={arrangeButton} className="button primary small-button" disabled={busy || confirmDelete} onClick={() => begin('edit')}>Arrange palette</button>
+                    <button className="button secondary small-button" disabled={busy || confirmDelete} onClick={() => begin('new')}>New palette</button>
+                    <details className="palette-actions-menu" ref={actionsMenu} onKeyDown={e => { if (e.key === 'Escape') { e.currentTarget.open = false; e.currentTarget.querySelector('summary')?.focus(); } }} onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.open = false; }}>
+                        <summary aria-label="More palette actions">•••</summary>
+                        <div className="palette-actions-popover">
+                            <button disabled={busy || confirmDelete} onClick={() => begin('copy')}>Duplicate</button>
+                            {palettes.some(p => p.id === active.id) && <button className="palette-delete-action" disabled={busy || confirmDelete} onClick={() => { if (actionsMenu.current) actionsMenu.current.open = false; setConfirmDelete(true); setError(''); }}>Delete palette</button>}
+                        </div>
+                    </details>
+                </div>}
+            </>}
         </div>
         {confirmDelete && <div className="palette-delete" role="group" aria-label="Delete palette confirmation">
             <p>Delete “{active.name}”? Only this arrangement will be removed.</p>
             <button className="button primary" disabled={busy} onClick={() => void remove()}>{busy ? 'Deleting…' : 'Delete arrangement'}</button>
             <button className="button subtle" disabled={busy} onClick={() => { setConfirmDelete(false); setError(''); }}>Keep palette</button>
         </div>}
-        {!editing && <p className="small muted">Your currently inked colors, arranged by you. Select a swatch to explore its pens.</p>}
-        {editing && <div className="palette-edit-toolbar">
-            <label className="palette-name-label" htmlFor="palette-name">Palette name
-                <input id="palette-name" value={draftName} maxLength={80} disabled={busy} placeholder="e.g. Quiet blues" onChange={e => setDraftName(e.target.value)} />
-            </label>
-            <p id="palette-help">Drag a handle or use the arrow buttons to reorder. With a keyboard, press Space on a handle, use arrow keys, then Space to drop or Escape to cancel.</p>
-            <div className="palette-save-actions"><button id="palette-save" className="button primary" disabled={busy || !draftName.trim()} onClick={() => void save()}>{busy ? 'Saving…' : 'Save palette'}</button><button className="button subtle" disabled={busy} onClick={close}>Cancel</button></div>
-        </div>}
         {error && <p role="alert">{error} {editing ? 'Your arrangement is still here.' : ''}</p>}
-        <span className="small muted" role="status">{notice}</span>
+        <span className="palette-status" role="status">{notice}</span>
         {editing ? <DndContext accessibility={{ announcements: {
             onDragStart: ({ active }) => `Picked up ${inkLabel(byId.get(String(active.id)))}.`,
             onDragOver: ({ active, over }) => over ? `${inkLabel(byId.get(String(active.id)))} over ${inkLabel(byId.get(String(over.id)))}.` : undefined,
@@ -128,7 +132,7 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
             onDragCancel: () => 'Move canceled.',
         } }} sensors={sensors} collisionDetection={closestCenter} onDragEnd={({ active, over }) => { if (over && active.id !== over.id) move(String(active.id), String(over.id)); }}>
             <SortableContext items={visible.map(item => item.inkId)} strategy={rectSortingStrategy}>
-                <ol className="palette-grid" aria-label="Palette order" aria-describedby="palette-help">{visible.map((item, index) => <SortableInk key={item.inkId} ink={byId.get(item.inkId)!} index={index} count={visible.length} disabled={busy} move={offset => move(item.inkId, visible[index + offset].inkId)} omit={() => toggle(item.inkId, true)} />)}</ol>
+                <ol className="palette-grid" aria-label="Palette order">{visible.map(item => <SortableInk key={item.inkId} ink={byId.get(item.inkId)!} disabled={busy} omit={() => toggle(item.inkId, true)} />)}</ol>
             </SortableContext>
         </DndContext> : <div className="palette-grid palette-view">{visible.map(item => {
             const ink = byId.get(item.inkId)!;
@@ -136,7 +140,7 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
             const refillCount = refills.get(ink.id) || 0;
             return <button key={ink.id} className="palette-color" aria-pressed={selectedInk === ink.id} aria-label={`Filter to ${inkLabel(ink)}${refillCount ? ` · ${refillCount} ${refillCount === 1 ? 'pen needs' : 'pens need'} refill` : ''}`} onClick={() => onSelect(selectedInk === ink.id ? '' : ink.id)}>
                 <span className="desk-palette-swatch"><Swatch ink={ink} large />{refillCount > 0 && <span className="badge refill-badge desk-palette-refill">{refillCount}</span>}</span>
-                <strong>{ink.name}<FavoriteMark item={ink} /></strong><span className="small muted">{[ink.brand, ink.collection].filter(Boolean).join(' · ')}</span><span className="palette-pen-count">{penCount} {penCount === 1 ? 'pen' : 'pens'}</span>
+                <span className="palette-identity"><strong>{ink.name}<FavoriteMark item={ink} /></strong><span className="palette-brand">{[ink.brand, ink.collection].filter(Boolean).join(' · ')}</span></span><span className="palette-pen-count">{penCount} {penCount === 1 ? 'pen' : 'pens'}</span>
             </button>;
         })}</div>}
         {!visible.length && <p className="palette-empty">{inks.length ? 'Every current color is omitted. Restore colors below to bring them back.' : 'Log a refill to bring colors to your palette.'}</p>}
@@ -144,7 +148,6 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
             const ink = byId.get(item.inkId)!;
             return <li key={ink.id}><Swatch ink={ink} /><span>{inkLabel(ink)}</span>{editing ? <button className="button subtle" disabled={busy} onClick={() => toggle(ink.id, false)}>Restore {ink.name}</button> : <button className="text-link" onClick={() => onSelect(ink.id)}>See pens</button>}</li>;
         })}</ul></details>}
-        {!editing && <p className="small muted">Swatches are approximate. Mixed refills show their component inks.</p>}
         {selectedInk && <button className="text-link" onClick={() => onSelect('')}>Close pen details</button>}
     </section>;
 }

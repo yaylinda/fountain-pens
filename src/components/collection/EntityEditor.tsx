@@ -203,12 +203,12 @@ export function EntityEditor({
                                     ? pen?.model
                                     : ink?.name
                                 : penMode
-                                  ? 'Meet your new pen'
-                                  : 'Meet your new ink'}
+                                  ? 'New pen'
+                                  : 'New ink'}
                         </h2>
                         <p className="muted">
                             {penMode
-                                ? 'Start with the brand and model. The little details can come later.'
+                                ? 'Enter the brand and model; other details are optional.'
                                 : 'Start with the brand and name. Add a swatch to make it easy to spot.'}
                         </p>
                     </div>
@@ -515,12 +515,11 @@ export function EntityEditor({
                             <span className="overline">
                                 {draft.brand || 'Your collection'}
                             </span>
-                            <h2>{draft.model || 'A pen with a story'}</h2>
+                            <h2>{draft.model || 'Pen preview'}</h2>
                             <p>
                                 {[draft.color, draft.nibSize, draft.nibType]
                                     .filter(Boolean)
-                                    .join(' · ') ||
-                                    'The details make it yours.'}
+                                    .join(' · ')}
                             </p>
                             {pen && (
                                 <div className="specimen-foot">
@@ -536,10 +535,10 @@ export function EntityEditor({
                                 {draft.brand || 'Your collection'}
                             </span>
                             <h2>
-                                {draft.name || 'A little color for your day'}
+                                {draft.name || 'Ink preview'}
                             </h2>
                             <p>
-                                {draft.collection || 'Your next favorite ink.'}
+                                {draft.collection}
                             </p>
                             {swatch ? (
                                 <span className="small muted">
@@ -570,9 +569,7 @@ export function EntityEditor({
                         <section className="history-section">
                             <div className="section-heading">
                                 <h2>
-                                    {penMode
-                                        ? 'This pen’s story'
-                                        : 'On the page'}
+                                    Refill history
                                 </h2>
                                 <span className="count">{history.length}</span>
                             </div>

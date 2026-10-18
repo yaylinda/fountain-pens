@@ -9,11 +9,6 @@ import {
 import {
     deskRows,
     deskColorRanks,
-    nibMaterial,
-    type DeskFilters,
-    type DeskGroup,
-    type DeskOrder,
-    type DeskState,
     readDeskState,
 } from '../../lib/writingDesk';
 import { FavoriteMark, EmptyState, Icon, InkNames, RefillPurityMark, Swatch } from './Primitives';
@@ -28,15 +23,7 @@ interface Props {
 export default function Overview({ model, onOpen, canEdit }: Props) {
     const [params, setParams] = useSearchParams();
     const state = readDeskState(params.get('desk'));
-    const { filters, group, order, selectedInk, view, filtersOpen } = state;
-    const update = (patch: Partial<DeskState>, replace = false) => {
-        const next = { ...state, ...patch };
-        if (JSON.stringify(next) === JSON.stringify(state)) return;
-        const nextParams = new URLSearchParams(params);
-        nextParams.set('desk', JSON.stringify(next));
-        setParams(nextParams, { replace });
-    };
-    const browsePens = params.get('pens') === '1';
+    const { selectedInk } = state;
     const setSelectedInk = (value: string) => {
         const next = new URLSearchParams(params);
         next.set('desk', JSON.stringify({ ...state, selectedInk: value }));
@@ -49,15 +36,9 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
         next.set('desk', JSON.stringify({ ...state, selectedInk: '' }));
         setParams(next, { replace: true });
     };
-    const togglePens = () => {
-        const next = new URLSearchParams(params);
-        if (browsePens) next.delete('pens'); else next.set('pens', '1');
-        next.set('desk', JSON.stringify({ ...state, selectedInk: '' }));
-        setParams(next);
-    };
     const colorRanks = useMemo(() => deskColorRanks(model), [model]);
     const base = deskRows(model, { brands: {}, nib: '', inkBrand: '' }, 'color', 'none', '', colorRanks);
-    const groups = deskRows(model, browsePens ? filters : { brands: {}, nib: '', inkBrand: '' }, browsePens ? order : 'pen', browsePens ? group : 'none', selectedInk, colorRanks);
+    const groups = selectedInk ? deskRows(model, { brands: {}, nib: '', inkBrand: '' }, 'pen', 'none', selectedInk, colorRanks) : [];
     const count = groups.reduce((n, [, rows]) => n + rows.length, 0);
     const refillCount = groups.reduce(
         (n, [, rows]) => n + rows.filter(({ pen }) => pen.needsRefill).length,
@@ -84,45 +65,11 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                 (colorRanks.get(b.id) ?? Number.MAX_SAFE_INTEGER) ||
             byName(inkLabel(a), inkLabel(b)),
     );
-    const brands = [...new Set(model.inked.map((p) => p.brand))].sort(byName);
-    const inkBrands = [
-        ...new Set(
-            model.inked
-                .flatMap((p) => model.latest.get(p.id)?.inkIds || [])
-                .map((id) => model.inkById.get(id)?.brand)
-                .filter((b): b is string => !!b),
-        ),
-    ].sort(byName);
-    const changeFilters = (next: DeskFilters) =>
-        update({ filters: next, selectedInk: '', view: '' });
-    const preset = (name: string) =>
-        update({
-            view: name,
-            selectedInk: '',
-            group: name === 'By color' ? 'color' : 'none',
-            order: 'color',
-            filters: {
-                brands:
-                    name === 'Lamy'
-                        ? { Lamy: 'include' }
-                        : name === 'TWSBI'
-                          ? { TWSBI: 'include' }
-                          : name === 'Non-TWSBI'
-                            ? { TWSBI: 'exclude' }
-                            : {},
-                nib: name === 'Gold nibs' ? 'Gold' : '',
-                inkBrand: '',
-            },
-        });
     return (
-        <>
+        <div className="desk-page">
             <header className="page-header">
                 <div>
-                    <p className="eyebrow">Ready to write</p>
-                    <h1>The writing desk</h1>
-                    <p className="page-intro">
-                        Find a color, explore a pairing, make it your own.
-                    </p>
+                    <h1>My Desk</h1>
                 </div>
                 {canEdit && (
                     <button
@@ -138,176 +85,14 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                 activeId={params.get('palette') || ''} onPaletteChange={setPalette}
                 penCounts={new Map(palette.map(ink => [ink.id, model.currentPens(ink.id).length]))}
                 canEdit={canEdit} selectedInk={selectedInk} onSelect={setSelectedInk} refills={paletteRefills} />
-            {!selectedInk && <button className="desk-browse-toggle" aria-expanded={browsePens} aria-controls="desk-pen-browser" onClick={togglePens}>
-                <span>{browsePens ? 'Hide inked pens' : 'Browse inked pens'} <span className="count">{model.inked.length}</span></span>
-                <span aria-hidden="true">{browsePens ? '−' : '+'}</span>
-            </button>}
-            {browsePens && <div id="desk-pen-browser">
-            <div className="desk-presets" aria-label="Quick views">
-                {[
-                    'All pens',
-                    'Lamy',
-                    'TWSBI',
-                    'Non-TWSBI',
-                    'Gold nibs',
-                    'By color',
-                ].map((name) => (
-                    <button
-                        key={name}
-                        className="button subtle small-button"
-                        aria-pressed={view === name}
-                        onClick={() => preset(name)}
-                    >
-                        {name}
-                    </button>
-                ))}
-            </div>
-            <div className="desk-controls">
-                <button
-                    className="desk-filter-toggle"
-                    aria-expanded={filtersOpen}
-                    aria-controls="desk-filters"
-                    onClick={() => update({ filtersOpen: !filtersOpen }, true)}
-                >
-                    {filtersOpen ? 'Hide filters' : 'Filter pens'}
-                    {Object.keys(filters.brands).length +
-                    Number(!!filters.nib) +
-                    Number(!!filters.inkBrand)
-                        ? ' · active'
-                        : ''}
-                </button>
-
-                <label>
-                    Group by
-                    <select
-                        value={group}
-                        onChange={(e) => {
-                            update({
-                                group: e.target.value as DeskGroup,
-                                view: '',
-                            });
-                        }}
-                    >
-                        <option value="none">No grouping</option>
-                        <option value="pen">Pen brand</option>
-                        <option value="nib">Nib material</option>
-                        <option value="ink">Ink brand</option>
-                        <option value="color">Ink color family</option>
-                    </select>
-                </label>
-                <label>
-                    Order by
-                    <select
-                        value={order}
-                        onChange={(e) => {
-                            update({
-                                order: e.target.value as DeskOrder,
-                                view: '',
-                            });
-                        }}
-                    >
-                        <option value="color">Ink color · rainbow</option>
-                        <option value="pen">Pen name</option>
-                        <option value="ink">Ink name</option>
-                        <option value="recent">Recently filled</option>
-                    </select>
-                </label>
-                <button
-                    className="text-link"
-                    onClick={() => preset('All pens')}
-                >
-                    Reset
-                </button>
-                {filtersOpen && (
-                    <div className="desk-filter-content" id="desk-filters">
-                        <fieldset>
-                            <legend>Pen brands</legend>
-                            {brands.map((brand) => (
-                                <label key={brand}>
-                                    {brand}
-                                    <select
-                                        aria-label={`${brand} filter`}
-                                        value={filters.brands[brand] || ''}
-                                        onChange={(e) => {
-                                            const next = { ...filters.brands };
-                                            if (e.target.value)
-                                                next[brand] = e.target.value as
-                                                    | 'include'
-                                                    | 'exclude';
-                                            else delete next[brand];
-                                            changeFilters({
-                                                ...filters,
-                                                brands: next,
-                                            });
-                                        }}
-                                    >
-                                        <option value="">Any</option>
-                                        <option value="include">Include</option>
-                                        <option value="exclude">Exclude</option>
-                                    </select>
-                                </label>
-                            ))}
-                        </fieldset>
-                        <label>
-                            Nib material
-                            <select
-                                value={filters.nib}
-                                onChange={(e) =>
-                                    changeFilters({
-                                        ...filters,
-                                        nib: e.target.value,
-                                    })
-                                }
-                            >
-                                <option value="">All materials</option>
-                                {[...new Set(model.inked.map(nibMaterial))]
-                                    .sort(byName)
-                                    .map((n) => (
-                                        <option key={n}>{n}</option>
-                                    ))}
-                            </select>
-                        </label>
-                        <label>
-                            Ink brand
-                            <select
-                                value={filters.inkBrand}
-                                onChange={(e) =>
-                                    changeFilters({
-                                        ...filters,
-                                        inkBrand: e.target.value,
-                                    })
-                                }
-                            >
-                                <option value="">All ink brands</option>
-                                {inkBrands.map((b) => (
-                                    <option key={b}>{b}</option>
-                                ))}
-                            </select>
-                        </label>
-                    </div>
-                )}
-            </div>
-            </div>}
-            {(browsePens || selectedInk || !model.inked.length) && <>
+            {(selectedInk || !model.inked.length) && <>
             <div className="desk-results-summary" aria-live="polite">
                 <span>
-                    {browsePens ? `${count} of ${model.inked.length} inked pens` : `${count} ${count === 1 ? 'pen' : 'pens'}`}
+                    {`${count} ${count === 1 ? 'pen' : 'pens'}`}
                     {refillCount > 0 && ` · ${refillCount} need${refillCount === 1 ? 's' : ''} refill`}
                     {selectedInk && model.inkById.get(selectedInk)
                         ? ` · ${inkLabel(model.inkById.get(selectedInk))}`
                         : ''}
-                </span>
-                <span>
-                    {browsePens && Object.entries(filters.brands)
-                        .map(
-                            ([b, mode]) =>
-                                `${mode === 'exclude' ? 'Without' : 'Only'} ${b}`,
-                        )
-                        .concat(
-                            filters.nib ? [`${filters.nib} nibs`] : [],
-                            filters.inkBrand ? [filters.inkBrand] : [],
-                        )
-                        .join(' · ')}
                 </span>
             </div>
             {!count && (
@@ -315,25 +100,25 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     title={
                         model.inked.length
                             ? 'No pens match this selection'
-                            : 'A fresh page awaits'
+                            : 'No inked pens'
                     }
                 >
                     {model.inked.length ? (
                         <button
                             className="text-link"
-                            onClick={() => preset('All pens')}
+                            onClick={() => setSelectedInk('')}
                         >
-                            Show all inked pens
+                            Back to palette
                         </button>
                     ) : (
-                        'Log a refill to bring your pens and colors to the desk.'
+                        'Log a refill to add an inked pen.'
                     )}
                 </EmptyState>
             )}
             {groups.map(([name, rows]) => (
                 <section className="desk-group" key={name}>
                     <h2>
-                        {!browsePens && selectedInk ? `Pens with ${model.inkById.get(selectedInk)?.name || 'this ink'}` : name} <span className="count">{rows.length}</span>
+                        {`Pens with ${model.inkById.get(selectedInk)?.name || 'this ink'}`} <span className="count">{rows.length}</span>
                     </h2>
                     <div className="desk-pairings">
                         {rows.map(({ pen, entry, inks }) => (
@@ -418,6 +203,6 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
             ))}
             </>}
             <RefillQueue model={model} onOpen={onOpen} canEdit={canEdit} />
-        </>
+        </div>
     );
 }

@@ -139,13 +139,7 @@ export default function Inventory({
         <>
             <header className="page-header">
                 <div>
-                    <p className="eyebrow">The collection</p>
-                    <h1>{isPens ? 'Fountain pens' : 'The ink cabinet'}</h1>
-                    <p className="page-intro">
-                        {isPens
-                            ? 'Every nib, every finish, every favorite pairing.'
-                            : 'A world of color, ready for your next page.'}
-                    </p>
+                    <h1>{isPens ? 'Fountain pens' : 'Inks'}</h1>
                 </div>
                 {canEdit && (
                     <button
@@ -281,10 +275,10 @@ export default function Inventory({
                 <EmptyState
                     title={
                         status === 'favorites' && !query && !brand && !nib
-                            ? 'Your favorites belong here'
+                            ? 'No favorites yet'
                             : filtered
-                            ? 'No matches on this shelf'
-                            : `Room for your first ${isPens ? 'pen' : 'ink'}`
+                            ? 'No matches'
+                            : `Add your first ${isPens ? 'pen' : 'ink'}`
                     }
                 >
                     {status === 'favorites' && !query && !brand && !nib
