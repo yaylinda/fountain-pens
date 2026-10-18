@@ -2223,8 +2223,8 @@
 .palette-color:hover { background: var(--sidebar); }
 .palette-color[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
 .palette-color .desk-palette-swatch { display: inline-flex; align-self: center; margin-bottom: 12px; }
-/* Original oval silhouette from 0eb4797, at its original 59 × 69 size. */
-.palette-grid .swatch-large { width: 59px; height: 69px; border-radius: 43% 48% 44% 46%; }
+/* Main’s tab silhouette, in compact golden-ratio proportions. */
+.palette-grid .swatch-large { width: 97px; height: 60px; border-radius: 3px 12px 3px 3px; }
 .palette-grid strong { font-size: .875rem; line-height: 1.3; overflow-wrap: anywhere; }
 .palette-grid .small { line-height: 1.4; }
 .palette-tile { padding: 12px; border: 1px solid var(--line); background: var(--paper); border-radius: 4px; }

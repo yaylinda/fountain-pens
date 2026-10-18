@@ -14,7 +14,7 @@ The desk opens on a compact swatch sheet. Saved palettes are the main workspace;
 
 ## Presentation
 
-The desk uses one compact palette toolbar, an open swatch sheet, and swatch-selected pen details plus the collapsed refill queue. The oval silhouette (`border-radius: 43% 48% 44% 46%`) and 59×69px large-swatch dimensions come from `0eb4797` (the original writing-desk redesign). That commit's small sidebar palette used the same silhouette at 40×46px; the labeled main workspace uses the original large size so colors stay readable without stretching. The pre-palette desk later used 44×44px variants, while `b80149b` introduced stretched rectangular tabs and `af25601` reduced their height. The restored oval deliberately retains the historical inset outline.
+The desk uses one compact palette toolbar, an open swatch sheet, and swatch-selected pen details plus the collapsed refill queue. Following visual review, it retains main’s rectangular tab silhouette (`border-radius: 3px 12px 3px 3px`) and inset outline, now centered at 97×60px (approximately the golden ratio) instead of stretching across each tile. This treatment is scoped to the desk palette; other swatches retain their existing shapes. The earlier historical oval trial came from `0eb4797`; Linda preferred the main tab treatment introduced by `b80149b`.
 
 Names, brand/collection and pen counts sit below each swatch. Phones retain two columns and 44px arrangement controls. Only My Desk receives layout and typography changes; global navigation and other pages lose decorative copy while keeping functional instructions, reference descriptions and user data. Save-animation copy is reduced to “Saved.”
 
