@@ -37,16 +37,13 @@ globalThis.fetch = async (input,init) => {
     }
     return Response.json({pens:[],inks:[],events:[],palette:persisted,palettes,canEdit:true,asOf:'2026-10-03'});
 };
-test('owner repeatedly reorders, omits, restores, cancels, saves and retains failed drafts; public is read-only', async () => {
+test('owner omits, restores, cancels, saves and retains failed drafts; public is read-only', async () => {
     service.activateCollection('synthetic-owner'); await service.loadData(true);
-    const props = {inks,saved:[],palettes:[],activeId:'',onPaletteChange:()=>{},penCounts:new Map(),canEdit:true,selectedInk:'',onSelect:()=>{},refills:new Map()};
+    const props = {inks,saved:[{inkId:'1',omitted:false},{inkId:'0',omitted:false},{inkId:'2',omitted:false}],palettes:[],activeId:'',onPaletteChange:()=>{},penCounts:new Map(),canEdit:true,selectedInk:'',onSelect:()=>{},refills:new Map()};
     const ui=render(<DeskPalette {...props}/>);
     await user.click(screen.getByRole('button',{name:'Arrange palette'}));
     const order=()=>within(screen.getByRole('list',{name:'Palette order'})).getAllByRole('listitem').map(el=>el.querySelector('strong')?.textContent);
-    await user.click(screen.getByRole('button',{name:'Move Maker Copper later'}));
     assert.deepEqual(order(),['Green','Copper','Blue']);
-    await user.click(screen.getByRole('button',{name:'Move Maker Copper later'}));
-    await user.click(screen.getByRole('button',{name:'Move Maker Copper earlier'}));
     await user.click(screen.getByRole('button',{name:'Omit Maker Copper'}));
     assert.deepEqual(order(),['Green','Blue']);
     await user.click(screen.getByRole('button',{name:'Restore Copper'}));
@@ -64,7 +61,7 @@ test('owner repeatedly reorders, omits, restores, cancels, saves and retains fai
     fail=false;
     await user.click(screen.getByRole('button',{name:'Save palette'}));
     await screen.findByRole('button',{name:'Arrange palette'});
-    assert.deepEqual(persisted,[{inkId:'0',omitted:true},{inkId:'1',omitted:true},{inkId:'2',omitted:false}]);
+    assert.deepEqual(persisted,[{inkId:'1',omitted:true},{inkId:'0',omitted:true},{inkId:'2',omitted:false}]);
     ui.rerender(<DeskPalette {...props} saved={persisted} canEdit={false}/>);
     assert.equal(screen.queryByRole('button',{name:'Arrange palette'}),null);
     assert.ok(screen.getByRole('button',{name:'Filter to Maker Blue'}));
@@ -92,7 +89,6 @@ test('named palettes retain independent orders through duplicate, rename, reload
     assert.equal(screen.queryByLabelText('Saved palette'),null);
     await user.clear(screen.getByLabelText('Palette name'));
     await user.type(screen.getByLabelText('Palette name'),'Cool colors');
-    await user.click(screen.getByRole('button',{name:'Move Maker Blue earlier'}));
     await user.click(screen.getByRole('button',{name:'Omit Maker Copper'}));
     await user.click(screen.getByRole('button',{name:'Save palette'}));
     await screen.findByRole('button',{name:'Arrange palette'});
@@ -100,7 +96,7 @@ test('named palettes retain independent orders through duplicate, rename, reload
     assert.notEqual(copyId,'default');
     assert.deepEqual(palettes.find(p=>p.id==='default').items,persisted);
     const visible=()=>[...document.querySelectorAll('.palette-color strong')].map(el=>el.textContent);
-    assert.deepEqual(visible(),['Blue','Green']);
+    assert.deepEqual(visible(),['Green','Blue']);
     await user.selectOptions(screen.getByLabelText('Saved palette'),'default');
     assert.deepEqual(visible(),['Copper','Green','Blue']);
     await user.selectOptions(screen.getByLabelText('Saved palette'),copyId);
@@ -116,7 +112,7 @@ test('named palettes retain independent orders through duplicate, rename, reload
     await screen.findByRole('option',{name:'Evening inks'});
     ui.unmount(); await service.loadData(true); ui=render(<Library/>);
     await user.selectOptions(screen.getByLabelText('Saved palette'),copyId);
-    assert.deepEqual(visible(),['Blue','Green']);
+    assert.deepEqual(visible(),['Green','Blue']);
     await user.click(screen.getByRole('button',{name:'New palette'}));
     assert.equal(screen.getByRole('button',{name:'Save palette'}).disabled,true);
     const before=writes;
@@ -150,7 +146,7 @@ test('new palette is an unsaved draft; cancel restores selection and save select
     render(<Library/>);
     const before=writes;
     await user.click(screen.getByRole('button',{name:'New palette'}));
-    assert.ok(screen.getByRole('heading',{name:'New palette'}));
+    assert.equal(screen.getByLabelText('Palette name').getAttribute('placeholder'),'New palette name');
     assert.ok(screen.getByText(/Unsaved · 3 colors/));
     assert.equal(screen.queryByLabelText('Saved palette'),null);
     assert.equal(screen.queryByText('Saved blues'),null);

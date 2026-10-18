@@ -20,8 +20,8 @@ interface Props {
     onSelect: (id: string) => void;
     refills: Map<string, number>;
 }
-function SortableInk({ ink, index, count, move, omit, disabled }: {
-    ink: Ink; index: number; count: number; move: (offset: number) => void; omit: () => void; disabled: boolean;
+function SortableInk({ ink, index, omit, disabled }: {
+    ink: Ink; index: number; omit: () => void; disabled: boolean;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: ink.id, disabled });
     return <li ref={setNodeRef} className={`palette-tile ${isDragging ? 'is-dragging' : ''}`} style={{ transform: CSS.Transform.toString(transform), transition }}>
@@ -31,8 +31,6 @@ function SortableInk({ ink, index, count, move, omit, disabled }: {
         <Swatch ink={ink} large />
         <strong>{ink.name}</strong><span className="small muted">{[ink.brand, ink.collection].filter(Boolean).join(' · ')}</span>
         <div className="palette-tile-actions">
-            <button disabled={disabled || index === 0} onClick={() => move(-1)} aria-label={`Move ${inkLabel(ink)} earlier`}>←</button>
-            <button disabled={disabled || index === count - 1} onClick={() => move(1)} aria-label={`Move ${inkLabel(ink)} later`}>→</button>
             <button disabled={disabled} onClick={omit} aria-label={`Omit ${inkLabel(ink)}`}>Omit</button>
         </div>
     </li>;
@@ -95,7 +93,10 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
     return <section className="desk-palette custom-palette" aria-label="Current ink palette">
         <div className="palette-library">
             {editing ? <>
-                <div className="palette-draft-context"><h2 className="palette-draft-heading">{creating ? 'New palette' : 'Edit palette'}</h2><span className="small muted">Unsaved · {visible.length} colors</span></div>
+                <div className="palette-selection">
+                    <label htmlFor="palette-name">Palette name</label>
+                    <div><input id="palette-name" value={draftName} maxLength={80} disabled={busy} placeholder={creating ? 'New palette name' : 'Palette name'} onChange={e => setDraftName(e.target.value)} /><span className="palette-color-count">Unsaved · {visible.length} colors</span></div>
+                </div>
                 <div className="palette-save-actions"><button id="palette-save" className="button primary" disabled={busy || !draftName.trim()} onClick={() => void save()}>{busy ? 'Saving…' : 'Save palette'}</button><button className="button secondary" disabled={busy} onClick={close}>Cancel</button></div>
             </> : <>
                 <div className="palette-selection">
@@ -123,12 +124,6 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
             <button className="button subtle" disabled={busy} onClick={() => { setConfirmDelete(false); setError(''); }}>Keep palette</button>
         </div>}
         {!editing && <p className="small muted">Select a color to see its pens.</p>}
-        {editing && <div className="palette-edit-toolbar">
-            <label className="palette-name-label" htmlFor="palette-name">Palette name
-                <input id="palette-name" value={draftName} maxLength={80} disabled={busy} placeholder="Palette name" onChange={e => setDraftName(e.target.value)} />
-            </label>
-            <p id="palette-help">Drag a handle or use the arrow buttons to reorder. With a keyboard, press Space on a handle, use arrow keys, then Space to drop or Escape to cancel.</p>
-        </div>}
         {error && <p role="alert">{error} {editing ? 'Your arrangement is still here.' : ''}</p>}
         <span className="small muted" role="status">{notice}</span>
         {editing ? <DndContext accessibility={{ announcements: {
@@ -138,7 +133,7 @@ export default function DeskPalette({ inks, saved, palettes, activeId, onPalette
             onDragCancel: () => 'Move canceled.',
         } }} sensors={sensors} collisionDetection={closestCenter} onDragEnd={({ active, over }) => { if (over && active.id !== over.id) move(String(active.id), String(over.id)); }}>
             <SortableContext items={visible.map(item => item.inkId)} strategy={rectSortingStrategy}>
-                <ol className="palette-grid" aria-label="Palette order" aria-describedby="palette-help">{visible.map((item, index) => <SortableInk key={item.inkId} ink={byId.get(item.inkId)!} index={index} count={visible.length} disabled={busy} move={offset => move(item.inkId, visible[index + offset].inkId)} omit={() => toggle(item.inkId, true)} />)}</ol>
+                <ol className="palette-grid" aria-label="Palette order">{visible.map((item, index) => <SortableInk key={item.inkId} ink={byId.get(item.inkId)!} index={index} disabled={busy} omit={() => toggle(item.inkId, true)} />)}</ol>
             </SortableContext>
         </DndContext> : <div className="palette-grid palette-view">{visible.map(item => {
             const ink = byId.get(item.inkId)!;
