@@ -66,6 +66,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                 (colorRanks.get(b.id) ?? Number.MAX_SAFE_INTEGER) ||
             byName(inkLabel(a), inkLabel(b)),
     );
+    const selected = model.inkById.get(selectedInk);
     return (
         <div className="desk-page">
             <header className="page-header">
@@ -82,19 +83,26 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                     </button>
                 )}
             </header>
+            <div className="desk-workspace">
             <DeskPalette key={canEdit ? 'owner' : 'public'} inks={palette} saved={model.palette} palettes={model.palettes}
                 activeId={params.get('palette') || ''} onPaletteChange={setPalette}
                 penCounts={new Map(palette.map(ink => [ink.id, model.currentPens(ink.id).length]))}
                 canEdit={canEdit} selectedInk={selectedInk} onSelect={setSelectedInk} refills={paletteRefills} />
-            {(selectedInk || !model.inked.length) && <>
+            <section className="desk-selection" aria-label="Selected ink and pens">
+            {selected ? <header className="desk-selection-header">
+                <Swatch ink={selected} large />
+                <div>
+                    <span className="overline">Selected ink</span>
+                    <h2><button className="name-link" aria-label={`View ${inkLabel(selected)}`} data-focus-key={`desk-selected-ink-${selected.id}`} onClick={() => onOpen({ kind: 'ink', item: selected })}>{selected.name}<FavoriteMark item={selected} /></button></h2>
+                    <span className="small muted">{[selected.brand, selected.collection].filter(Boolean).join(' · ')}</span>
+                </div>
+                <button className="text-link" aria-label="Close pen details" onClick={() => setSelectedInk('')}>Close</button>
+            </header> : <EmptyState title={model.inked.length ? 'Select a color' : 'No inked pens'}>
+                {model.inked.length ? 'Choose an ink to see its pens and log your writing.' : 'Log a refill to add an inked pen.'}
+            </EmptyState>}
+            {selectedInk && <>
             <div className="desk-results-summary" aria-live="polite">
-                <span>
-                    {`${count} ${count === 1 ? 'pen' : 'pens'}`}
-                    {refillCount > 0 && ` · ${refillCount} need${refillCount === 1 ? 's' : ''} refill`}
-                    {selectedInk && model.inkById.get(selectedInk)
-                        ? ` · ${inkLabel(model.inkById.get(selectedInk))}`
-                        : ''}
-                </span>
+                <span>{`${count} ${count === 1 ? 'pen' : 'pens'} with this ink`}{refillCount > 0 && ` · ${refillCount} need${refillCount === 1 ? 's' : ''} refill`}</span>
             </div>
             {!count && (
                 <EmptyState
@@ -118,17 +126,9 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
             )}
             {groups.map(([name, rows]) => (
                 <section className="desk-group" key={name}>
-                    <h2>
-                        {`Pens with ${model.inkById.get(selectedInk)?.name || 'this ink'}`} <span className="count">{rows.length}</span>
-                    </h2>
                     <div className="desk-pairings">
                         {rows.map(({ pen, entry, inks }) => (
                             <article className="desk-pairing" key={pen.id}>
-                                <div className="desk-pairing-swatches">
-                                    {inks.map((ink) => (
-                                        <Swatch key={ink.id} ink={ink} large />
-                                    ))}
-                                </div>
                                 <div className="pairing-info">
                                     <div className="desk-pen-status">
                                         <span className="overline">{pen.brand}</span>
@@ -151,7 +151,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                                     </span>
                                     {inks.length ? (
                                         <div className="desk-ink-details">
-                                            {inks.map((ink) => (
+                                            {inks.filter(ink => ink.id !== selectedInk).map((ink) => (
                                                 <div key={ink.id}>
                                                     <button
                                                         className="name-link"
@@ -161,7 +161,7 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                                                             onOpen({ kind: 'ink', item: ink })
                                                         }
                                                     >
-                                                        {ink.name}<FavoriteMark item={ink} />
+                                                        Also {ink.name}<FavoriteMark item={ink} />
                                                     </button>
                                                     <span className="small muted">
                                                         {[
@@ -204,6 +204,8 @@ export default function Overview({ model, onOpen, canEdit }: Props) {
                 </section>
             ))}
             </>}
+            </section>
+            </div>
             <RefillQueue model={model} onOpen={onOpen} canEdit={canEdit} />
         </div>
     );

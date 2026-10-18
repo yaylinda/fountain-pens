@@ -358,7 +358,8 @@ test('collection workflows work against isolated API fixtures without touching r
         assert.equal(screen.queryByLabelText('Group by'), null);
         assert.equal(document.querySelector('.desk-refill-queue')?.hasAttribute('open') || false, false);
         await user.click(screen.getByRole('button', { name: 'Filter to Diamine Happy Holidays' }));
-        assert.ok(screen.getByRole('heading', { name: 'Pens with Happy Holidays 1' }));
+        assert.ok(screen.getByRole('heading', { name: 'Happy Holidays' }));
+        assert.ok(screen.getByText('1 pen with this ink'));
         const deskUrl = appRouter.state.location.search;
         await user.click(screen.getByRole('button', { name: 'Falcon · Sapphire', exact: true }));
         await user.click(screen.getByRole('button', { name: 'Cancel', exact: true }));
@@ -644,7 +645,7 @@ test('collection workflows work against isolated API fixtures without touching r
                 /Lilac/,
             );
             assert.match(
-                document.querySelector('.desk-pairing')!.textContent!,
+                document.querySelector('.desk-selection-header')!.textContent!,
                 /Happy Holidays/,
             );
         },

@@ -2372,3 +2372,27 @@
 .writing-notice:empty { display: none; }
 .writing-notice { display: block; padding-top: 8px; }
 @media (max-width: 600px) { .desk-pairing > .writing-history { grid-column: 1 / -1; } }
+
+/* Keep the selected ink and its writing controls beside the swatch sheet. */
+.desk-workspace { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; align-items: start; padding-bottom: 24px; }
+.desk-workspace .custom-palette { min-width: 0; padding: 0; border-bottom: 0; }
+.desk-workspace .palette-library { flex-wrap: wrap; gap: 16px; }
+.desk-workspace .palette-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 16px 12px; margin: 20px 0; }
+.desk-selection { min-width: 0; position: sticky; top: 24px; padding: 20px; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); }
+.desk-selection-header { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: start; gap: 12px; }
+.desk-selection-header > .swatch-large { width: 40px; height: 48px; }
+.desk-selection-header h2 { margin: 4px 0; }
+.desk-selection-header .name-link { font-family: 'Figtree', sans-serif; font-size: 1.125rem; font-weight: 600; text-align: left; overflow-wrap: anywhere; }
+.desk-selection-header > .text-link { min-height: 32px; }
+.desk-selection .desk-results-summary { margin: 20px 0 0; }
+.desk-selection .desk-group { margin: 12px 0 0; }
+.desk-selection .desk-pairings { grid-template-columns: 1fr; }
+.desk-selection .desk-pairing { grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+.desk-selection .desk-pairing > .button { grid-column: 2; }
+.desk-selection .desk-pairing > .writing-history { grid-column: 1 / -1; }
+.desk-selection .desk-pairing:last-child { padding-bottom: 0; }
+.desk-selection .empty-state { padding: 24px 0; }
+@media (max-width: 1199px) {
+    .desk-workspace { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+    .desk-selection { position: static; }
+}
