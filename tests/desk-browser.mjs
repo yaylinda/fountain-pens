@@ -194,9 +194,9 @@ try {
     await page.getByRole("link", { name: /Full collection/ }).count(),
     0,
   );
-  await mkdir("docs/verification/desk-iteration", { recursive: true });
+  await mkdir(".artifacts/desk-browser", { recursive: true });
   await page.screenshot({
-    path: "docs/verification/desk-iteration/public-desktop.png",
+    path: ".artifacts/desk-browser/public-desktop.png",
     fullPage: false,
   });
   await page.goto(new URL("/index.html", page.url()).href);
@@ -285,9 +285,8 @@ try {
     .getByRole("button", { name: "Save correction", exact: true })
     .click();
   await page.getByText("2026-10-07", { exact: true }).waitFor();
-  await mkdir("docs/verification/desk-iteration", { recursive: true });
   await page.screenshot({
-    path: "docs/verification/desk-iteration/connected-writing.png",
+    path: ".artifacts/desk-browser/connected-writing.png",
   });
   await page
     .getByText("2026-10-07", { exact: true })
@@ -425,12 +424,12 @@ try {
     })
     .click();
   await page.screenshot({
-    path: "docs/verification/desk-iteration/connected-desktop.png",
+    path: ".artifacts/desk-browser/connected-desktop.png",
     fullPage: false,
   });
   await page.setViewportSize({ width: 780, height: 1000 });
   await page.screenshot({
-    path: "docs/verification/desk-iteration/connected-half-width.png",
+    path: ".artifacts/desk-browser/connected-half-width.png",
     fullPage: false,
   });
   assert.ok(
@@ -453,7 +452,7 @@ try {
         }));
     const before = await measure();
     await page.evaluate(() => scrollTo(0, 0));
-    await page.screenshot({ path: `docs/verification/desk-iteration/short-name-${width}.png` });
+    await page.screenshot({ path: `.artifacts/desk-browser/short-name-${width}.png` });
     await swatches.nth(4).click();
     assert.deepEqual(await measure(), before);
     const panelBox = await page.locator(".selection-slot").boundingBox();
@@ -472,14 +471,14 @@ try {
     assert.deepEqual(await measure(), before);
     await page.evaluate(() => scrollTo(0, 0));
     await page.screenshot({
-      path: `docs/verification/desk-iteration/deselected-${width}.png`,
+      path: `.artifacts/desk-browser/deselected-${width}.png`,
       fullPage: false,
     });
     await swatches.nth(4).click();
     await page.waitForTimeout(220);
     await page.evaluate(() => scrollTo(0, 0));
     await page.screenshot({
-      path: `docs/verification/desk-iteration/selected-${width}.png`,
+      path: `.artifacts/desk-browser/selected-${width}.png`,
       fullPage: false,
     });
     await page
@@ -487,7 +486,7 @@ try {
       .click();
     await page.evaluate(() => scrollTo(0, 0));
     await page.screenshot({
-      path: `docs/verification/desk-iteration/editing-${width}.png`,
+      path: `.artifacts/desk-browser/editing-${width}.png`,
       fullPage: false,
     });
     await page.getByRole("button", { name: "Cancel", exact: true }).click();
@@ -515,7 +514,7 @@ try {
     }
     await page.evaluate(() => scrollTo(0, 0));
     await page.screenshot({
-      path: `docs/verification/desk-iteration/${name.toLowerCase().replaceAll(" ", "-")}.png`,
+      path: `.artifacts/desk-browser/${name.toLowerCase().replaceAll(" ", "-")}.png`,
       fullPage: false,
     });
     assert.ok(
@@ -555,14 +554,14 @@ try {
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.getByText("◉ Signed in · View only", { exact: true }).waitFor();
   assert.equal(await page.getByRole("button", { name: "Edit palette", exact: true }).count(), 0);
-  await page.screenshot({ path: "docs/verification/desk-iteration/view-only.png" });
+  await page.screenshot({ path: ".artifacts/desk-browser/view-only.png" });
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await page.getByRole("button", { name: "Owner sign in", exact: true }).waitFor();
   state.events = [];
   state.palettes = [];
   await page.reload();
   await page.getByText("No currently inked pens.", { exact: true }).waitFor();
-  await page.screenshot({ path: "docs/verification/desk-iteration/empty.png" });
+  await page.screenshot({ path: ".artifacts/desk-browser/empty.png" });
   assert.deepEqual(errors, []);
   console.log(
     `PASS: public/owner gates; refill-specific writing add/correct/delete; saved palette keyboard order/omit/restore/copy/delete; needs-refill chooser; mixed refill; failed-save draft retention; cleaning; half-width; ${writes.length} synthetic RPC writes, zero real writes.`,

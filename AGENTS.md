@@ -34,6 +34,8 @@ Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are browser configu
 `src/data/{pens,inks,refillLog}.json` is the fixed offline importer source, not runtime inventory. Keep the source snapshot and manufacturer/reference catalogs. Preserve these inputs for reproducible import tests and audit history; they are not current production data.
 
 ### Verification
+
+Write generated review screenshots and browser captures to ignored `.artifacts/`, and share them through Library or PR attachments. Do not commit review captures; keep intentional app assets and test fixtures tracked.
 Keep feature code simple and clean for the current core use cases of this personal, single-owner collection. Handle realistic failures without speculative defensive layers. Prefer a few representative behavior tests over redundant assertions or exhaustive edge-case combinations; retain essential correctness, known regressions, owner/public access boundaries, and data-preservation checks.
 
 Run `npm test`, `npm run lint`, `npm run build`, `npm run test:migration`, and `npm run test:db`. The database harness only creates its own labeled disposable PostgreSQL container. Node 22 is the CI runtime; the app test runner enables native WebSocket support when run under Node 20. Local synthetic tests do not establish hosted Auth/PostgREST compatibility.
