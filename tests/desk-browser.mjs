@@ -41,6 +41,10 @@ const inks = (await read("../src/data/inks.json"))
       "#8d993f",
     ][n % 8],
   }));
+inks[3].name = "Blue";
+inks[4].name = "[Day 23] Let it Snow — A Very Long Winter Evening Ink Name";
+inks[4].details =
+  "Synthetic reference notes for browsing. No production data is changed.";
 const events = pens.slice(0, 36).map((p, n) => ({
   id: `event-${n}`,
   sequence: String(n + 1),
@@ -87,7 +91,7 @@ await page.route("**/*", async (route) => {
     body = request.postDataJSON() || {};
   let result;
   if (url.pathname.includes("/auth/v1/token")) {
-    owner = true;
+    owner = body.email !== "viewer@example.test";
     const id = "00000000-0000-4000-8000-000000000001";
     const token = `${btoa(JSON.stringify({ alg: "HS256" }))}.${btoa(JSON.stringify({ sub: id, exp: Math.floor(Date.now() / 1000) + 3600 }))}.synthetic`;
     result = {
@@ -175,9 +179,7 @@ await page.route("**/*", async (route) => {
   await route.fulfill({ json: result });
 });
 try {
-  await page.goto(
-    process.env.DESK_URL || "http://127.0.0.1:5188/",
-  );
+  await page.goto(process.env.DESK_URL || "http://127.0.0.1:5188/");
   await page
     .getByRole("button", { name: "Everyday spectrum", exact: true })
     .waitFor();
@@ -188,13 +190,23 @@ try {
     0,
   );
   assert.equal(await page.title(), "Fountain Pens · My desk");
-  assert.equal(await page.getByRole("link", { name: /Full collection/ }).count(), 0);
-  await mkdir("docs/verification/homepage", { recursive: true });
-  await page.screenshot({ path: "docs/verification/homepage/public-desktop.png", fullPage: true });
+  assert.equal(
+    await page.getByRole("link", { name: /Full collection/ }).count(),
+    0,
+  );
+  await mkdir(".artifacts/desk-browser", { recursive: true });
+  await page.screenshot({
+    path: ".artifacts/desk-browser/public-desktop.png",
+    fullPage: false,
+  });
   await page.goto(new URL("/index.html", page.url()).href);
-  await page.getByRole("button", { name: "Everyday spectrum", exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Everyday spectrum", exact: true })
+    .waitFor();
   await page.reload();
-  await page.getByRole("button", { name: "Everyday spectrum", exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Everyday spectrum", exact: true })
+    .waitFor();
   await page
     .getByRole("button", { name: "Owner sign in", exact: true })
     .click();
@@ -210,6 +222,9 @@ try {
       exact: true,
     })
     .click();
+  await page
+    .getByRole("button", { name: "Wrote today", exact: true })
+    .waitFor();
   assert.equal(
     await page
       .getByRole("button", { name: "Wrote today", exact: true })
@@ -234,6 +249,9 @@ try {
       exact: true,
     })
     .click();
+  await page
+    .getByRole("button", { name: "Wrote today", exact: true })
+    .waitFor();
   assert.equal(
     await page
       .getByRole("button", { name: "Wrote today", exact: true })
@@ -267,8 +285,9 @@ try {
     .getByRole("button", { name: "Save correction", exact: true })
     .click();
   await page.getByText("2026-10-07", { exact: true }).waitFor();
-  await mkdir("docs/verification/homepage", { recursive: true });
-  await page.screenshot({ path: "docs/verification/homepage/connected-writing.png" });
+  await page.screenshot({
+    path: ".artifacts/desk-browser/connected-writing.png",
+  });
   await page
     .getByText("2026-10-07", { exact: true })
     .locator("..")
@@ -380,7 +399,7 @@ try {
   assert.equal(state.events.at(-1).kind, "cleaning");
   assert.equal(state.events.at(-1).inkIds.length, 0);
   const cleanedId = state.events.at(-1).id;
-  await page.getByRole("button", { name: "Activity", exact: true }).click();
+  await page.getByRole("link", { name: "Activity", exact: true }).click();
   await page
     .getByRole("button", { name: "Correct refill", exact: true })
     .first()
@@ -397,6 +416,7 @@ try {
     "Corrected synthetic cleaning",
   );
 
+  await page.getByRole("link", { name: "My desk", exact: true }).click();
   await page
     .getByRole("button", {
       name: `${inks[0].brand} ${inks[0].name}`,
@@ -404,24 +424,120 @@ try {
     })
     .click();
   await page.screenshot({
-    path: "docs/verification/homepage/connected-desktop.png",
-    fullPage: true,
+    path: ".artifacts/desk-browser/connected-desktop.png",
+    fullPage: false,
   });
   await page.setViewportSize({ width: 780, height: 1000 });
   await page.screenshot({
-    path: "docs/verification/homepage/connected-half-width.png",
-    fullPage: true,
+    path: ".artifacts/desk-browser/connected-half-width.png",
+    fullPage: false,
   });
   assert.ok(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   );
+  // Selection uses a stable slot at both target widths, including long names.
+  for (const width of [1440, 780]) {
+    await page.setViewportSize({ width, height: 1000 });
+    const swatches = page.locator(".desk-swatch");
+    await swatches.nth(3).click();
+    const measure = () =>
+      page
+        .locator(".selection-slot")
+        .evaluate((el) => ({
+          top: el.getBoundingClientRect().top + scrollY,
+          height: el.clientHeight,
+          width: el.clientWidth,
+        }));
+    const before = await measure();
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.screenshot({ path: `.artifacts/desk-browser/short-name-${width}.png` });
+    await swatches.nth(4).click();
+    assert.deepEqual(await measure(), before);
+    const panelBox = await page.locator(".selection-slot").boundingBox();
+    const actionsBox = await page.locator(".ink-actions").boundingBox();
+    assert.ok(actionsBox.y + actionsBox.height <= panelBox.y + panelBox.height + 1,
+      "Writing actions remain inside the visible detail panel for long names");
+    await page
+      .getByRole("button", { name: "Deselect ink", exact: true })
+      .click();
+    await page.waitForTimeout(220);
+    assert.equal(
+      await page.locator(".desk-swatch[aria-pressed=true]").count(),
+      0,
+    );
+    await page.getByText("No ink selected", { exact: true }).waitFor();
+    assert.deepEqual(await measure(), before);
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.screenshot({
+      path: `.artifacts/desk-browser/deselected-${width}.png`,
+      fullPage: false,
+    });
+    await swatches.nth(4).click();
+    await page.waitForTimeout(220);
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.screenshot({
+      path: `.artifacts/desk-browser/selected-${width}.png`,
+      fullPage: false,
+    });
+    await page
+      .getByRole("button", { name: "Edit palette", exact: true })
+      .click();
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.screenshot({
+      path: `.artifacts/desk-browser/editing-${width}.png`,
+      fullPage: false,
+    });
+    await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  }
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  assert.equal(
+    await page
+      .locator(".selected-panel")
+      .evaluate((el) => getComputedStyle(el).transitionDuration),
+    "0s",
+  );
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  for (const name of ["Pens", "Inks", "Refill queue", "Activity"]) {
+    await page.getByRole("link", { name, exact: true }).click();
+    await page
+      .getByRole("heading", { level: 1, name: name + "_", exact: true })
+      .waitFor();
+    assert.equal(await page.getByRole("dialog").count(), 0);
+    if (name === "Pens" || name === "Inks") {
+      await page
+        .getByLabel(`Search ${name.toLowerCase()}`)
+        .fill(name === "Pens" ? pens[0].brand : inks[0].brand);
+      await page.locator(".collection-row").first().click();
+      await page.locator(".reference-detail h2").waitFor();
+    }
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.screenshot({
+      path: `.artifacts/desk-browser/${name.toLowerCase().replaceAll(" ", "-")}.png`,
+      fullPage: false,
+    });
+    assert.ok(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    );
+  }
+  await page.goBack();
+  assert.equal(
+    await page
+      .getByRole("link", { name: "Refill queue" })
+      .getAttribute("aria-current"),
+    "page",
+  );
+  await page.getByRole("link", { name: "My desk", exact: true }).click();
   await page.getByRole("button", { name: "New", exact: true }).click();
   await page.getByLabel("Palette name").fill("New daily palette");
   await page.getByRole("button", { name: "Save palette", exact: true }).click();
-  await page.getByRole("button", { name: "New daily palette", exact: true }).waitFor();
-  assert.ok(state.palettes.some(p => p.name === "New daily palette"));
+  await page
+    .getByRole("button", { name: "New daily palette", exact: true })
+    .waitFor();
+  assert.ok(state.palettes.some((p) => p.name === "New daily palette"));
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await page
     .getByRole("button", { name: "Owner sign in", exact: true })
@@ -432,6 +548,20 @@ try {
       .count(),
     0,
   );
+  await page.getByRole("button", { name: "Owner sign in", exact: true }).click();
+  await page.getByLabel("Email", { exact: true }).fill("viewer@example.test");
+  await page.getByLabel("Password", { exact: true }).fill("synthetic-password");
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+  await page.getByText("◉ Signed in · View only", { exact: true }).waitFor();
+  assert.equal(await page.getByRole("button", { name: "Edit palette", exact: true }).count(), 0);
+  await page.screenshot({ path: ".artifacts/desk-browser/view-only.png" });
+  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await page.getByRole("button", { name: "Owner sign in", exact: true }).waitFor();
+  state.events = [];
+  state.palettes = [];
+  await page.reload();
+  await page.getByText("No currently inked pens.", { exact: true }).waitFor();
+  await page.screenshot({ path: ".artifacts/desk-browser/empty.png" });
   assert.deepEqual(errors, []);
   console.log(
     `PASS: public/owner gates; refill-specific writing add/correct/delete; saved palette keyboard order/omit/restore/copy/delete; needs-refill chooser; mixed refill; failed-save draft retention; cleaning; half-width; ${writes.length} synthetic RPC writes, zero real writes.`,

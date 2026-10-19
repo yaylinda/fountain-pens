@@ -37,8 +37,12 @@ export function Access({ canEdit }: { canEdit: boolean }) {
   return (
     <>
       <XStack gap={10} alignItems="center" flexWrap="wrap">
-        <Muted>
-          {canEdit ? "Editing" : signedIn ? "View only" : "Public view"}
+        <Muted className={`status ${canEdit ? "status-green" : "status-blue"}`}>
+          {canEdit
+            ? "✓ Signed in · Owner"
+            : signedIn
+              ? "◉ Signed in · View only"
+              : "◉ Signed out · Public view"}
         </Muted>
         <Action
           disabled={!ready || command.busy}
