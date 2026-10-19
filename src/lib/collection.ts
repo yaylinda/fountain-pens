@@ -16,14 +16,9 @@ export interface Collection {
 }
 export interface RefillDraft extends RefillLog {
     index?: number;
-    hasUnsavedChanges?: boolean;
     // A current cleaning can update the pen's queue flag; never saved on the event.
     needsRefill?: boolean;
 }
-export type EditorState =
-    | { kind: 'pen'; item?: Pen; returnTo?: RefillDraft }
-    | { kind: 'ink'; item?: Ink; returnTo?: RefillDraft }
-    | { kind: 'refill'; draft?: RefillDraft };
 
 export const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 export const isCleaning = (entry: RefillLog) =>
@@ -65,27 +60,6 @@ export const byPenName = (a: Pen, b: Pen) =>
     byName(penDescription(a), penDescription(b));
 export const newestFirst = (a: JournalEntry, b: JournalEntry) =>
     b.date.localeCompare(a.date) || (a.sequence && b.sequence ? (BigInt(b.sequence) > BigInt(a.sequence) ? 1 : BigInt(b.sequence) < BigInt(a.sequence) ? -1 : 0) : b.index - a.index);
-export const formatDate = (value?: string, short = false) => {
-    if (!value) return 'No refills yet';
-    const date = new Date(`${value}T12:00:00`);
-    return Number.isNaN(date.getTime())
-        ? value
-        : new Intl.DateTimeFormat('en-US', {
-              month: 'short',
-              day: 'numeric',
-              ...(short ? {} : { year: 'numeric' }),
-          }).format(date);
-};
-export const formatMonth = (value: string) => {
-    const date = new Date(`${value.slice(0, 7)}-01T12:00:00`);
-    return Number.isNaN(date.getTime())
-        ? 'Undated'
-        : new Intl.DateTimeFormat('en-US', {
-              month: 'long',
-              year: 'numeric',
-          }).format(date);
-};
-
 export function getSwatch(
     ink?: Ink,
 ): { hex: string; source: string; url?: string } | undefined {
@@ -116,29 +90,15 @@ export function deriveCollection(collection: Collection, asOf = today()) {
     const inkById = new Map(inks.map((ink) => [ink.id, ink]));
     const journal = [...entries].sort(newestFirst);
     const latest = new Map<string, JournalEntry>();
-    const penHistory = new Map<string, JournalEntry[]>();
-    const inkHistory = new Map<string, JournalEntry[]>();
     for (const entry of journal) {
         if (entry.date <= asOf && !latest.has(entry.penId))
             latest.set(entry.penId, entry);
-        penHistory.set(entry.penId, [
-            ...(penHistory.get(entry.penId) || []),
-            entry,
-        ]);
-        for (const id of new Set(realInkIds(entry)))
-            inkHistory.set(id, [...(inkHistory.get(id) || []), entry]);
     }
     const activePens = pens.filter((pen) => !pen.archived);
-    const activeInks = inks.filter(
-        (ink) => ink.id !== EMPTY_INK_ID && !ink.archived,
-    );
     const inked = activePens.filter((pen) => {
         const entry = latest.get(pen.id);
         return entry && !isCleaning(entry);
     });
-    const inkCount = (id: string) => inkHistory.get(id)?.length || 0;
-    const penCount = (id: string) =>
-        penHistory.get(id)?.filter((entry) => !isCleaning(entry)).length || 0;
     const currentPens = (id: string) =>
         inked.filter((pen) => latest.get(pen.id)?.inkIds.includes(id));
     return {
@@ -149,16 +109,9 @@ export function deriveCollection(collection: Collection, asOf = today()) {
         inkById,
         journal,
         latest,
-        penHistory,
-        inkHistory,
         activePens,
-        activeInks,
         inked,
-        inkCount,
-        penCount,
         currentPens,
-        refills: entries.filter((entry) => !isCleaning(entry)),
-        untried: activeInks.filter((ink) => inkCount(ink.id) === 0),
     };
 }
 export type CollectionModel = ReturnType<typeof deriveCollection>;

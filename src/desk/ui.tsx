@@ -44,7 +44,7 @@ export function Modal({
     () => () => {
       window.setTimeout(() => {
         if (
-          !document.querySelector(".lab-dialog") &&
+          !document.querySelector(".desk-dialog") &&
           returnFocus.current?.isConnected
         )
           returnFocus.current.focus();
@@ -63,7 +63,7 @@ export function Modal({
       <Dialog.Portal>
         <Dialog.Overlay backgroundColor="rgba(24,24,30,.3)" />
         <Dialog.Content
-          className="lab-dialog"
+          className="desk-dialog"
           backgroundColor="background"
           padding={24}
           borderRadius={10}

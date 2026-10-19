@@ -2,11 +2,10 @@ import { withReferences, pilotReferences, wearingeulReferences } from './referen
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { getInkReference, inkReferenceSearchText, referenceHex } from '../src/lib/inkReference';
+import { getInkReference, referenceHex } from '../src/lib/inkReference';
 import {
     byPenName,
     deriveCollection,
-    formatDate,
     getSwatch,
     isCleaning,
     matches,
@@ -114,21 +113,10 @@ test('latest pairings use date and original array position, including same-day c
 });
 test('cleaning placeholder and archived inventory are excluded from active totals', () => {
     const result = deriveCollection(fixture, '2025-01-03');
-    assert.equal(result.activeInks.length, 3);
     assert.equal(result.activePens.length, 3);
-    assert.equal(result.refills.length, 3);
-    assert.equal(result.penCount('a'), 2);
-    assert.equal(result.inkCount('blue'), 2);
-    assert.deepEqual(
-        result.untried.map((value) => value.id),
-        ['unused'],
-    );
-    assert.equal(result.penHistory.get('a')?.length, 3);
 });
 test('all inks in a mix retain their own usage and latest pairing relationships', () => {
     const result = deriveCollection(fixture, '2025-01-03');
-    assert.equal(result.inkCount('red'), 3);
-    assert.equal(result.inkCount('blue'), 2);
     assert.equal(result.currentPens('red').length, 1);
     assert.equal(result.currentPens('blue').length, 1);
 });
@@ -152,10 +140,6 @@ test('search accepts accented names, partial words, and unordered terms', () => 
     assert.ok(matches('nepal kyanite', 'Kyanite du Népal'));
     assert.ok(matches('pilot fine', 'Pilot Falcon', 'Extra Fine'));
     assert.ok(!matches('sailor fine', 'Pilot Falcon', 'Extra Fine'));
-});
-test('calendar dates stay on the same day in the user time zone', () => {
-    assert.equal(formatDate('2025-01-01'), 'Jan 1, 2025');
-    assert.equal(formatDate('2025-01-01', true), 'Jan 1');
 });
 test('refill validation rejects invalid dates, unknown references, and mixed cleaning entries', () => {
     const valid = {
@@ -235,13 +219,6 @@ test('the real source inventory is coherent and legacy index fields do not deter
         for (const id of entry.inkIds)
             assert.ok(id === 'NONE' || result.inkById.has(id));
     }
-    assert.equal(
-        result.activeInks.length,
-        inks.filter(
-            (value: { id: string; archived?: boolean }) =>
-                value.id !== 'NONE' && !value.archived,
-        ).length,
-    );
 });
 
 test('Wearingeul references cover the owned collection with traceable, valid colors', () => {
@@ -268,8 +245,6 @@ test('manufacturer swatches keep custom colors, brand boundaries, and inventory 
     assert.equal(getSwatch({ ...mermaid, colorHex: '#123456' })?.hex, '#123456');
     assert.equal(getSwatch({ ...mermaid, name: 'Corrected inventory label' })?.hex, '#64b1bf');
     assert.equal(getInkReference({ id: 'new-unresearched-ink', name: mermaid.name, brand: mermaid.brand, collection: '' }), undefined);
-    assert.match(inkReferenceSearchText(mermaid), /Hans Christian Andersen/);
-    assert.match(inkReferenceSearchText(mermaid), /shimmer/);
     assert.ok(getInkReference(withReferences({ ...mermaid, id: 'ink_57' }))?.properties.includes('Color Change'));
     assert.ok(getInkReference(withReferences({ ...mermaid, id: 'ink_57' }))?.colorGuideProperties?.includes('Color Shading'));
 });
@@ -287,8 +262,5 @@ test('Pilot references cover every owned ink with sourced observations and no in
         assert.ok(reference.sources.length);
         assert.ok(reference.writing);
     }
-    const firefly = owned.find((item: { name: string }) => item.name === 'Hotaru-Bi');
-    assert.match(inkReferenceSearchText(firefly), /蛍火/);
-    assert.match(inkReferenceSearchText(firefly), /Firefly glow/);
     assert.equal(getInkReference({ id: 'unresearched-pilot', name: 'Hotaru-Bi', brand: 'Pilot', collection: '' }), undefined);
 });

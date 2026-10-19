@@ -84,7 +84,7 @@ export function RefillEditor({
       busy={command.busy}
     >
       <form
-        className="lab-form"
+        className="desk-form"
         onSubmit={(event) => {
           event.preventDefault();
           void command.run(async () => {
@@ -100,7 +100,7 @@ export function RefillEditor({
           }, close);
         }}
       >
-        <fieldset disabled={command.busy} className="lab-form">
+        <fieldset disabled={command.busy} className="desk-form">
           <Label htmlFor="refill-date">Date</Label>
           <Input
             id="refill-date"
@@ -123,7 +123,7 @@ export function RefillEditor({
                 penDescription(model.penById.get(draft.penId)!)
               : "No pen selected"}
           </Muted>
-          <YStack className="lab-options" gap={5}>
+          <YStack className="desk-options" gap={5}>
             {pens.map((p) => (
               <Action
                 key={p.id}
@@ -172,7 +172,7 @@ export function RefillEditor({
                   .map((id) => inkLabel(model.inkById.get(id)))
                   .join(" + ") || "No ink selected"}
               </Muted>
-              <YStack className="lab-options" gap={5}>
+              <YStack className="desk-options" gap={5}>
                 {inks.map((i) => (
                   <Action
                     key={i.id}
@@ -249,7 +249,7 @@ export function WritingEditor({
       </Muted>
       {collection.canEdit && entry.id && (
         <form
-          className="lab-form"
+          className="desk-form"
           onSubmit={(event) => {
             event.preventDefault();
             void command.run(
