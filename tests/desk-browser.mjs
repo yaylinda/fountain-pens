@@ -176,7 +176,7 @@ await page.route("**/*", async (route) => {
 });
 try {
   await page.goto(
-    process.env.DESK_URL || "http://127.0.0.1:5188/desk-lab.html",
+    process.env.DESK_URL || "http://127.0.0.1:5188/",
   );
   await page
     .getByRole("button", { name: "Everyday spectrum", exact: true })
@@ -187,6 +187,14 @@ try {
       .count(),
     0,
   );
+  assert.equal(await page.title(), "Fountain Pens · My desk");
+  assert.equal(await page.getByRole("link", { name: /Full collection/ }).count(), 0);
+  await mkdir("docs/verification/homepage", { recursive: true });
+  await page.screenshot({ path: "docs/verification/homepage/public-desktop.png", fullPage: true });
+  await page.goto(new URL("/index.html", page.url()).href);
+  await page.getByRole("button", { name: "Everyday spectrum", exact: true }).waitFor();
+  await page.reload();
+  await page.getByRole("button", { name: "Everyday spectrum", exact: true }).waitFor();
   await page
     .getByRole("button", { name: "Owner sign in", exact: true })
     .click();
@@ -259,8 +267,8 @@ try {
     .getByRole("button", { name: "Save correction", exact: true })
     .click();
   await page.getByText("2026-10-07", { exact: true }).waitFor();
-  await mkdir("docs/desk-lab", { recursive: true });
-  await page.screenshot({ path: "docs/desk-lab/connected-writing.png" });
+  await mkdir("docs/verification/homepage", { recursive: true });
+  await page.screenshot({ path: "docs/verification/homepage/connected-writing.png" });
   await page
     .getByText("2026-10-07", { exact: true })
     .locator("..")
@@ -278,7 +286,7 @@ try {
   );
   await page.getByRole("button", { name: "Edit palette", exact: true }).click();
   await page.getByLabel("Palette name").fill("Edited spectrum");
-  const first = page.locator(".lab-swatch").first();
+  const first = page.locator(".desk-swatch").first();
   const label = await first.getAttribute("aria-label");
   await page
     .getByRole("button", { name: `Move ${label}`, exact: true })
@@ -327,10 +335,10 @@ try {
     exact: true,
   });
   assert.match(
-    await modal.locator(".lab-options button").first().innerText(),
+    await modal.locator(".desk-options button").first().innerText(),
     /Needs refill/,
   );
-  await modal.locator(".lab-options button").first().click();
+  await modal.locator(".desk-options button").first().click();
   await page
     .getByLabel("Inks · select more than one to mix")
     .fill(inks[0].name);
@@ -363,7 +371,7 @@ try {
   await page
     .getByRole("button", { name: "+ Refill or clean a pen", exact: true })
     .click();
-  await modal.locator(".lab-options button").first().click();
+  await modal.locator(".desk-options button").first().click();
   await page
     .getByRole("button", { name: "Cleaned & empty", exact: true })
     .click();
@@ -396,12 +404,12 @@ try {
     })
     .click();
   await page.screenshot({
-    path: "docs/desk-lab/connected-desktop.png",
+    path: "docs/verification/homepage/connected-desktop.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 780, height: 1000 });
   await page.screenshot({
-    path: "docs/desk-lab/connected-half-width.png",
+    path: "docs/verification/homepage/connected-half-width.png",
     fullPage: true,
   });
   assert.ok(
@@ -409,6 +417,11 @@ try {
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   );
+  await page.getByRole("button", { name: "New", exact: true }).click();
+  await page.getByLabel("Palette name").fill("New daily palette");
+  await page.getByRole("button", { name: "Save palette", exact: true }).click();
+  await page.getByRole("button", { name: "New daily palette", exact: true }).waitFor();
+  assert.ok(state.palettes.some(p => p.name === "New daily palette"));
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await page
     .getByRole("button", { name: "Owner sign in", exact: true })

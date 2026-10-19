@@ -24,5 +24,5 @@ export function useCollection() {
         return () => { window.removeEventListener('focus', refetch); window.removeEventListener('online', refetch); window.clearInterval(timer); };
     }, [retry, owner]);
     const model = useMemo(() => deriveCollection(collection, collection.asOf || today()), [collection]);
-    return { collection, model, loading, error: !opened.current && error, warning: warning || (opened.current ? error : ''), refresh: () => {}, retry };
+    return { collection, model, loading, error: !opened.current && error, warning: warning || (opened.current ? error : ''), retry };
 }

@@ -62,7 +62,7 @@ export function Access({ canEdit }: { canEdit: boolean }) {
       {open && (
         <Modal title="Owner sign in" close={close} busy={command.busy}>
           <form
-            className="lab-form"
+            className="desk-form"
             onSubmit={(event) => {
               event.preventDefault();
               void command.run(async () => {

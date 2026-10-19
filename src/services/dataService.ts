@@ -1,10 +1,9 @@
-import { arrangementDto, paletteDto, type DeskArrangement, type PaletteItem } from '../lib/deskPalette';
+import { arrangementDto, type DeskArrangement, type PaletteItem } from '../lib/deskPalette';
 import type { MutationName, MutationPayload } from './database.types';
-import type { Ink, Pen, RefillLog } from '../models/types';
+import type { RefillLog } from '../models/types';
 import { isCleaning, realInkIds, type Collection, type JournalEntry } from '../lib/collection';
-import { collectionDto, eventDto, writingLogDto, inkDto, object, penDto } from './collectionAdapter';
+import { collectionDto, eventDto, writingLogDto, object } from './collectionAdapter';
 import { getSupabase } from './supabaseClient';
-import { captureSaveOrigin, celebrateSave } from '../lib/saveCelebration';
 
 export class CollectionError extends Error {}
 export function safeError(error: unknown): CollectionError {
@@ -40,12 +39,6 @@ export function activateCollection(userId: string | null) {
     // Collection content is public; revoke editing immediately while refreshing capability.
     collection = { ...collection, canEdit: false }; pendingLoad = null; warning = ''; emit();
 }
-export const getAllPens = () => collection.pens;
-export const getAllInks = () => collection.inks;
-export const getAllRefillLogs = () => collection.entries;
-export const getPenById = (id: string) => collection.pens.find(p => p.id === id);
-export const getInkById = (id: string) => collection.inks.find(i => i.id === id);
-export const getRefillLogByIndex = (index: number) => collection.entries[index];
 export async function loadData(force = false): Promise<void> {
     if (pendingLoad) return pendingLoad;
     if (initialized && !force) return;
@@ -63,43 +56,13 @@ async function command(name: MutationName, payload: MutationPayload, apply: (val
     if (!owner || !collection.canEdit) throw new CollectionError('Only the collection owner can save changes.');
     if (saving) return Promise.reject(new CollectionError('A save is in progress.'));
     saving = true;
-    const origin = typeof document === 'undefined' ? null : captureSaveOrigin();
     try {
         const { data, error } = await getSupabase().rpc(name, payload);
         if (error) throw safeError(error);
         apply(object(data)); initialized = true; emit();
-        if (origin) celebrateSave(origin);
         try { await loadData(true); } catch { warning = 'Saved. The collection could not refresh. Please refresh when connected.'; emit(); }
     } catch (error) { throw error instanceof CollectionError ? error : safeError(error); }
     finally { saving = false; emit(); }
-}
-const penInput = (p: Omit<Pen, 'id'>) => ({ details: p.details || '', sources: (p.sources || []).map(s => ({ ...s })), brand: p.brand, model: p.model, color: p.color, nibSize: p.nibSize, nibType: p.nibType, needsRefill: !!p.needsRefill, favorite: !!p.favorite, archived: !!p.archived });
-const inkInput = (i: Omit<Ink, 'id'>) => ({ details: i.details || '', sources: (i.sources || []).map(s => ({ ...s })), brand: i.brand, collection: i.collection, name: i.name, colorHex: i.colorHex || null, favorite: !!i.favorite, archived: !!i.archived });
-async function savePen(p: Omit<Pen, 'id'>, existing?: Pen) {
-    let saved!: Pen;
-    await command(existing ? 'update_pen' : 'create_pen', { ...(existing ? { p_id: existing.id } : {}), p_item: penInput(p) }, result => {
-        saved = penDto(result.item);
-        collection = { ...collection, pens: [...collection.pens.filter(p => p.id !== saved.id), saved] };
-    });
-    return saved;
-}
-async function saveInk(i: Omit<Ink, 'id'>, existing?: Ink) {
-    let saved!: Ink;
-    await command(existing ? 'update_ink' : 'create_ink', { ...(existing ? { p_id: existing.id } : {}), p_item: inkInput(i) }, result => {
-        saved = inkDto(result.item);
-        collection = { ...collection, inks: [...collection.inks.filter(i => i.id !== saved.id), saved] };
-    });
-    return saved;
-}
-export const addPen = (p: Omit<Pen, 'id'>) => savePen(p);
-export const updatePen = (p: Pen) => savePen(p, p);
-export const addInk = (i: Omit<Ink, 'id'>) => saveInk(i);
-export const updateInk = (i: Ink) => saveInk(i, i);
-export async function deletePen(item: Pen) {
-    await command('delete_pen', { p_id: item.id }, () => { collection = { ...collection, pens: collection.pens.filter(p => p.id !== item.id) }; });
-}
-export async function deleteInk(item: Ink) {
-    await command('delete_ink', { p_id: item.id }, () => { collection = { ...collection, inks: collection.inks.filter(i => i.id !== item.id) }; });
 }
 const eventInput = (e: RefillLog, queueAfterCleaning?: boolean) => ({ penId: e.penId, date: e.date, kind: isCleaning(e) ? 'cleaning' : 'refill', inkIds: realInkIds(e), notes: e.notes, notPure: !isCleaning(e) && !!e.notPure, ...(isCleaning(e) && queueAfterCleaning !== undefined ? { queueAfterCleaning } : {}) });
 async function saveRefill(entry: RefillLog, existing?: RefillLog, queue?: boolean): Promise<JournalEntry> {
@@ -114,26 +77,6 @@ async function saveRefill(entry: RefillLog, existing?: RefillLog, queue?: boolea
 }
 export const addRefillLog = (entry: RefillLog, queue?: boolean) => saveRefill(entry, undefined, queue);
 export const updateRefillLog = (entry: RefillLog, expected: RefillLog) => saveRefill(entry, expected);
-export async function deleteRefillLog(expected: RefillLog) {
-    if (collection.writingLogs?.some(log => log.refillId === expected.id)) throw new CollectionError('Remove this refill’s writing history before deleting it.');
-    await command('delete_refill_event', { p_event_id: expected.id! }, () => { collection = { ...collection, entries: collection.entries.filter(e => e.id !== expected.id) }; });
-}
-export async function setFavorite(kind: 'pen' | 'ink', id: string, favorite: boolean): Promise<boolean> {
-    const item = kind === 'pen' ? getPenById(id) : getInkById(id);
-    if (!item) return false;
-    try {
-        if (kind === 'pen') await updatePen({ ...item as Pen, favorite });
-        else await updateInk({ ...item as Ink, favorite });
-        return true;
-    } catch { return false; }
-}
-
-export async function saveDeskPalette(items: PaletteItem[]) {
-    await command('save_desk_palette', { p_items: items.map(item => ({ ...item })) }, result => {
-        collection = { ...collection, palette: paletteDto(result.items) };
-    });
-}
-
 export async function saveNamedPalette(id: string | null, name: string, items: PaletteItem[]) {
     let saved!: DeskArrangement;
     await command('save_named_palette', { p_id: id, p_name: name, p_items: items.map(item => ({ ...item })) }, result => {

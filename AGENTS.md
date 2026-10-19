@@ -22,10 +22,10 @@ The `scripts/` directory contains a Python utility for scraping ink hex colors f
 ## Architecture
 
 ### Data Flow
-The React/Vite SPA uses public Supabase reads and owner-only writes:
-1. Everyone can browse collection data and displayed journal notes. `OwnerControls` offers email/password sign-in with no signup UI.
+The React/Tamagui/Vite desk uses public Supabase reads and owner-only writes:
+1. Everyone can browse collection data and displayed journal notes. `src/desk/Access.tsx` offers email/password sign-in with no signup UI.
 2. `dataService.ts` reads `get_collection`, including the database-approved `canEdit` capability.
-3. Inventory CRUD and refill RPCs use invoker rights, owner checks and RLS. A refill's event, ordered ink links and queue effect commit atomically.
+3. The database inventory contract and refill RPCs use invoker rights, owner checks and RLS. A refill's event, ordered ink links and queue effect commit atomically.
 4. Normal forms keep drafts during editing and show save errors. Do not add retry receipts, expected-version conflicts, advisory locks or session draft recovery.
 5. No mutable JSON fallback, file API plugin, LAN authorization or Git sync is part of the browser runtime.
 

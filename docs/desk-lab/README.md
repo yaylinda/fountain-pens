@@ -1,3 +1,7 @@
+# Historical design notes
+
+The connected Tamagui experiment documented below has been promoted to the sole homepage. The old app and lab entry have been removed; the descriptions of the original app and its Full collection link below are historical only. See the [current app documentation](../../README.md) and [homepage verification](../verification/homepage/README.md) for current scope.
+
 # Tamagui connected desk experiment
 
 A separate working desk at `/desk-lab.html`, now using the existing `useCollection`, Supabase adapter and owner capability. The original `/` app stays intact. No migrations, auth-policy changes, production writes, deployment changes, or merge.

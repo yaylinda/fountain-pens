@@ -6,7 +6,4 @@ export default defineConfig({
   plugins: [react()],
   define: { "process.env.TAMAGUI_TARGET": JSON.stringify("web") },
   resolve: { alias: { "react-native": "react-native-web" } },
-  build: {
-    rollupOptions: { input: { app: "index.html", deskLab: "desk-lab.html" } },
-  },
 });
