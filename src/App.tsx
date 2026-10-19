@@ -207,7 +207,14 @@ export function App() {
   };
   return (
     <div className="desk-shell">
-      <a className="desk-skip" href="#desk-main" onClick={(event) => { event.preventDefault(); document.getElementById("desk-main")?.focus(); }}>
+      <a
+        className="desk-skip"
+        href="#desk-main"
+        onClick={(event) => {
+          event.preventDefault();
+          document.getElementById("desk-main")?.focus();
+        }}
+      >
         Skip to desk
       </a>
       <header className="desk-rail">
@@ -266,7 +273,9 @@ export function App() {
           <>
             <Failure error={warning} />
             <Failure error={command.error} />
-            <Muted role="status">{view === "desk" ? notice : ""}</Muted>
+            <Muted className="desk-notice" role="status">
+              {view === "desk" ? notice : ""}
+            </Muted>
             {(view === "pens" || view === "inks") && (
               <CollectionView
                 key={view}
@@ -486,6 +495,16 @@ export function App() {
                     )}
                 </YStack>
                 <YStack className="desk-active" gap={16}>
+                  {canEdit && (
+                    <Primary
+                      backgroundColor="#edf5ff"
+                      color="#185b98"
+                      borderColor="#b6d2eb"
+                      onPress={() => setDialog({ kind: "refill" })}
+                    >
+                      + Refill or clean a pen
+                    </Primary>
+                  )}
                   <div className="selection-slot">
                     <div className="selection-empty" hidden={selectionOpen}>
                       <Text fontSize={18}>No ink selected</Text>
@@ -510,7 +529,14 @@ export function App() {
                               </Text>
                               <Action
                                 aria-label="Deselect ink"
-                                onPress={() => { document.querySelector<HTMLButtonElement>('.desk-swatch[aria-pressed="true"]')?.focus(); setSelected(""); }}
+                                onPress={() => {
+                                  document
+                                    .querySelector<HTMLButtonElement>(
+                                      '.desk-swatch[aria-pressed="true"]',
+                                    )
+                                    ?.focus();
+                                  setSelected("");
+                                }}
                               >
                                 ×
                               </Action>
@@ -646,13 +672,6 @@ export function App() {
                       </Panel>
                     </div>
                   </div>
-                  {canEdit && (
-                    <Primary backgroundColor="#edf5ff"
-                      color="#185b98"
-                      borderColor="#b6d2eb" onPress={() => setDialog({ kind: "refill" })}>
-                      + Refill or clean a pen
-                    </Primary>
-                  )}
                 </YStack>
               </div>
             )}
@@ -685,9 +704,12 @@ export function App() {
                   )}
                 </Panel>
                 {canEdit && (
-                  <Primary backgroundColor="#edf5ff"
-                      color="#185b98"
-                      borderColor="#b6d2eb" onPress={() => setDialog({ kind: "refill" })}>
+                  <Primary
+                    backgroundColor="#edf5ff"
+                    color="#185b98"
+                    borderColor="#b6d2eb"
+                    onPress={() => setDialog({ kind: "refill" })}
+                  >
                     + Refill or clean a pen
                   </Primary>
                 )}

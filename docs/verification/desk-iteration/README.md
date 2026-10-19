@@ -38,3 +38,17 @@ CHROMIUM_PATH='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' nod
 ```
 
 Playwright is a local verification-only install, not an application dependency. Tests ran on this Mac's Node 26; CI uses Node 22. Synthetic browser checks do not establish hosted Auth/PostgREST compatibility. No production writes, schema/security edits, merge or deployment were performed.
+
+## Approved skill refinement (19 October)
+
+Installed only the approved pinned core directories using Codex's trusted Python installer:
+- `design-taste-frontend`: Leonxlnx/taste-skill `a9c73c3d5dbf401e3e47f86e7b41f29ede1687df`, 38 core files.
+- `build-awwwards-quality-sites`: MengTo/Skills `398cd41c86ba42fbb30e944ae507f463648f08b7`, 2 core files.
+
+Every installed core file was byte-compared with the reviewed source; each root MIT LICENSE was retained. No automatic updater or additional skills installed. Restart Codex to discover these skills automatically in future sessions.
+
+Art direction: the real swatches are the focal material; Silkscreen identifies the product and Fira Mono carries the working interface. The desk answers “what ink is in my pens, and what did I write with?” Reference pages answer “which pen or ink am I looking for?” Queue and Activity keep their dedicated jobs. Taste's app draw selected editorial-greeting (seed 123697366), using its clear personal-home hierarchy, adapted to the existing compact two-column desk rather than replacing approved layout. User constraints preserve the multicolor identity, underscore and selected underline. No artwork or new dependencies introduced.
+
+Changes: a 650px stable detail slot, a smaller readable ink title, sticky writing controls inside the scroll area, a general refill action above the panel, a compact deselected prompt, stable space for save feedback, navigation/row feedback and a stronger swatch focus offset. Selection uses a short ease-out slide; existing reduced-motion rules bypass all transitions. Native scrolling remains; marketing entrances, GSAP, smooth-scroll libraries, Three.js and motion quotas are inappropriate for this daily data tool and explicitly excluded by the approved scope.
+
+Validation: full `npm run check` passed again. Built Chrome tests rerun across public/owner/view-only modes, editing and all existing workflows. Added a geometry assertion that writing actions remain inside the selected panel with a long name at desktop/half width. Updated screenshots use synthetic intercepted Auth/RPC, zero production writes. The custom Playwright harness substitutes for the skill inspector so all screenshots contain controlled synthetic state. Style lint exceptions: Fira Mono is requested branding; ✎ and ✓ are functional indicators paired with text; box-shadow declarations draw focus/selection rings and underlines, not decorative elevation. No merge or deployment.

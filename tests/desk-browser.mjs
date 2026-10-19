@@ -456,6 +456,10 @@ try {
     await page.screenshot({ path: `docs/verification/desk-iteration/short-name-${width}.png` });
     await swatches.nth(4).click();
     assert.deepEqual(await measure(), before);
+    const panelBox = await page.locator(".selection-slot").boundingBox();
+    const actionsBox = await page.locator(".ink-actions").boundingBox();
+    assert.ok(actionsBox.y + actionsBox.height <= panelBox.y + panelBox.height + 1,
+      "Writing actions remain inside the visible detail panel for long names");
     await page
       .getByRole("button", { name: "Deselect ink", exact: true })
       .click();
