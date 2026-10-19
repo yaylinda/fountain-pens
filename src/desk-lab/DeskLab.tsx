@@ -44,7 +44,7 @@ const Action = styled(Button, {
   height: "control",
   borderRadius: "control",
   fontSize: 13,
-  fontWeight: "600",
+  fontWeight: "400",
   borderWidth: 1,
   borderColor: "borderColor",
   backgroundColor: "surface",
@@ -74,7 +74,7 @@ const Panel = styled(YStack, {
 const Eyebrow = styled(Text, {
   name: "DeskEyebrow",
   fontSize: 11,
-  fontWeight: "600",
+  fontWeight: "400",
   color: "muted",
 });
 function Swatch({
@@ -109,14 +109,14 @@ function Swatch({
         onPress={onSelect}
         height={112}
         padding={0}
-        borderRadius={12}
+        borderRadius={6}
         overflow="hidden"
         backgroundColor={ink.color}
         borderWidth={selected ? 3 : 0}
         borderColor="white"
       >
         <YStack position="absolute" bottom={12} left={13} right={13}>
-          <Text color="white" fontFamily="Georgia" fontSize={23} opacity={0.85}>
+          <Text color="white" fontFamily="body" fontSize={23} opacity={0.85}>
             Aa
           </Text>
           <XStack marginTop={8} gap={4}>
@@ -133,11 +133,11 @@ function Swatch({
         </YStack>
       </Button>
       <XStack justifyContent="space-between" alignItems="center">
-        <Text fontSize={12} fontWeight="600">
+        <Text fontSize={12} fontWeight="400">
           {ink.name}
         </Text>
         {selected && (
-          <Text color="accent" fontSize={12}>
+          <Text color="color" fontSize={12}>
             ●
           </Text>
         )}
@@ -230,22 +230,33 @@ export function DeskLab() {
       </a>
       <aside className="lab-rail">
         <YStack gap={8}>
-          <Text fontSize={25} fontWeight="800" letterSpacing={-1}>
-            fountain<Text color="accent">.</Text>
+          <Text
+            fontSize={25}
+            fontFamily="pixel"
+            fontWeight="400"
+            letterSpacing={0}
+          >
+            <span className="brand-mark" aria-hidden="true">
+              ◆
+            </span>{" "}
+            fount<span style={{ color: "#e94b58" }}>a</span>
+            <span style={{ color: "#30a46c" }}>i</span>
+            <span style={{ color: "#1686ed" }}>n</span>
           </Text>
-          <Eyebrow>Ink & writing</Eyebrow>
         </YStack>
         <YStack className="lab-rail-nav" gap={8}>
           <Action
             justifyContent="flex-start"
-            backgroundColor={tab === "desk" ? "surface" : "transparent"}
+            className={tab === "desk" ? "nav-active" : ""}
+            backgroundColor="transparent"
             onPress={() => setTab("desk")}
           >
             ▦ My Desk
           </Action>
           <Action
             justifyContent="flex-start"
-            backgroundColor={tab === "activity" ? "surface" : "transparent"}
+            className={tab === "activity" ? "nav-active" : ""}
+            backgroundColor="transparent"
             onPress={() => setTab("activity")}
           >
             ◷ Activity
@@ -258,29 +269,6 @@ export function DeskLab() {
             ▤ Collection
           </Action>
         </YStack>
-        <YStack className="lab-rail-footer" marginTop="auto" gap={10}>
-          <Separator />
-          <Muted>Design experiment</Muted>
-          <Text fontSize={11} color="accent">
-            ● Local demo session
-          </Text>
-          <a
-            href={
-              location.search
-                ? "/desk-lab.html"
-                : "/desk-lab.html?theme=graphite"
-            }
-            style={{ fontSize: 12 }}
-          >
-            Try {location.search ? "Garden" : "Graphite"} theme
-          </a>
-          <Muted fontSize={10}>
-            Synthetic collection. Changes reset on reload.
-          </Muted>
-          <a href="/" style={{ fontSize: 11 }}>
-            Open existing app ↗
-          </a>
-        </YStack>
       </aside>
       <main id="main" className="lab-main">
         <XStack
@@ -292,16 +280,14 @@ export function DeskLab() {
         >
           <YStack gap={8}>
             <Eyebrow>
-              {tab === "desk"
-                ? "Your collection, in use"
-                : "Your refill journal"}
+              {tab === "desk" ? "Personal collection" : "Your refill journal"}
             </Eyebrow>
             <H1
               fontFamily="heading"
-              fontSize={38}
+              fontSize={34}
               lineHeight="44px"
-              fontWeight="600"
-              letterSpacing={-1.5}
+              fontWeight="400"
+              letterSpacing={-1}
             >
               {tab === "desk" ? "My Desk" : "Writing activity"}
             </H1>
@@ -312,10 +298,10 @@ export function DeskLab() {
             </Muted>
             <Text
               backgroundColor="soft"
-              color="accent"
+              color="color"
               paddingHorizontal={12}
               paddingVertical={7}
-              borderRadius={20}
+              borderRadius={6}
               fontSize={11}
             >
               Local demo
@@ -347,7 +333,7 @@ export function DeskLab() {
                   backgroundColor={inks[r.inks[0]].color}
                 />
                 <YStack flex={1}>
-                  <Text fontSize={14} fontWeight="600">
+                  <Text fontSize={14} fontWeight="400">
                     {r.pen}
                   </Text>
                   <Muted>{r.inks.map((id) => inks[id].name).join(" + ")}</Muted>
@@ -378,7 +364,7 @@ export function DeskLab() {
                 gap={10}
               >
                 <YStack gap={5}>
-                  <H2 fontFamily="heading" fontSize={21} fontWeight="600">
+                  <H2 fontFamily="heading" fontSize={21} fontWeight="400">
                     Color palettes
                   </H2>
                   <Muted>
@@ -404,7 +390,7 @@ export function DeskLab() {
                     key={p.name}
                     height={32}
                     fontSize={11}
-                    borderRadius={20}
+                    borderRadius={6}
                     backgroundColor={i === palette ? "soft" : "transparent"}
                     borderColor={
                       i === palette ? "selectedBorder" : "borderColor"
@@ -481,7 +467,7 @@ export function DeskLab() {
                     color={inkTextColor(ink.color)}
                     fontFamily="heading"
                     fontSize={28}
-                    fontWeight="600"
+                    fontWeight="400"
                   >
                     {ink.name}
                   </H2>
@@ -525,7 +511,7 @@ export function DeskLab() {
                         justifyContent="flex-start"
                       >
                         <YStack gap={4} flex={1}>
-                          <Text fontSize={14} fontWeight="600">
+                          <Text fontSize={14} fontWeight="400">
                             {r.pen}
                           </Text>
                           <Muted>{r.nib}</Muted>
@@ -536,7 +522,7 @@ export function DeskLab() {
                             </Muted>
                           )}
                         </YStack>
-                        <Text color="accent">
+                        <Text color="color">
                           {refill?.id === r.id ? "●" : "○"}
                         </Text>
                       </Button>
@@ -592,7 +578,7 @@ export function DeskLab() {
                         backgroundColor={inks[r.inks[0]].color}
                       />
                       <YStack flex={1}>
-                        <Text fontSize={12} fontWeight="600">
+                        <Text fontSize={12} fontWeight="400">
                           {r.pen}
                         </Text>
                         <Muted fontSize={10}>{r.nib}</Muted>
@@ -620,8 +606,8 @@ export function DeskLab() {
           gap={8}
         >
           <Muted fontSize={10}>TAMAGUI / DESK LAB</Muted>
-          <Text role="status" aria-live="polite" fontSize={12} color="accent">
-            {notice || "Demo data · no production writes"}
+          <Text role="status" aria-live="polite" fontSize={12} color="color">
+            {notice || "Local demo · changes reset on reload"}
           </Text>
         </XStack>
       </main>
@@ -636,7 +622,7 @@ export function DeskLab() {
           <Dialog.Content
             className="lab-dialog"
             backgroundColor="surface"
-            borderRadius={20}
+            borderRadius={6}
             padding={28}
             gap={18}
           >

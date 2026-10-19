@@ -4,12 +4,9 @@ import { TamaguiProvider } from "tamagui";
 import { config } from "./config";
 import { DeskLab } from "./DeskLab";
 import "./shell.css";
-const graphite =
-  new URLSearchParams(location.search).get("theme") === "graphite";
-document.documentElement.dataset.direction = graphite ? "graphite" : "garden";
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <TamaguiProvider config={config} defaultTheme={graphite ? "dark" : "light"}>
+    <TamaguiProvider config={config} defaultTheme="light">
       <DeskLab />
     </TamaguiProvider>
   </React.StrictMode>,

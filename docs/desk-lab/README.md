@@ -8,7 +8,6 @@ A separate, synthetic vertical slice at `/desk-lab.html`. The existing `/` app a
 npm ci
 npm run dev
 # open http://localhost:5173/desk-lab.html
-# alternate: http://localhost:5173/desk-lab.html?theme=graphite
 ```
 
 - Select an ink, then select one of its pens and log a writing day.
@@ -17,18 +16,17 @@ npm run dev
 - Fill a pen puts needs-refill pens first. A new refill starts with no writing days; its predecessor and writing history remain in Activity.
 - Data is synthetic and session-only. Reload resets it. Collection explicitly explains what remains in the existing app.
 
-## Visual directions
+## Reference-led visual direction
 
-**Garden**: soft sage utility surfaces, Figtree typography, rounded compact controls. The palette is the primary visual element; selected ink, pens, and writing actions stay together. The selected ink heading chooses dark/light text by luminance. Shared Tamagui theme, space, radius, and control-size tokens govern the controls.
+Linda supplied a Tamagui header screenshot and clarified: “the font style and the yellow/red/green/blue splash of colors on top of the plain computer terminal techy look (but still modern).” This supersedes the earlier Garden/Graphite proposals, which have been removed from the UI.
 
-**Graphite**: the same component system with charcoal surfaces, subdued lavender control accents, and a serif page heading. This is a comparison direction, not a second implementation. It tests whether a darker, book-like surrounding surface makes the same ink collection more satisfying.
+The supplied image shows a pixel-lettered logo, monospaced navigation, an almost-white surface, and small yellow/coral/green/blue accents. It is only a header, so it does not establish a preferred full-screen layout. The implementation uses **Silkscreen only for the wordmark**, **Fira Mono for the interface**, crisp light neutral surfaces, yellow primary actions, blue selection outlines, and small coral/green/blue brand accents. These are chosen approximations of the visible cues, not a claim to have identified the screenshot's exact fonts. Open-source font licenses are included in `public/fonts`.
 
-At 1440px the rail, palette and active refill are adjacent. At 780px the rail becomes a top bar and a compact three-column palette stays beside the refill. Narrower windows wrap normally; mobile-specific flows are not a separate scope.
+Ink colors remain unchanged. The active refill stays beside the palette at desktop and 780px. Reduced radii and a horizontal utility header replace the prior soft sage rail, while the existing Tamagui component system and working flows are retained. No extra theme options or retro game styling were added.
 
-![Garden desktop](garden-desktop.png)
-![Graphite desktop](graphite-desktop.png)
-![Half-width](garden-half-width.png)
-![Writing interaction](writing-interaction.png)
+![Reference-led desktop](terminal-desktop.png)
+![Half-width](terminal-half-width.png)
+![Writing interaction](terminal-writing.png)
 
 ## What existed before this branch
 
@@ -64,13 +62,13 @@ No commits explicitly named “revert” were found in the accessible history. L
 
 Tamagui and `@tamagui/config` are pinned to **3.0.18**, using the current v6 config. npm metadata requires React >=19; React/React DOM are pinned together to 19.3.1 and verified in browser and existing tests. React Native Web 0.21.2 is aliased for web compatibility. The official [Vite guide](https://tamagui.dev/docs/guides/vite) permits a manual web setup; runtime styles are used without extraction. Current v3 bare token references and CSS line-height units are used, not copied from the old 1.x app.
 
-Tamagui Button, Dialog/Portal, Input, Label, typography and stacks form the actual UI. `Action`, `Primary`, `Panel` and text primitives share semantic theme/shape/space tokens. CSS handles the page grid, two viewport layouts, font loading, focus and reduced motion. The experiment is a separate Vite HTML entry, so Tamagui is not imported by the existing app entry.
+Tamagui Button, Dialog/Portal, Input, Label, typography and stacks form the actual UI. `Action`, `Primary`, `Panel` and text primitives share semantic theme/shape/space tokens. CSS handles the page grid, responsive layouts, font loading, focus and reduced motion. The experiment is a separate Vite HTML entry, so Tamagui is not imported by the existing app entry.
 
-Skills applied: frontend-design for subject-specific hierarchy and restraint; theme-factory for two coherent custom themes (the user's instruction to choose direction supersedes its theme-choice ceremony); building-components for shared primitives, semantic tokens and keyboard behavior; Impeccable against the provided design context; web-design-guidelines and React best practices for the final source/interaction review. No framework substitutions or added architecture from generic examples.
+Skills applied: frontend-design for subject-specific hierarchy and restraint; theme-factory for a coherent custom theme (the explicit reference supersedes its theme-choice ceremony); building-components for shared primitives, semantic tokens and keyboard behavior; Impeccable against the provided design context; web-design-guidelines and React best practices for the final source/interaction review. No framework substitutions or added architecture from generic examples.
 
 ## Intentional omissions
 
-No live data integration or persistence, sign-in, inventory CRUD, manufacturer details/search, palette rename/delete, writing-day correction/deletion, cleaning flow, or creation of mixed-ink refills. Existing mixed refills are represented correctly. New demo refills are single ink. Existing app provides the production features. Theme switching reloads/reset the demo; it is a visual comparison. No production readiness or hosted preview claim.
+No live data integration or persistence, sign-in, inventory CRUD, manufacturer details/search, palette rename/delete, writing-day correction/deletion, cleaning flow, or creation of mixed-ink refills. Existing mixed refills are represented correctly. New demo refills are single ink. Existing app provides the production features. No production readiness or hosted preview claim.
 
 ## Verification
 
@@ -78,7 +76,7 @@ No live data integration or persistence, sign-in, inventory CRUD, manufacturer d
 - `npm run lint`, `npm run build`: pass.
 - `npm run test:migration`: 13 passing; `npm run test:deployment`: 8 passing.
 - `npm run test:db`: passes against the repository's labeled disposable PostgreSQL container.
-- Playwright on actual Chromium: select either pen for one ink, record writing on the chosen refill, repeat date without duplication, select mixed ink, switch named palettes, keyboard reorder, 780px overflow check, both themes, dialog Escape. No page errors.
+- Playwright on actual Chromium: select either pen for one ink, record writing on the chosen refill, repeat date without duplication, select mixed ink, switch named palettes, keyboard reorder, 780px overflow check, reference-led theme, dialog Escape. No page errors.
 - Screenshots above are actual rendered app captures, not mockups.
 
-Historical design notes are evidence, not visual requirements. Linda explicitly authorized replacing prior aesthetics/layout choices she no longer likes. Garden and Graphite are new proposals for reaction; neither is presented as a discovered permanent preference.
+Historical design notes are evidence, not visual requirements. Linda explicitly authorized replacing prior aesthetics/layout choices she no longer likes. The current direction follows the new image and explicit typography/color preference; older proposals are not preserved as requirements.
