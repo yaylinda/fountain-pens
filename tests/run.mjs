@@ -10,7 +10,6 @@ try {
     await build({
         entryPoints: [
             'tests/collection.test.ts',
-            'tests/deskLab.test.ts',
             'tests/supabase-runtime.test.tsx',
             'tests/writingDesk.test.ts',
             'tests/workflows.test.tsx',
@@ -35,7 +34,6 @@ try {
             ...(Number(process.versions.node.split('.')[0]) === 20 ? ['--experimental-websocket'] : []),
             '--test',
             join(output, 'collection.test.mjs'),
-            join(output, 'deskLab.test.mjs'),
             join(output, 'supabase-runtime.test.mjs'),
             join(output, 'writingDesk.test.mjs'),
             join(output, 'workflows.test.mjs'),

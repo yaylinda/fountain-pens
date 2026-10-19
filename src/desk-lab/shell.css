@@ -192,3 +192,39 @@ h2 {
     transition: none !important;
   }
 }
+.lab-rail-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.lab-rail-nav a {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.lab-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+fieldset.lab-form {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.lab-options {
+  max-height: 180px;
+  overflow: auto;
+}
+.lab-options button {
+  white-space: normal;
+  text-align: left;
+}
+button[aria-pressed="true"]:not(.lab-swatch) {
+  background: #edf5ff;
+  border-color: #1686ed;
+}
+.lab-pen-choice {
+  white-space: normal;
+  text-align: left;
+}

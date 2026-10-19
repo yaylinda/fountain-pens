@@ -1,20 +1,33 @@
-# Tamagui desk experiment
+# Tamagui connected desk experiment
 
-A separate, synthetic vertical slice at `/desk-lab.html`. The existing `/` app and its routes remain intact. This branch is for visual evaluation, not a production migration. No schema, auth, production records, deployment workflow, or service adapter changes.
+A separate working desk at `/desk-lab.html`, now using the existing `useCollection`, Supabase adapter and owner capability. The original `/` app stays intact. No migrations, auth-policy changes, production writes, deployment changes, or merge.
 
 ## Try it
 
 ```sh
 npm ci
+# Configure the existing public browser variables from .env.example.
 npm run dev
 # open http://localhost:5173/desk-lab.html
 ```
 
-- Select an ink, then select one of its pens and log a writing day.
-- Waka-uguisu is in two pens. Robinson Crusoe / Bleu Pervenche share a mixed refill.
-- Create a named palette; Arrange enables pointer or keyboard sorting (Space, arrows, Space) and omissions. Other palettes retain their own order/membership.
-- Fill a pen puts needs-refill pens first. A new refill starts with no writing days; its predecessor and writing history remain in Activity.
-- Data is synthetic and session-only. Reload resets it. Collection explicitly explains what remains in the existing app.
+Public visitors can browse saved palettes, current inks/pens, writing history, refill activity and the refill queue. Owner sign-in uses the existing Supabase password flow and database-approved `canEdit` capability. **Owner actions are connected writes**, not demo buttons; use synthetic interception for experiments.
+
+- Saved named palettes: create, rename, duplicate, delete, drag/keyboard reorder, omit and restore. Dormant entries survive; newly current colors append through the existing reconciliation helper.
+- Select an ink to use any of its current pens. Mixed refills retain every ink and residual-ink status.
+- Wrote today records one day on that refill; history supports backdating, correcting and deleting. Last-written is derived from those records.
+- Refill/cleaning editor: searchable pen and ink lists, needs-refill pens first, multiple inks, residual-ink flag, notes and the existing atomic queue behavior. Activity allows corrections to earlier refills and writing history.
+- Pending saves prevent duplicate submissions; failures retain inputs. Auth state changes revoke owner controls until the server revalidates capability. Shared Tamagui dialogs trap focus and restore it on close.
+
+## Current captures
+
+[Public collection at desktop](connected-public.png) is an actual anonymous read: 37 current pens, 31 colors and four queued pens at capture. The saved palette intentionally omits colors. No production write requests were permitted.
+
+The owner captures below use an intercepted backend built from the fixed importer inventory with **synthetic refills, palettes, colors and writing records**, including 36 active pens and 31 current colors. They demonstrate layout and writes without touching production.
+
+![Connected owner desk](connected-desktop.png)
+![Connected half-width](connected-half-width.png)
+![Writing correction interaction](connected-writing.png)
 
 ## Reference-led visual direction
 
@@ -24,9 +37,7 @@ The supplied image shows a pixel-lettered logo, monospaced navigation, an almost
 
 Ink colors remain unchanged. The active refill stays beside the palette at desktop and 780px. Reduced radii and a horizontal utility header replace the prior soft sage rail, while the existing Tamagui component system and working flows are retained. No extra theme options or retro game styling were added.
 
-![Reference-led desktop](terminal-desktop.png)
-![Half-width](terminal-half-width.png)
-![Writing interaction](terminal-writing.png)
+The earlier `terminal-*.png` captures record the selected visual direction before service integration.
 
 ## What existed before this branch
 
@@ -54,7 +65,7 @@ Only targeted manifests/config/components were read. No unrelated repositories w
 | `bc9d803` / PR #23 removes substantial overview machinery                                                  | Inference: a focused desk earns more space than a dashboard of parallel summaries.                                              |
 | `faf05b4` / PR #24 adds explicit refill writing days                                                       | Preserve refill identity and derive last-written from recorded days; never infer writing from fill date.                        |
 | `d4fe6c7` / PR #25 brings palette and writing controls together                                            | Recorded proximity improvement; keep that relationship while changing visual language.                                          |
-| `f7a70b2` / PR #17 clarifies public/owner access                                                           | Existing public/owner boundary stays untouched. The lab is explicitly local demo state.                                         |
+| `f7a70b2` / PR #17 clarifies public/owner access                                                           | Existing public/owner boundary stays untouched. The connected desk uses the same server capability.                                         |
 
 No commits explicitly named “revert” were found in the accessible history. Later changes supersede earlier layouts; a briefly tried arrangement is not treated as a lasting preference.
 
@@ -68,15 +79,24 @@ Skills applied: frontend-design for subject-specific hierarchy and restraint; th
 
 ## Intentional omissions
 
-No live data integration or persistence, sign-in, inventory CRUD, manufacturer details/search, palette rename/delete, writing-day correction/deletion, cleaning flow, or creation of mixed-ink refills. Existing mixed refills are represented correctly. New demo refills are single ink. Existing app provides the production features. No production readiness or hosted preview claim.
+Inventory CRUD, rich manufacturer/reference detail, refill deletion and broad catalog filtering remain in the original app through **Full collection**. No separate mobile redesign, theme picker, URL-persisted selection or hosted PR preview. The lab has no fake successful actions or runtime fixture fallback. This is a connected experimental route, not a completed replacement of every original screen.
 
 ## Verification
 
-- `npm test`: 73 passing (including three focused demo model tests).
-- `npm run lint`, `npm run build`: pass.
-- `npm run test:migration`: 13 passing; `npm run test:deployment`: 8 passing.
-- `npm run test:db`: passes against the repository's labeled disposable PostgreSQL container.
-- Playwright on actual Chromium: select either pen for one ink, record writing on the chosen refill, repeat date without duplication, select mixed ink, switch named palettes, keyboard reorder, 780px overflow check, reference-led theme, dialog Escape. No page errors.
-- Screenshots above are actual rendered app captures, not mockups.
+- `npm test`: 70 existing application/service tests pass. The obsolete three-test demo model and its parallel domain implementation were removed.
+- `npm run lint`, `npm run build`: pass. Vite retains its >500 kB shared-chunk advisory; runtime Tamagui extraction/bundle optimization is deferred.
+- `npm run test:migration`: 13 pass; `npm run test:deployment`: 8 pass.
+- `npm run test:db`: passes in the repository's disposable PG17.11 container, including owner/public rules, multi-ink refills, named palettes and writing history.
+- `tests/desk-lab-browser.mjs`: real Chromium with every backend request intercepted. Covers owner/public gating, refill-specific writing add/correct/delete, palette keyboard reorder/omit/restore/duplicate/delete, needs-refill ordering, mixed refill, failed-save draft retention, cleaning, Escape/focus restoration and 780px overflow. No production writes or browser errors.
 
-Historical design notes are evidence, not visual requirements. Linda explicitly authorized replacing prior aesthetics/layout choices she no longer likes. The current direction follows the new image and explicit typography/color preference; older proposals are not preserved as requirements.
+To repeat the browser check, start Vite with public configuration, install Playwright in a temporary directory, and run:
+
+```sh
+PLAYWRIGHT_MODULE=/absolute/path/to/playwright/index.mjs \
+CHROMIUM_PATH=/absolute/path/to/chromium \
+node tests/desk-lab-browser.mjs
+```
+
+The browser script fails closed on unexpected external requests and does not use a real owner session. Local synthetic verification does not establish hosted owner-auth compatibility; that final manual check is left to Linda.
+
+Historical design notes are evidence, not visual requirements. The selected direction follows Linda's image and explicit typography/color preference.
