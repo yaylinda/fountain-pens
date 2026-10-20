@@ -1398,3 +1398,28 @@ button[aria-pressed="true"] .status-neutral {
 .palette-choice {
   flex-basis: 240px;
 }
+
+.page-caption {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 18px;
+  color: #68686e;
+  font-size: 12px;
+  line-height: 18px;
+}
+.page-caption strong {
+  color: #303037;
+  font-weight: 700;
+}
+.page-caption .summary-secondary {
+  border-left: 1px solid #d9d9de;
+  padding-left: 14px;
+}
+.page-caption .summary-status {
+  padding: 0 7px;
+  line-height: 18px;
+}
+.page-caption .summary-status strong {
+  color: inherit;
+}

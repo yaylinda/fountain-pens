@@ -291,15 +291,51 @@ export function App() {
                   </XStack>
                 )}
             </XStack>
-            <Muted className="page-caption">
-              {view === "desk"
-                ? `${model.inked.length} inked pens · ${model.activePens.filter((p) => p.needsRefill).length} need refill`
-                : view === "refills"
-                  ? `${model.journal.length} refill logs · newest first`
-                  : view === "pens"
-                    ? `${model.activePens.length} pens · ${model.inked.length} currently inked`
-                    : `${collection.inks.filter((i) => !i.archived).length} inks · ${currentInks.length} currently in use`}
-            </Muted>
+            <div className="page-caption">
+              {view === "desk" ? (
+                <>
+                  <span>
+                    <strong>{model.inked.length}</strong> inked pens
+                  </span>
+                  {model.activePens.some((p) => p.needsRefill) && (
+                    <span className="status status-red summary-status">
+                      <strong>
+                        {model.activePens.filter((p) => p.needsRefill).length}
+                      </strong>{" "}
+                      need refill
+                    </span>
+                  )}
+                </>
+              ) : view === "refills" ? (
+                <>
+                  <span>
+                    <strong>{model.journal.length}</strong> refill logs
+                  </span>
+                  <span className="summary-secondary">Newest first</span>
+                </>
+              ) : view === "pens" ? (
+                <>
+                  <span>
+                    <strong>{model.activePens.length}</strong> pens
+                  </span>
+                  <span className="summary-secondary">
+                    <strong>{model.inked.length}</strong> currently inked
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span>
+                    <strong>
+                      {collection.inks.filter((i) => !i.archived).length}
+                    </strong>{" "}
+                    inks
+                  </span>
+                  <span className="summary-secondary">
+                    <strong>{currentInks.length}</strong> currently in use
+                  </span>
+                </>
+              )}
+            </div>
           </YStack>
         </XStack>
         {loading ? (
