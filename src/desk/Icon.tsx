@@ -1,4 +1,7 @@
 const paths = {
+  grip: "M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01",
+  chevron: "m6 9 6 6 6-6",
+  restore: "M4 5v6h6M4 11a8 8 0 1 1 2 7",
   circle: "M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   ink: "M12 3S5 11 5 15a7 7 0 0 0 14 0c0-4-7-12-7-12Z",
   plus: "M12 5v14M5 12h14",

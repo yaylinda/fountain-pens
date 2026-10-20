@@ -173,7 +173,7 @@ export function RefillEditor({
                   >
                     <PenIdentity pen={p} />
                     {p.needsRefill && (
-                      <span className="status status-red">Queued</span>
+                      <span className="status status-red">Needs refill</span>
                     )}
                   </Action>
                 ))}
@@ -356,7 +356,7 @@ export function WritingEditor({
         >
           <div className="form-field">
             <Label htmlFor="writing-date">
-              {editing ? "Correct date" : "Add writing day"}
+              {editing ? "Edit date" : "Add writing day"}
             </Label>
             <Input
               id="writing-date"
@@ -371,11 +371,7 @@ export function WritingEditor({
             />
           </div>
           <Primary type="submit" disabled={command.busy}>
-            {command.busy
-              ? "Saving…"
-              : editing
-                ? "Save correction"
-                : "Log writing"}
+            {command.busy ? "Saving…" : editing ? "Update" : "Log writing"}
           </Primary>
           {editing && (
             <Action
@@ -385,7 +381,7 @@ export function WritingEditor({
                 setDate(today());
               }}
             >
-              Cancel correction
+              Cancel edit
             </Action>
           )}
         </form>
@@ -422,7 +418,7 @@ export function WritingEditor({
                         setDeleting(null);
                       }}
                     >
-                      Correct
+                      Edit
                     </Action>
                     <Action
                       className="action-quiet action-danger"

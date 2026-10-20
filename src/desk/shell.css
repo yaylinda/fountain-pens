@@ -1250,3 +1250,151 @@ button[aria-pressed="true"] .status-neutral {
   color: #68686e;
   font-size: 0.75rem;
 }
+
+/* Palette selection and draft tools have distinct visual roles. */
+.all-palette strong {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.palette-radio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #929299;
+  border-radius: 50%;
+}
+.palette-radio .ui-icon {
+  width: 14px;
+  height: 14px;
+}
+.all-palette[aria-pressed="true"] .palette-radio {
+  border-color: #25252b;
+  background: #25252b;
+  color: white;
+}
+.palette-choice {
+  position: relative;
+}
+.palette-choice select {
+  appearance: none;
+  padding-right: 44px;
+}
+.select-chevron {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: flex;
+}
+.palette-bulk {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 36px;
+  color: #68686e;
+  background: transparent;
+  border: 0;
+  cursor: grab;
+  touch-action: none;
+}
+.drag-handle:hover {
+  background: #efeff1;
+  color: #25252b;
+}
+.drag-handle:active {
+  cursor: grabbing;
+}
+.drag-handle .ui-icon {
+  stroke-width: 4;
+}
+.drag-handle:focus-visible {
+  outline: 2px solid #25252b;
+  outline-offset: 2px;
+}
+.restore-label {
+  color: #68686e;
+  font-size: 11px;
+}
+.restore-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.ink-details {
+  display: block;
+  font-size: 12px;
+  line-height: 18px;
+  color: #494950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.ink-collection {
+  color: #777780;
+  font-weight: 400;
+}
+.object-identity {
+  min-width: 0;
+  max-width: 100%;
+}
+.ink-identity > .object-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.desk-swatches .object-name {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+}
+.desk-swatches .ink-details {
+  font-size: 11px;
+}
+.activity-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 20px;
+}
+.activity-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 8px;
+}
+.activity-entry > .activity-actions {
+  margin-top: 0;
+  justify-content: flex-end;
+}
+.activity-heading {
+  gap: 16px;
+}
+@media (max-width: 1100px) {
+  .activity-entry {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .activity-entry > .activity-actions {
+    margin-top: 8px;
+  }
+}
+.restore-swatch + strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.palette-choice {
+  flex-basis: 240px;
+}

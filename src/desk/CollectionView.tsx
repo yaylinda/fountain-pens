@@ -1,4 +1,10 @@
-import { PenIdentity, PenDetails, InkIdentity, DateStamp } from "./Identity";
+import {
+  PenIdentity,
+  PenDetails,
+  InkIdentity,
+  InkDetails,
+  DateStamp,
+} from "./Identity";
 import { Icon } from "./Icon";
 import { useState } from "react";
 import { H2, Input, Label, Text, XStack, YStack } from "tamagui";
@@ -155,13 +161,7 @@ export function CollectionView({
                 ink!.name
               )}
             </H2>
-            {pen ? (
-              <PenDetails pen={pen} />
-            ) : (
-              <Muted>
-                {[ink!.brand, ink!.collection].filter(Boolean).join(" · ")}
-              </Muted>
-            )}
+            {pen ? <PenDetails pen={pen} /> : <InkDetails ink={ink!} />}
             {ink && (
               <>
                 <div

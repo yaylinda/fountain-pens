@@ -31,11 +31,24 @@ export function InkIdentity({
   compact?: boolean;
 }) {
   return (
-    <span className={`object-identity ${compact ? "ink-identity-inline" : ""}`}>
+    <span
+      className={`object-identity ink-identity ${compact ? "ink-identity-inline" : ""}`}
+    >
       <strong className="object-name">{ink.name}</strong>
-      <span className="object-meta">
-        {[ink.brand, ink.collection].filter(Boolean).join(" · ")}
-      </span>
+      <InkDetails ink={ink} />
+    </span>
+  );
+}
+export function InkDetails({ ink }: { ink: Ink }) {
+  return (
+    <span
+      className="ink-details"
+      title={[ink.brand, ink.collection].filter(Boolean).join(" · ")}
+    >
+      <span>{ink.brand}</span>
+      {ink.collection?.trim() && (
+        <span className="ink-collection"> ({ink.collection})</span>
+      )}
     </span>
   );
 }

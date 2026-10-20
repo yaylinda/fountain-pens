@@ -38,7 +38,12 @@ import type { Ink } from "./models/types";
 import { Action, Primary, Muted, Panel, Failure } from "./desk/ui";
 import { CollectionView } from "./desk/CollectionView";
 import { PaletteMenu } from "./desk/PaletteMenu";
-import { PenIdentity, InkIdentity, DateStamp } from "./desk/Identity";
+import {
+  PenIdentity,
+  InkIdentity,
+  InkDetails,
+  DateStamp,
+} from "./desk/Identity";
 import { Icon } from "./desk/Icon";
 import { PaletteCreate } from "./desk/PaletteCreate";
 import { Access } from "./desk/Access";
@@ -96,23 +101,19 @@ function Swatch({
           </XStack>
         </YStack>
       </Action>
-      <Text fontSize={13} lineHeight="18px" fontWeight="500">
-        {ink.name}
-      </Text>
-      <Muted fontSize={11}>{ink.brand}</Muted>
+      <InkIdentity ink={ink} />
       {editing && (
         <XStack gap={4}>
-          <Action
-            flex={1}
-            height={36}
-            fontSize={10}
+          <button
+            type="button"
+            className="drag-handle"
+            ref={sort.setActivatorNodeRef}
             {...sort.attributes}
             {...sort.listeners}
-            role="button"
             aria-label={`Move ${inkLabel(ink)}`}
           >
-            <Icon name="move" /> Move
-          </Action>
+            <Icon name="grip" />
+          </button>
           <Action
             height={36}
             fontSize={10}
@@ -292,7 +293,7 @@ export function App() {
             </XStack>
             <Muted className="page-caption">
               {view === "desk"
-                ? `${model.inked.length} inked pens · ${currentInks.length} colors · ${model.activePens.filter((p) => p.needsRefill).length} need refill`
+                ? `${model.inked.length} inked pens · ${model.activePens.filter((p) => p.needsRefill).length} need refill`
                 : view === "refills"
                   ? `${model.journal.length} refill logs · newest first`
                   : view === "pens"
@@ -346,7 +347,12 @@ export function App() {
                             setConfirmDelete(false);
                           }}
                         >
-                          <strong>All</strong>
+                          <strong>
+                            <span className="palette-radio" aria-hidden="true">
+                              {isAll && <Icon name="check" />}
+                            </span>
+                            All
+                          </strong>
                           <span>Currently inked · {currentInks.length}</span>
                         </button>
                       )}
@@ -376,7 +382,7 @@ export function App() {
                             }}
                           >
                             <option value="" disabled>
-                              Saved palettes
+                              Select custom palette
                             </option>
                             {palettes.map((p) => (
                               <option key={p.id} value={p.id}>
@@ -384,6 +390,11 @@ export function App() {
                               </option>
                             ))}
                           </select>
+                        )}
+                        {!editing && (
+                          <span className="select-chevron">
+                            <Icon name="chevron" />
+                          </span>
                         )}
                       </div>
                       {canEdit && (
@@ -472,6 +483,45 @@ export function App() {
                       </XStack>
                     </Panel>
                   )}
+                  {editing && (
+                    <div className="palette-bulk">
+                      <Action
+                        disabled={command.busy || !visible.length}
+                        onPress={() =>
+                          setDraft({
+                            ...draft,
+                            items: items.map((i) =>
+                              currentIds.has(i.inkId)
+                                ? { ...i, omitted: true }
+                                : i,
+                            ),
+                          })
+                        }
+                      >
+                        <Icon name="minus" /> Omit all
+                      </Action>
+                      <Action
+                        disabled={
+                          command.busy ||
+                          !items.some(
+                            (i) => i.omitted && currentIds.has(i.inkId),
+                          )
+                        }
+                        onPress={() =>
+                          setDraft({
+                            ...draft,
+                            items: items.map((i) =>
+                              currentIds.has(i.inkId)
+                                ? { ...i, omitted: false }
+                                : i,
+                            ),
+                          })
+                        }
+                      >
+                        <Icon name="restore" /> Restore all
+                      </Action>
+                    </div>
+                  )}
                   <DndContext
                     sensors={sensors}
                     onDragEnd={({ active, over }) => {
@@ -550,7 +600,19 @@ export function App() {
                                   })
                                 }
                               >
-                                Restore {model.inkById.get(item.inkId)?.name}
+                                <Icon name="restore" />
+                                <span className="restore-label">Restore</span>
+                                <span
+                                  className="restore-swatch"
+                                  style={{
+                                    background:
+                                      getSwatch(model.inkById.get(item.inkId)!)
+                                        ?.hex || "#e2e2e5",
+                                  }}
+                                />
+                                <strong>
+                                  {model.inkById.get(item.inkId)?.name}
+                                </strong>
                               </Action>
                             ))}
                         </XStack>
@@ -582,11 +644,7 @@ export function App() {
                                 >
                                   {activeInk.name}
                                 </H2>
-                                <Muted>
-                                  {[activeInk.brand, activeInk.collection]
-                                    .filter(Boolean)
-                                    .join(" · ")}
-                                </Muted>
+                                <InkDetails ink={activeInk} />
                               </div>
                               <Action
                                 flexShrink={0}
@@ -761,31 +819,40 @@ export function App() {
                     key={entry.id || entry.index}
                     gap={8}
                   >
-                    <div className="activity-heading">
-                      <PenIdentity pen={model.penById.get(entry.penId)!} />
-                      <DateStamp value={entry.date} />
-                    </div>
-                    <div className="activity-inks">
-                      {isCleaning(entry) ? (
-                        <Muted>Cleaned & empty</Muted>
-                      ) : (
-                        entry.inkIds.map((id, index) => (
-                          <span className="activity-ink" key={id}>
-                            {index > 0 && (
-                              <span className="ink-separator">+</span>
-                            )}
-                            <InkIdentity ink={model.inkById.get(id)!} compact />
+                    <div className="activity-content">
+                      <div className="activity-heading">
+                        <PenIdentity pen={model.penById.get(entry.penId)!} />
+                        <DateStamp value={entry.date} />
+                      </div>
+                      <div className="activity-inks">
+                        {isCleaning(entry) ? (
+                          <Muted>Cleaned & empty</Muted>
+                        ) : (
+                          entry.inkIds.map((id, index) => (
+                            <span className="activity-ink" key={id}>
+                              {index > 0 && (
+                                <span className="ink-separator">+</span>
+                              )}
+                              <InkIdentity
+                                ink={model.inkById.get(id)!}
+                                compact
+                              />
+                            </span>
+                          ))
+                        )}
+                        {entry.notPure && (
+                          <span className="status status-neutral">
+                            Residual ink
                           </span>
-                        ))
-                      )}
-                      {entry.notPure && (
-                        <span className="status status-neutral">
-                          Residual ink
-                        </span>
-                      )}
+                        )}
+                      </div>
+                      {entry.notes && <Muted>{entry.notes}</Muted>}
                     </div>
-                    {entry.notes && <Muted>{entry.notes}</Muted>}
-                    <XStack gap={5} flexWrap="wrap">
+                    <XStack
+                      className="activity-actions"
+                      gap={5}
+                      flexWrap="wrap"
+                    >
                       {!isCleaning(entry) && (
                         <Action
                           onPress={() => setDialog({ kind: "writing", entry })}
