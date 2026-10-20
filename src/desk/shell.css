@@ -10,6 +10,18 @@
   font-weight: 400;
   font-display: swap;
 }
+@font-face {
+  font-family: "Fira Mono";
+  src: url("/fonts/fira-mono-medium.ttf") format("truetype");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fira Mono";
+  src: url("/fonts/fira-mono-bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
 * {
   box-sizing: border-box;
 }
@@ -17,6 +29,7 @@ body {
   margin: 0;
   background: #fcfbfc;
   font-family: "Fira Mono", monospace;
+  font-synthesis: none;
 }
 button,
 input,
@@ -211,8 +224,8 @@ fieldset.desk-form {
   text-align: left;
 }
 button[aria-pressed="true"]:not(.desk-swatch) {
-  background: #edf5ff;
-  border-color: #1686ed;
+  background: #f2f1f3;
+  border-color: #68686e;
 }
 
 /* Terminal chrome stays quiet; ink colors remain the focus. */
@@ -244,28 +257,66 @@ button[aria-pressed="true"]:not(.desk-swatch) {
   font-weight: 700;
   box-shadow: inset 0 -3px #f3d51b;
 }
-.palette-tabs {
+.header-access {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.palette-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+.action-quiet {
+  background: transparent;
+  border-color: transparent !important;
+}
+.palette-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 20px;
+  padding-bottom: 20px;
   border-bottom: 1px solid #d9d9de;
-  padding-bottom: 14px;
 }
-.palette-tabs button {
-  font-size: 15px;
-  font-weight: 700;
-  min-height: 44px;
-  height: auto;
-  white-space: normal;
+.palette-choice {
+  display: flex;
+  flex: 1 1 240px;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
 }
-.palette-tabs button[aria-pressed="true"] {
-  background: #fff7bd;
-  border-color: #a78b00;
+.palette-choice input,
+.palette-choice select {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #b8b8bf;
+  border-radius: 6px;
+  background: #fff;
+  color: #242426;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
 }
 .palette-actions {
-  min-height: 36px;
-}
-.palette-actions button {
-  font-size: 11px;
-  height: 32px;
-  background: transparent;
+  margin-left: auto;
+  justify-content: flex-end;
+  min-height: 42px;
 }
 .action-danger {
   color: #ad2635 !important;
@@ -334,10 +385,11 @@ button[aria-pressed="true"]:not(.desk-swatch) {
   display: none;
 }
 .ink-identity {
-  min-height: 128px;
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 .ink-identity h2 {
   margin: 0;
@@ -444,7 +496,8 @@ button[aria-pressed="true"]:not(.desk-swatch) {
   white-space: pre-line;
 }
 input:focus-visible,
-textarea:focus-visible {
+textarea:focus-visible,
+select:focus-visible {
   outline: 3px solid #1686ed;
   outline-offset: 2px;
 }
@@ -506,9 +559,6 @@ textarea:focus-visible {
 .selected-panel > div {
   min-height: 100%;
 }
-.desk-notice {
-  min-height: 24px;
-}
 .ink-actions {
   position: sticky;
   bottom: 0;
@@ -540,4 +590,14 @@ button:disabled {
 }
 .action-danger span {
   color: #ad2635;
+}
+
+@media (max-width: 900px) {
+  .desk-rail {
+    grid-template-columns: 1fr;
+  }
+  .header-access {
+    justify-self: start;
+    justify-content: flex-start;
+  }
 }

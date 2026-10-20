@@ -4,13 +4,14 @@ export const Action = styled(Button, {
   height: 38,
   borderRadius: 6,
   fontSize: 12,
-  fontWeight: "400",
+  fontWeight: "500",
   borderWidth: 1,
   borderColor: "borderColor",
   backgroundColor: "surface",
   color: "color",
 });
 export const Primary = styled(Action, {
+  fontWeight: "700",
   backgroundColor: "accent",
   color: "accentText",
   borderColor: "accent",
@@ -33,11 +34,13 @@ export function Modal({
   children,
   close,
   busy = false,
+  showCloseButton = true,
 }: {
   title: string;
   children: ReactNode;
   close: () => void;
   busy?: boolean;
+  showCloseButton?: boolean;
 }) {
   const returnFocus = useRef(document.activeElement as HTMLElement | null);
   useEffect(
@@ -74,9 +77,11 @@ export function Modal({
             {title}
           </Dialog.Title>
           {children}
-          <Action disabled={busy} onPress={close}>
-            Close
-          </Action>
+          {showCloseButton && (
+            <Action disabled={busy} onPress={close}>
+              Close
+            </Action>
+          )}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog>

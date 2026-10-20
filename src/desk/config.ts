@@ -1,10 +1,12 @@
 import { createTamagui } from "tamagui";
+import { animations } from "@tamagui/config/animations-css";
 import { defaultConfig } from "@tamagui/config/v6";
 
 // Tamagui 3 uses bare token references and CSS line-height units.
 // Keep longhand props readable in this small web-only experiment.
 export const config = createTamagui({
   ...defaultConfig,
+  animations,
   tokens: {
     ...defaultConfig.tokens,
     space: {
