@@ -75,6 +75,11 @@ export function Modal({
           borderRadius={10}
           gap={16}
           aria-describedby={undefined}
+          onInteractOutside={(details) => {
+            const target = details.event?.target;
+            if (target instanceof Element && target.closest(".desk-toasts"))
+              details.cancel();
+          }}
         >
           <div className="dialog-heading">
             <Dialog.Title fontSize={23} fontWeight="700" lineHeight="30px">

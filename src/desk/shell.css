@@ -1500,3 +1500,66 @@ button[aria-pressed="true"] .status-neutral {
   outline: 2px solid #242426;
   outline-offset: 2px;
 }
+.feedback-toast.feedback-success {
+  background: #edf8f1;
+  border: 1px solid #b9dac7;
+  color: #226943;
+}
+.feedback-toast.feedback-error {
+  background: #fff0f0;
+  border: 1px solid #ecc0c6;
+  color: #a52738;
+}
+.feedback-toast {
+  padding: 8px 10px 8px 16px;
+  border-radius: 9px;
+  box-shadow: 0 4px 18px #24242618;
+}
+.feedback-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+}
+.feedback-content > .ui-icon {
+  flex-shrink: 0;
+}
+.feedback-content > span {
+  flex: 1;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
+}
+.feedback-content button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.feedback-content button:hover {
+  background: #2424260c;
+}
+.feedback-content button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+.ink-actions > .writing-complete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  border: 1px solid #b9dac7;
+  border-radius: 6px;
+  background: #edf8f1;
+  color: #226943;
+  font-size: 12px;
+  font-weight: 500;
+}

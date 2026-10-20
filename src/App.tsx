@@ -286,7 +286,7 @@ export function App() {
                         borderColor="#f3d51b"
                         onPress={() => setDialog({ kind: "refill" })}
                       >
-                        <Icon name="plus" /> New refill log
+                        <Icon name="plus" /> Add refill log
                       </Primary>
                     )}
                   </XStack>
@@ -298,14 +298,9 @@ export function App() {
                   <span>
                     <strong>{model.inked.length}</strong> inked pens
                   </span>
-                  {model.activePens.some((p) => p.needsRefill) && (
-                    <span className="status status-red summary-status">
-                      <strong>
-                        {model.activePens.filter((p) => p.needsRefill).length}
-                      </strong>{" "}
-                      need refill
-                    </span>
-                  )}
+                  <span className="summary-secondary">
+                    <strong>{currentInks.length}</strong> ink colors
+                  </span>
                 </>
               ) : view === "refills" ? (
                 <>
@@ -390,7 +385,7 @@ export function App() {
                             </span>
                             All
                           </strong>
-                          <span>Currently inked · {currentInks.length}</span>
+                          <span>Currently inked</span>
                         </button>
                       )}
                       <div className="palette-choice">
@@ -463,7 +458,9 @@ export function App() {
                                     () => {
                                       setDraft(null);
                                       toast.success(
-                                        draft.id ? "Saved" : "Created",
+                                        draft.id
+                                          ? "Palette saved"
+                                          : "Palette created",
                                       );
                                     },
                                   )
@@ -507,7 +504,7 @@ export function App() {
                               () => {
                                 setConfirmDelete(false);
                                 setPaletteId("");
-                                toast.success("Deleted");
+                                toast.success("Palette deleted");
                               },
                             )
                           }
@@ -775,34 +772,37 @@ export function App() {
                                     )}
 
                                     <div className="ink-actions">
-                                      {canEdit && (
-                                        <Primary
-                                          disabled={
-                                            command.busy || used || !entry.id
-                                          }
-                                          onPress={() =>
-                                            void command.run(
-                                              () =>
-                                                saveWritingLog(
-                                                  entry.id!,
-                                                  today(),
-                                                ),
-                                              () =>
-                                                toast.success(
-                                                  "Writing day saved",
-                                                ),
-                                            )
-                                          }
-                                        >
-                                          {used ? (
-                                            <>
-                                              <Icon name="check" /> Logged today
-                                            </>
-                                          ) : (
-                                            "Log writing today"
-                                          )}
-                                        </Primary>
-                                      )}
+                                      {canEdit &&
+                                        (used ? (
+                                          <div
+                                            className="writing-complete"
+                                            role="status"
+                                          >
+                                            <Icon name="check" /> Writing logged
+                                            today
+                                          </div>
+                                        ) : (
+                                          <Primary
+                                            disabled={
+                                              command.busy || used || !entry.id
+                                            }
+                                            onPress={() =>
+                                              void command.run(
+                                                () =>
+                                                  saveWritingLog(
+                                                    entry.id!,
+                                                    today(),
+                                                  ),
+                                                () =>
+                                                  toast.success(
+                                                    "Writing day saved",
+                                                  ),
+                                              )
+                                            }
+                                          >
+                                            Log writing today
+                                          </Primary>
+                                        ))}
                                       <XStack gap={6} flexWrap="wrap">
                                         <Action
                                           onPress={() =>
@@ -812,7 +812,7 @@ export function App() {
                                             })
                                           }
                                         >
-                                          Writing history
+                                          View writing history
                                         </Action>
                                         {canEdit && (
                                           <Action
@@ -823,7 +823,7 @@ export function App() {
                                               })
                                             }
                                           >
-                                            New refill log
+                                            Add refill log
                                           </Action>
                                         )}
                                       </XStack>
@@ -887,7 +887,7 @@ export function App() {
                           type="button"
                           onClick={() => setDialog({ kind: "writing", entry })}
                         >
-                          <Icon name="history" /> Writing history
+                          <Icon name="history" /> View writing history
                         </button>
                       )}
                       {canEdit && (

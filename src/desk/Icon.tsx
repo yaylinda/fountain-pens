@@ -1,4 +1,5 @@
 const paths = {
+  warning: "M12 3 2 21h20L12 3ZM12 9v5m0 3h.01",
   history: "M4 5v5h5M4 10a8 8 0 1 1 2 8M12 7v5l3 2",
   grip: "M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01",
   chevron: "m6 9 6 6 6-6",

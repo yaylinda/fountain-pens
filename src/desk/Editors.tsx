@@ -1,3 +1,4 @@
+import { toast } from "tamagui";
 import { PenIdentity, InkIdentity, DateStamp } from "./Identity";
 import { Icon } from "./Icon";
 import { useCommand } from "./useCommand";
@@ -91,17 +92,29 @@ export function RefillEditor({
         className="desk-form"
         onSubmit={(event) => {
           event.preventDefault();
-          void command.run(async () => {
-            const error = validateRefill(draft, collection);
-            if (error) throw new Error(error);
-            const payload = refillPayload(draft);
-            if (entry) await updateRefillLog(payload, entry);
-            else
-              await addRefillLog(
-                payload,
-                cleaning && queueAllowed ? draft.needsRefill : undefined,
+          void command.run(
+            async () => {
+              const error = validateRefill(draft, collection);
+              if (error) throw new Error(error);
+              const payload = refillPayload(draft);
+              if (entry) await updateRefillLog(payload, entry);
+              else
+                await addRefillLog(
+                  payload,
+                  cleaning && queueAllowed ? draft.needsRefill : undefined,
+                );
+            },
+            () => {
+              toast.success(
+                cleaning
+                  ? "Cleaning logged"
+                  : entry
+                    ? "Refill log updated"
+                    : "Refill logged",
               );
-          }, close);
+              close();
+            },
+          );
         }}
       >
         <fieldset disabled={command.busy} className="desk-form">
