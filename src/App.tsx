@@ -1,6 +1,6 @@
 import { useCommand } from "./desk/useCommand";
 import { useEffect, useState } from "react";
-import { H1, H2, Input, Label, Text, XStack, YStack } from "tamagui";
+import { H1, H2, Input, Text, XStack, YStack, toast } from "tamagui";
 import {
   DndContext,
   KeyboardSensor,
@@ -39,6 +39,7 @@ import {
 import type { Ink } from "./models/types";
 import { Action, Primary, Muted, Panel, Failure } from "./desk/ui";
 import { CollectionView } from "./desk/CollectionView";
+import { PaletteCreate } from "./desk/PaletteCreate";
 import { Access } from "./desk/Access";
 import { RefillEditor, WritingEditor } from "./desk/Editors";
 function Swatch({
@@ -94,8 +95,10 @@ function Swatch({
           </XStack>
         </YStack>
       </Action>
-      <Text fontSize={12}>{ink.name}</Text>
-      <Muted fontSize={10}>{ink.brand}</Muted>
+      <Text fontSize={13} lineHeight="18px" fontWeight="500">
+        {ink.name}
+      </Text>
+      <Muted fontSize={11}>{ink.brand}</Muted>
       {editing && (
         <XStack gap={4}>
           <Action
@@ -153,6 +156,7 @@ export function App() {
   const [draft, setDraft] = useState<
     (Omit<DeskArrangement, "id"> & { id: string | null }) | null
   >(null);
+  const [creating, setCreating] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [dialog, setDialog] = useState<
     | { kind: "refill"; penId?: string; entry?: JournalEntry }
@@ -160,7 +164,6 @@ export function App() {
     | null
   >(null);
   const command = useCommand();
-  const [notice, setNotice] = useState("");
   const canEdit = !!collection.canEdit;
   const currentIds = new Set(
     model.inked.flatMap((p) => model.latest.get(p.id)?.inkIds || []),
@@ -192,17 +195,13 @@ export function App() {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
-  const begin = (mode: "edit" | "new" | "copy") => {
+  const begin = (mode: "edit" | "copy") => {
     setConfirmDelete(false);
     setDraft({
       id: mode === "edit" ? palette.id : null,
       name:
-        mode === "new"
-          ? ""
-          : mode === "copy"
-            ? `${palette.name} copy`.slice(0, 80)
-            : palette.name,
-      items: reconcilePalette(mode === "new" ? [] : palette.items, currentInks),
+        mode === "copy" ? `${palette.name} copy`.slice(0, 80) : palette.name,
+      items: reconcilePalette(palette.items, currentInks),
     });
   };
   return (
@@ -248,11 +247,45 @@ export function App() {
           gap={16}
           marginBottom={28}
         >
-          <YStack gap={8}>
-            <H1 fontSize={34} lineHeight="42px">
-              {views[view]}
-              <span className="brand-mark">_</span>
-            </H1>
+          <YStack gap={8} width="100%">
+            <XStack
+              alignItems="center"
+              justifyContent="space-between"
+              flexWrap="wrap"
+              gap={24}
+            >
+              <H1 fontWeight="700" fontSize={34} lineHeight="42px">
+                {views[view]}
+                <span className="brand-mark">_</span>
+              </H1>
+              {canEdit &&
+                !loading &&
+                !error &&
+                (view === "desk" || view === "queue") && (
+                  <XStack
+                    gap={8}
+                    flexWrap="wrap"
+                    alignItems="center"
+                    justifyContent="flex-end"
+                    marginLeft="auto"
+                  >
+                    {view === "desk" && (
+                      <Primary
+                        disabled={command.busy}
+                        onPress={() => setCreating(true)}
+                      >
+                        + New palette
+                      </Primary>
+                    )}
+                    <Action
+                      borderColor="#85858c"
+                      onPress={() => setDialog({ kind: "refill" })}
+                    >
+                      + Refill or clean a pen
+                    </Action>
+                  </XStack>
+                )}
+            </XStack>
             {view === "desk" && (
               <Muted>
                 {model.inked.length} inked pens · {currentInks.length} colors ·{" "}
@@ -273,9 +306,6 @@ export function App() {
           <>
             <Failure error={warning} />
             <Failure error={command.error} />
-            <Muted className="desk-notice" role="status">
-              {view === "desk" ? notice : ""}
-            </Muted>
             {(view === "pens" || view === "inks") && (
               <CollectionView
                 key={view}
@@ -287,108 +317,129 @@ export function App() {
             {view === "desk" && (
               <div className="desk-workbench">
                 <YStack gap={20}>
-                  <XStack
-                    className="palette-tabs"
-                    gap={8}
-                    flexWrap="wrap"
-                    alignItems="center"
-                    aria-label="Saved palettes"
-                  >
-                    {palettes.map((p) => (
-                      <Action
-                        key={p.id}
-                        fontSize={15}
-                        fontWeight="700"
-                        disabled={editing || command.busy}
-                        aria-pressed={p.id === palette.id}
-                        onPress={() => {
-                          setPaletteId(p.id);
-                          setSelected("");
-                          setConfirmDelete(false);
-                        }}
-                      >
-                        {p.name}
-                      </Action>
-                    ))}
-                  </XStack>
-                  {canEdit && (
-                    <XStack
-                      className="palette-actions"
-                      gap={8}
-                      flexWrap="wrap"
-                      alignItems="center"
+                  <div className="palette-controls">
+                    <label
+                      className="visually-hidden"
+                      htmlFor={editing ? "palette-name" : "saved-palette"}
                     >
-                      {editing && (
-                        <Text className="status status-blue">
-                          ✎ Editing palette
-                        </Text>
-                      )}
-                      {editing ? (
-                        <>
-                          <Primary
-                            disabled={command.busy || !draft.name.trim()}
-                            onPress={() =>
-                              void command.run(
-                                async () => {
-                                  const saved = await saveNamedPalette(
-                                    draft.id,
-                                    draft.name.trim(),
-                                    items,
-                                  );
-                                  setPaletteId(saved.id);
-                                },
-                                () => {
-                                  setDraft(null);
-                                  setNotice("Palette saved.");
-                                },
-                              )
-                            }
-                          >
-                            {command.busy ? "Saving…" : "Save palette"}
-                          </Primary>
-                          <Action
+                      {editing
+                        ? draft.id
+                          ? "Edit palette"
+                          : "New palette"
+                        : "Saved palette"}
+                    </label>
+                    <div className="palette-toolbar">
+                      <div className="palette-choice">
+                        {editing ? (
+                          <Input
+                            id="palette-name"
+                            maxLength={80}
+                            value={draft.name}
                             disabled={command.busy}
-                            onPress={() => setDraft(null)}
+                            onChangeText={(name) =>
+                              setDraft({ ...draft, name })
+                            }
+                          />
+                        ) : (
+                          <select
+                            id="saved-palette"
+                            name="saved-palette"
+                            value={palette.id}
+                            disabled={editing || command.busy}
+                            onChange={(event) => {
+                              setPaletteId(event.target.value);
+                              setSelected("");
+                              setConfirmDelete(false);
+                            }}
                           >
-                            Cancel
-                          </Action>
-                        </>
-                      ) : (
-                        <>
-                          <Action onPress={() => begin("edit")}>
-                            Edit palette
-                          </Action>
-                          <Action onPress={() => begin("new")}>New</Action>
-                          <Action onPress={() => begin("copy")}>
-                            Duplicate
-                          </Action>
-                          <Action
-                            className="action-danger"
-                            onPress={() => setConfirmDelete(true)}
-                          >
-                            Delete
-                          </Action>
-                        </>
+                            {palettes.map((p) => (
+                              <option key={p.id} value={p.id}>
+                                {p.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                      {canEdit && (
+                        <XStack
+                          className="palette-actions"
+                          role="group"
+                          aria-label="Palette actions"
+                          gap={8}
+                          flexWrap="wrap"
+                          alignItems="center"
+                        >
+                          {editing ? (
+                            <>
+                              <Action
+                                backgroundColor="#226943"
+                                color="white"
+                                borderColor="#226943"
+                                disabled={command.busy || !draft.name.trim()}
+                                onPress={() =>
+                                  void command.run(
+                                    async () => {
+                                      const saved = await saveNamedPalette(
+                                        draft.id,
+                                        draft.name.trim(),
+                                        items,
+                                      );
+                                      setPaletteId(saved.id);
+                                    },
+                                    () => {
+                                      setDraft(null);
+                                      toast.success(
+                                        draft.id ? "Saved" : "Created",
+                                      );
+                                    },
+                                  )
+                                }
+                              >
+                                {command.busy ? "Saving…" : "Save"}
+                              </Action>
+                              <Action
+                                backgroundColor="transparent"
+                                borderColor="transparent"
+                                disabled={command.busy}
+                                onPress={() => setDraft(null)}
+                              >
+                                Cancel
+                              </Action>
+                            </>
+                          ) : (
+                            <>
+                              <Action
+                                borderColor="#85858c"
+                                aria-label="Edit"
+                                onPress={() => begin("edit")}
+                              >
+                                <span aria-hidden="true">✎</span> Edit
+                              </Action>
+                              <Action
+                                backgroundColor="transparent"
+                                borderColor="transparent"
+                                onPress={() => begin("copy")}
+                              >
+                                Duplicate
+                              </Action>
+                              <Action
+                                className="action-quiet action-danger"
+                                onPress={() => setConfirmDelete(true)}
+                              >
+                                Delete
+                              </Action>
+                            </>
+                          )}
+                        </XStack>
                       )}
-                    </XStack>
-                  )}
-                  {editing && (
-                    <YStack gap={8}>
-                      <Label htmlFor="palette-name">Palette name</Label>
-                      <Input
-                        id="palette-name"
-                        maxLength={80}
-                        value={draft.name}
-                        disabled={command.busy}
-                        onChangeText={(name) => setDraft({ ...draft, name })}
-                      />
-                    </YStack>
-                  )}
+                    </div>
+                  </div>
                   {confirmDelete && canEdit && (
                     <Panel>
                       <Text>Delete “{palette.name}”?</Text>
                       <XStack gap={8}>
                         <Action
+                          className="action-danger"
                           disabled={command.busy}
                           onPress={() =>
                             void command.run(
@@ -396,7 +447,7 @@ export function App() {
                               () => {
                                 setConfirmDelete(false);
                                 setPaletteId("");
-                                setNotice("Palette deleted.");
+                                toast.success("Deleted");
                               },
                             )
                           }
@@ -495,16 +546,6 @@ export function App() {
                     )}
                 </YStack>
                 <YStack className="desk-active" gap={16}>
-                  {canEdit && (
-                    <Primary
-                      backgroundColor="#edf5ff"
-                      color="#185b98"
-                      borderColor="#b6d2eb"
-                      onPress={() => setDialog({ kind: "refill" })}
-                    >
-                      + Refill or clean a pen
-                    </Primary>
-                  )}
                   <div className="selection-slot">
                     <div className="selection-empty" hidden={selectionOpen}>
                       <Text fontSize={18}>No ink selected</Text>
@@ -520,14 +561,21 @@ export function App() {
                       <Panel>
                         {activeInk ? (
                           <>
-                            <XStack
-                              justifyContent="space-between"
-                              alignItems="center"
-                            >
-                              <Text className="status status-blue">
-                                ◉ Selected ink
-                              </Text>
+                            <XStack gap={12} alignItems="flex-start">
+                              <div className="ink-identity">
+                                <H2
+                                  fontWeight="700"
+                                  fontSize={26}
+                                  lineHeight="32px"
+                                >
+                                  {activeInk.name}
+                                </H2>
+                                <Muted>
+                                  {activeInk.brand} · {activeInk.collection}
+                                </Muted>
+                              </div>
                               <Action
+                                flexShrink={0}
                                 aria-label="Deselect ink"
                                 onPress={() => {
                                   document
@@ -541,15 +589,8 @@ export function App() {
                                 ×
                               </Action>
                             </XStack>
-                            <div className="ink-identity">
-                              <H2 fontSize={26} lineHeight="32px">
-                                {activeInk.name}
-                              </H2>
-                              <Muted>
-                                {activeInk.brand} · {activeInk.collection}
-                              </Muted>
-                            </div>
                             <YStack
+                              className="selected-ink-color"
                               height={8}
                               borderRadius={4}
                               backgroundColor={
@@ -623,8 +664,8 @@ export function App() {
                                                   today(),
                                                 ),
                                               () =>
-                                                setNotice(
-                                                  `Writing day saved for ${penLabel(pen)}.`,
+                                                toast.success(
+                                                  "Writing day saved",
                                                 ),
                                             )
                                           }
@@ -703,16 +744,6 @@ export function App() {
                     <Muted>No pens waiting.</Muted>
                   )}
                 </Panel>
-                {canEdit && (
-                  <Primary
-                    backgroundColor="#edf5ff"
-                    color="#185b98"
-                    borderColor="#b6d2eb"
-                    onPress={() => setDialog({ kind: "refill" })}
-                  >
-                    + Refill or clean a pen
-                  </Primary>
-                )}
               </YStack>
             )}
           </>
@@ -761,6 +792,25 @@ export function App() {
           </section>
         )}
       </main>
+      {creating && canEdit && (
+        <PaletteCreate
+          items={reconcilePalette([], currentInks)}
+          hasUnsavedChanges={
+            !!draft &&
+            (draft.id === null ||
+              draft.name !== palette.name ||
+              JSON.stringify(items) !==
+                JSON.stringify(reconcilePalette(palette.items, currentInks)))
+          }
+          close={() => setCreating(false)}
+          created={(saved) => {
+            setPaletteId(saved.id);
+            setDraft(saved);
+            setConfirmDelete(false);
+            setCreating(false);
+          }}
+        />
+      )}
       {dialog?.kind === "refill" && canEdit && (
         <RefillEditor
           collection={collection}

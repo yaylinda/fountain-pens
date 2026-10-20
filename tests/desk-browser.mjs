@@ -81,7 +81,10 @@ let owner = false,
   failNext = false;
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 const errors = [];
-page.on("pageerror", (e) => errors.push(e.message));
+page.on("pageerror", (e) => {
+  errors.push(e.message);
+  console.error(e.stack);
+});
 await page.route("**/*", async (route) => {
   const request = route.request(),
     url = new URL(request.url());
@@ -180,13 +183,9 @@ await page.route("**/*", async (route) => {
 });
 try {
   await page.goto(process.env.DESK_URL || "http://127.0.0.1:5188/");
-  await page
-    .getByRole("button", { name: "Everyday spectrum", exact: true })
-    .waitFor();
+  await page.getByLabel("Saved palette", { exact: true }).waitFor();
   assert.equal(
-    await page
-      .getByRole("button", { name: "Edit palette", exact: true })
-      .count(),
+    await page.getByRole("button", { name: "Edit", exact: true }).count(),
     0,
   );
   assert.equal(await page.title(), "Fountain Pens · My desk");
@@ -200,22 +199,16 @@ try {
     fullPage: false,
   });
   await page.goto(new URL("/index.html", page.url()).href);
-  await page
-    .getByRole("button", { name: "Everyday spectrum", exact: true })
-    .waitFor();
+  await page.getByLabel("Saved palette", { exact: true }).waitFor();
   await page.reload();
-  await page
-    .getByRole("button", { name: "Everyday spectrum", exact: true })
-    .waitFor();
+  await page.getByLabel("Saved palette", { exact: true }).waitFor();
   await page
     .getByRole("button", { name: "Owner sign in", exact: true })
     .click();
   await page.getByLabel("Email", { exact: true }).fill("owner@example.test");
   await page.getByLabel("Password", { exact: true }).fill("synthetic-password");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Edit palette", exact: true })
-    .waitFor();
+  await page.getByRole("button", { name: "Edit", exact: true }).waitFor();
   await page
     .getByRole("button", {
       name: `${inks[0].brand} ${inks[0].name}`,
@@ -303,8 +296,17 @@ try {
     await page.evaluate(() => document.activeElement?.textContent),
     "Writing history",
   );
-  await page.getByRole("button", { name: "Edit palette", exact: true }).click();
-  await page.getByLabel("Palette name").fill("Edited spectrum");
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  assert.equal(await page.getByLabel("Saved palette").count(), 0);
+  assert.equal(
+    await page
+      .getByRole("button", { name: "+ New palette", exact: true })
+      .count(),
+    1,
+  );
+  await page
+    .getByRole("textbox", { name: /^(Edit|New) palette$/ })
+    .fill("Edited spectrum");
   const first = page.locator(".desk-swatch").first();
   const label = await first.getAttribute("aria-label");
   await page
@@ -320,35 +322,72 @@ try {
   await page
     .getByRole("button", { name: `Omit ${label}`, exact: true })
     .click();
-  await page.getByRole("button", { name: "Save palette", exact: true }).click();
+  failNext = true;
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByRole("alert").waitFor();
+  assert.equal(
+    await page
+      .getByRole("textbox", { name: "Edit palette", exact: true })
+      .inputValue(),
+    "Edited spectrum",
+  );
+  assert.equal(await page.getByText("Saved", { exact: true }).count(), 0);
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).waitFor();
+  await page.getByText("Saved", { exact: true }).waitFor();
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: ".artifacts/desk-browser/saved-toast.png" });
   await page
-    .getByRole("button", { name: "Edited spectrum", exact: true })
-    .waitFor();
+    .getByRole("status")
+    .filter({ has: page.getByText("Saved", { exact: true }) })
+    .getByRole("button", { name: "Close toast", exact: true })
+    .click();
+  await page.getByText("Saved", { exact: true }).waitFor({ state: "hidden" });
   assert.equal(
     state.palettes[0].items.find((i) => i.inkId === inks[0].id).omitted,
     true,
   );
   await page.getByRole("button", { name: "Duplicate", exact: true }).click();
-  await page.getByLabel("Palette name").fill("Copy");
-  await page.getByRole("button", { name: "Save palette", exact: true }).click();
-  await page.getByRole("button", { name: "Copy", exact: true }).waitFor();
+  await page
+    .getByRole("textbox", { name: /^(Edit|New) palette$/ })
+    .fill("Copy");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.waitForFunction(
+    () =>
+      document.querySelector("#saved-palette option:checked")?.textContent ===
+      "Copy",
+  );
+  await page.getByText("Created", { exact: true }).waitFor();
+  await page.getByLabel("Saved palette").selectOption("default");
+  assert.equal(await page.getByLabel("Saved palette").inputValue(), "default");
+  await page.getByLabel("Saved palette").selectOption({ label: "Copy" });
   await page.getByRole("button", { name: "Delete", exact: true }).click();
   await page
     .getByRole("button", { name: "Confirm delete", exact: true })
     .click();
-  await page.getByText("Palette deleted.", { exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Confirm delete", exact: true })
+    .waitFor({ state: "detached" });
+  await page.getByText("Deleted", { exact: true }).waitFor();
+  await page.getByText("Deleted", { exact: true }).waitFor({ state: "hidden" });
   assert.equal(state.palettes.length, 1);
-  await page.getByRole("button", { name: "Edit palette", exact: true }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
   await page
     .getByRole("button", { name: `Restore ${inks[0].name}`, exact: true })
     .click();
-  await page.getByRole("button", { name: "Save palette", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Edit palette", exact: true })
-    .waitFor();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).waitFor();
   await page
     .getByRole("button", { name: "+ Refill or clean a pen", exact: true })
     .click();
+  assert.equal(
+    await page
+      .locator(".desk-workbench")
+      .getByRole("button", { name: "+ Refill or clean a pen", exact: true })
+      .count(),
+    0,
+  );
   const modal = page.getByRole("dialog", {
     name: "Refill or clean",
     exact: true,
@@ -423,6 +462,25 @@ try {
       exact: true,
     })
     .click();
+  await page.getByText("Saved", { exact: true }).waitFor({ state: "hidden" });
+  await page.evaluate(() => document.fonts.ready);
+  const fontWeights = await page.evaluate(() =>
+    [...document.fonts]
+      .filter((face) => face.family === "Fira Mono" && face.status === "loaded")
+      .map((face) => face.weight),
+  );
+  assert.ok(fontWeights.includes("500") && fontWeights.includes("700"));
+  assert.equal(
+    await page.getByText("Selected ink", { exact: true }).count(),
+    0,
+  );
+  const identity = await page.locator(".ink-identity").boundingBox();
+  const colorBar = await page.locator(".selected-ink-color").boundingBox();
+  assert.ok(
+    colorBar.y - (identity.y + identity.height) <= 20,
+    "Ink color follows the identity without a fixed spacer",
+  );
+  await page.waitForTimeout(250);
   await page.screenshot({
     path: ".artifacts/desk-browser/connected-desktop.png",
     fullPage: false,
@@ -443,22 +501,24 @@ try {
     const swatches = page.locator(".desk-swatch");
     await swatches.nth(3).click();
     const measure = () =>
-      page
-        .locator(".selection-slot")
-        .evaluate((el) => ({
-          top: el.getBoundingClientRect().top + scrollY,
-          height: el.clientHeight,
-          width: el.clientWidth,
-        }));
+      page.locator(".selection-slot").evaluate((el) => ({
+        top: el.getBoundingClientRect().top + scrollY,
+        height: el.clientHeight,
+        width: el.clientWidth,
+      }));
     const before = await measure();
     await page.evaluate(() => scrollTo(0, 0));
-    await page.screenshot({ path: `.artifacts/desk-browser/short-name-${width}.png` });
+    await page.screenshot({
+      path: `.artifacts/desk-browser/short-name-${width}.png`,
+    });
     await swatches.nth(4).click();
     assert.deepEqual(await measure(), before);
     const panelBox = await page.locator(".selection-slot").boundingBox();
     const actionsBox = await page.locator(".ink-actions").boundingBox();
-    assert.ok(actionsBox.y + actionsBox.height <= panelBox.y + panelBox.height + 1,
-      "Writing actions remain inside the visible detail panel for long names");
+    assert.ok(
+      actionsBox.y + actionsBox.height <= panelBox.y + panelBox.height + 1,
+      "Writing actions remain inside the visible detail panel for long names",
+    );
     await page
       .getByRole("button", { name: "Deselect ink", exact: true })
       .click();
@@ -481,16 +541,55 @@ try {
       path: `.artifacts/desk-browser/selected-${width}.png`,
       fullPage: false,
     });
-    await page
-      .getByRole("button", { name: "Edit palette", exact: true })
-      .click();
+    await page.getByRole("button", { name: "Edit", exact: true }).click();
     await page.evaluate(() => scrollTo(0, 0));
     await page.screenshot({
       path: `.artifacts/desk-browser/editing-${width}.png`,
       fullPage: false,
     });
+    await page
+      .getByRole("textbox", { name: /^(Edit|New) palette$/ })
+      .fill("Discard this edit");
     await page.getByRole("button", { name: "Cancel", exact: true }).click();
+    assert.equal(
+      await page
+        .getByLabel("Saved palette")
+        .locator("option:checked")
+        .textContent(),
+      "Edited spectrum",
+    );
+    await page
+      .getByRole("button", { name: "+ New palette", exact: true })
+      .click();
+    const naming = page.getByRole("dialog", {
+      name: "New palette",
+      exact: true,
+    });
+    const countBeforeCancel = state.palettes.length;
+    assert.equal(
+      await naming
+        .getByRole("button", { name: "Create", exact: true })
+        .isDisabled(),
+      true,
+    );
+    await naming
+      .getByRole("textbox", { name: "Name", exact: true })
+      .fill("Weekend colors");
+    await page.screenshot({
+      path: `.artifacts/desk-browser/naming-${width}.png`,
+    });
+    await naming.getByRole("button", { name: "Cancel", exact: true }).click();
+    assert.equal(state.palettes.length, countBeforeCancel);
+    assert.equal(
+      await page
+        .getByLabel("Saved palette")
+        .locator("option:checked")
+        .textContent(),
+      "Edited spectrum",
+    );
   }
+  assert.equal(await page.getByText("Saved", { exact: true }).count(), 0);
+  assert.equal(await page.getByText("Created", { exact: true }).count(), 0);
   await page.emulateMedia({ reducedMotion: "reduce" });
   assert.equal(
     await page
@@ -505,6 +604,12 @@ try {
       .getByRole("heading", { level: 1, name: name + "_", exact: true })
       .waitFor();
     assert.equal(await page.getByRole("dialog").count(), 0);
+    assert.equal(
+      await page
+        .getByRole("button", { name: "+ New palette", exact: true })
+        .count(),
+      0,
+    );
     if (name === "Pens" || name === "Inks") {
       await page
         .getByLabel(`Search ${name.toLowerCase()}`)
@@ -531,32 +636,91 @@ try {
     "page",
   );
   await page.getByRole("link", { name: "My desk", exact: true }).click();
-  await page.getByRole("button", { name: "New", exact: true }).click();
-  await page.getByLabel("Palette name").fill("New daily palette");
-  await page.getByRole("button", { name: "Save palette", exact: true }).click();
   await page
-    .getByRole("button", { name: "New daily palette", exact: true })
+    .getByRole("button", { name: "+ New palette", exact: true })
+    .click();
+  const naming = page.getByRole("dialog", { name: "New palette", exact: true });
+  await naming
+    .getByRole("textbox", { name: "Name", exact: true })
+    .fill("New daily palette");
+  const paletteCount = state.palettes.length;
+  failNext = true;
+  await naming.getByRole("button", { name: "Create", exact: true }).click();
+  await naming.getByRole("alert").waitFor();
+  assert.equal(
+    await naming
+      .getByRole("textbox", { name: "Name", exact: true })
+      .inputValue(),
+    "New daily palette",
+  );
+  assert.equal(state.palettes.length, paletteCount);
+  await naming.getByRole("button", { name: "Create", exact: true }).click();
+  await naming.waitFor({ state: "detached" });
+  const editName = page.getByRole("textbox", {
+    name: "Edit palette",
+    exact: true,
+  });
+  assert.equal(await editName.inputValue(), "New daily palette");
+  const newId = state.palettes.find((p) => p.name === "New daily palette").id;
+  assert.equal(state.palettes.length, paletteCount + 1);
+  assert.ok(
+    state.palettes
+      .find((p) => p.id === newId)
+      .items.every((item) => !item.omitted),
+  );
+  assert.equal(
+    await page
+      .getByRole("button", { name: "+ New palette", exact: true })
+      .isVisible(),
+    true,
+  );
+  await editName.fill("Unsaved changes");
+  await page
+    .getByRole("button", { name: "+ New palette", exact: true })
+    .click();
+  await naming
+    .getByText("Creating a palette will discard your current unsaved edits.", {
+      exact: true,
+    })
     .waitFor();
-  assert.ok(state.palettes.some((p) => p.name === "New daily palette"));
+  await naming.getByRole("button", { name: "Cancel", exact: true }).click();
+  assert.equal(await editName.inputValue(), "Unsaved changes");
+  await editName.fill("New daily palette");
+  for (const width of [1440, 780]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.evaluate(() => scrollTo(0, 0));
+    await page.screenshot({
+      path: `.artifacts/desk-browser/created-edit-${width}.png`,
+    });
+  }
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await page.getByLabel("Saved palette").waitFor();
+  assert.equal(await page.getByLabel("Saved palette").inputValue(), newId);
+  assert.equal(state.palettes.length, paletteCount + 1);
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await page
     .getByRole("button", { name: "Owner sign in", exact: true })
     .waitFor();
   assert.equal(
-    await page
-      .getByRole("button", { name: "Edit palette", exact: true })
-      .count(),
+    await page.getByRole("button", { name: "Edit", exact: true }).count(),
     0,
   );
-  await page.getByRole("button", { name: "Owner sign in", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Owner sign in", exact: true })
+    .click();
   await page.getByLabel("Email", { exact: true }).fill("viewer@example.test");
   await page.getByLabel("Password", { exact: true }).fill("synthetic-password");
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await page.getByText("◉ Signed in · View only", { exact: true }).waitFor();
-  assert.equal(await page.getByRole("button", { name: "Edit palette", exact: true }).count(), 0);
+  assert.equal(
+    await page.getByRole("button", { name: "Edit", exact: true }).count(),
+    0,
+  );
   await page.screenshot({ path: ".artifacts/desk-browser/view-only.png" });
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
-  await page.getByRole("button", { name: "Owner sign in", exact: true }).waitFor();
+  await page
+    .getByRole("button", { name: "Owner sign in", exact: true })
+    .waitFor();
   state.events = [];
   state.palettes = [];
   await page.reload();
@@ -566,6 +730,10 @@ try {
   console.log(
     `PASS: public/owner gates; refill-specific writing add/correct/delete; saved palette keyboard order/omit/restore/copy/delete; needs-refill chooser; mixed refill; failed-save draft retention; cleaning; half-width; ${writes.length} synthetic RPC writes, zero real writes.`,
   );
+} catch (error) {
+  console.error("Browser errors:", errors);
+  await page.screenshot({ path: ".artifacts/desk-browser/failure.png" });
+  throw error;
 } finally {
   await browser.close();
 }
