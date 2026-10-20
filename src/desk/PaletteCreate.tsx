@@ -33,7 +33,7 @@ export function PaletteCreate({
           void command.run(async () => {
             const palette = await saveNamedPalette(null, name.trim(), items);
             created(palette);
-            toast.success("Created");
+            toast.success("Palette created");
           });
         }}
       >

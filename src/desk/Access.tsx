@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import { useCommand } from "./useCommand";
 import { useEffect, useState } from "react";
 import { Input, Label, XStack } from "tamagui";
@@ -38,11 +39,12 @@ export function Access({ canEdit }: { canEdit: boolean }) {
     <>
       <XStack gap={10} alignItems="center" flexWrap="wrap">
         <Muted className={`status ${canEdit ? "status-green" : "status-blue"}`}>
+          <Icon name={canEdit ? "check" : "circle"} />
           {canEdit
-            ? "✓ Signed in · Owner"
+            ? "Signed in · Owner"
             : signedIn
-              ? "◉ Signed in · View only"
-              : "◉ Signed out · Public view"}
+              ? "Signed in · View only"
+              : "Signed out · Public view"}
         </Muted>
         <Action
           disabled={!ready || command.busy}

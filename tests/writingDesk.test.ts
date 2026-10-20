@@ -1,4 +1,4 @@
-import { reconcilePalette, movePalette, paletteDto } from '../src/lib/deskPalette';
+import { reconcilePalette, movePalette, paletteDto, currentlyInkedColors } from '../src/lib/deskPalette';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { perceptualColor, sortInksByColor } from '../src/lib/colorOrder';
@@ -56,4 +56,35 @@ test('palette preserves dormant omissions, appends new colors and moves by stabl
     assert.equal(saved.length, 2);
     assert.deepEqual(paletteDto(next), next);
     assert.throws(() => paletteDto([{inkId:'a',omitted:false},{inkId:'a',omitted:true}]));
+});
+
+
+test('All follows current mixed refills without inheriting or changing saved omissions', async () => {
+    const { deriveCollection } = await import('../src/lib/collection');
+    const inks = swatchInks(['#854c48', '#376e78', '#675d91']);
+    const saved = [{ inkId: inks[0].id, omitted: true }];
+    const collection = {
+        inks, pens: [{id:'p', brand:'Pilot', model:'Test', color:'', nibSize:'M', nibType:''}],
+        entries: [{id:'fill', index:0, penId:'p', date:'2026-10-01', inkIds:[inks[0].id, inks[1].id], notes:''}],
+        palettes: [{id:'custom', name:'Custom', items:saved}],
+    };
+    assert.deepEqual(new Set(currentlyInkedColors(inks, deriveCollection(collection)).map(i => i.id)), new Set([inks[0].id, inks[1].id]));
+    assert.deepEqual(saved, [{inkId:inks[0].id, omitted:true}]);
+    collection.entries.push({id:'clean', index:1, penId:'p', date:'2026-10-02', inkIds:[], notes:''});
+    assert.deepEqual(currentlyInkedColors(inks, deriveCollection(collection)), []);
+});
+
+test('calendar-date display keeps American dates and relative days stable across time zones and DST', async () => {
+    const { displayDate } = await import('../src/lib/displayDate');
+    const previous = process.env.TZ;
+    try {
+        for (const zone of ['America/Los_Angeles', 'America/New_York', 'Pacific/Auckland', 'UTC']) {
+            process.env.TZ = zone;
+            assert.deepEqual(displayDate('2026-10-10', '2026-10-20'), { absolute: 'Oct 10, 2026', relative: '10 days ago' });
+            assert.equal(displayDate('2026-10-20', '2026-10-20').relative, 'Today');
+            assert.equal(displayDate('2026-03-08', '2026-03-09').relative, 'Yesterday');
+            assert.equal(displayDate('2026-11-01', '2026-11-02').relative, 'Yesterday');
+            assert.equal(displayDate('2026-01-01', '2025-12-31').relative, 'Tomorrow');
+        }
+    } finally { process.env.TZ = previous; }
 });
