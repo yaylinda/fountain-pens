@@ -103,7 +103,7 @@ function Swatch({
       </Action>
       <InkIdentity ink={ink} />
       {editing && (
-        <XStack gap={4}>
+        <div className="swatch-edit-controls">
           <button
             type="button"
             className="drag-handle"
@@ -113,16 +113,17 @@ function Swatch({
             aria-label={`Move ${inkLabel(ink)}`}
           >
             <Icon name="grip" />
+            <span>Drag</span>
           </button>
-          <Action
-            height={36}
-            fontSize={10}
+          <button
+            type="button"
+            className="swatch-omit"
             aria-label={`Omit ${inkLabel(ink)}`}
-            onPress={omit}
+            onClick={omit}
           >
             <Icon name="minus" />
-          </Action>
-        </XStack>
+          </button>
+        </div>
       )}
     </YStack>
   );
@@ -848,18 +849,14 @@ export function App() {
         {view === "refills" && !loading && !error && (
           <div className="refills-layout">
             <section className="activity-view" aria-label="Refill activity">
-              <YStack gap={16}>
+              <YStack gap={0}>
                 {model.journal.map((entry) => (
-                  <YStack
-                    className="activity-entry"
-                    key={entry.id || entry.index}
-                    gap={8}
-                  >
+                  <div className="activity-entry" key={entry.id || entry.index}>
+                    <div className="activity-heading">
+                      <PenIdentity pen={model.penById.get(entry.penId)!} />
+                      <DateStamp value={entry.date} />
+                    </div>
                     <div className="activity-content">
-                      <div className="activity-heading">
-                        <PenIdentity pen={model.penById.get(entry.penId)!} />
-                        <DateStamp value={entry.date} />
-                      </div>
                       <div className="activity-inks">
                         {isCleaning(entry) ? (
                           <Muted>Cleaned & empty</Muted>
@@ -884,27 +881,25 @@ export function App() {
                       </div>
                       {entry.notes && <Muted>{entry.notes}</Muted>}
                     </div>
-                    <XStack
-                      className="activity-actions"
-                      gap={5}
-                      flexWrap="wrap"
-                    >
+                    <div className="activity-actions">
                       {!isCleaning(entry) && (
-                        <Action
-                          onPress={() => setDialog({ kind: "writing", entry })}
+                        <button
+                          type="button"
+                          onClick={() => setDialog({ kind: "writing", entry })}
                         >
-                          Writing history
-                        </Action>
+                          <Icon name="history" /> Writing history
+                        </button>
                       )}
                       {canEdit && (
-                        <Action
-                          onPress={() => setDialog({ kind: "refill", entry })}
+                        <button
+                          type="button"
+                          onClick={() => setDialog({ kind: "refill", entry })}
                         >
-                          Correct refill
-                        </Action>
+                          <Icon name="edit" /> Edit log
+                        </button>
                       )}
-                    </XStack>
-                  </YStack>
+                    </div>
+                  </div>
                 ))}
               </YStack>
             </section>
