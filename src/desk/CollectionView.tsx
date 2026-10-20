@@ -1,4 +1,13 @@
 import {
+  SidebarCard,
+  SidebarSection,
+  SidebarFacts,
+  SidebarActions,
+} from "./Sidebar";
+import { RefillNeededAction } from "./RefillNeededAction";
+import { InkColors } from "./InkColors";
+import type { JournalEntry } from "../lib/collection";
+import {
   PenIdentity,
   PenDetails,
   InkIdentity,
@@ -7,7 +16,7 @@ import {
 } from "./Identity";
 import { Icon } from "./Icon";
 import { useState } from "react";
-import { H2, Input, Label, Text, XStack, YStack } from "tamagui";
+import { Input, Label, Text, XStack, YStack } from "tamagui";
 import {
   byPenName,
   deriveCollection,
@@ -20,13 +29,17 @@ import {
   type Collection,
 } from "../lib/collection";
 import { getInkReference } from "../lib/inkReference";
-import { Action, Muted, Panel } from "./ui";
+import { Action, Muted } from "./ui";
 
 export function CollectionView({
   kind,
   collection,
   model,
+  onRefill,
+  onHistory,
 }: {
+  onRefill: (penId: string) => void;
+  onHistory: (entry: JournalEntry) => void;
   kind: "pens" | "inks";
   collection: Collection;
   model: ReturnType<typeof deriveCollection>;
@@ -54,6 +67,11 @@ export function CollectionView({
   const reference = getInkReference(ink);
   const swatch = getSwatch(ink);
   const entry = pen && model.latest.get(pen.id);
+  const lastWritten =
+    entry &&
+    model.writingLogs
+      .filter((log) => log.refillId === entry.id)
+      .sort((a, b) => b.writtenOn.localeCompare(a.writtenOn))[0];
   return (
     <div className="collection-view">
       <YStack gap={16} minWidth={0}>
@@ -142,152 +160,175 @@ export function CollectionView({
           )}
         </div>
       </YStack>
-      <Panel className="reference-detail">
-        {!item ? (
+      <SidebarCard
+        className="reference-detail"
+        title={
+          !item ? (
+            `Select ${kind === "pens" ? "a pen" : "an ink"}`
+          ) : pen ? (
+            <>
+              <span className="object-brand">{pen.brand}</span> {pen.model}
+            </>
+          ) : (
+            ink!.name
+          )
+        }
+        subtitle={
+          !item ? (
+            "Browse the collection to open its reference."
+          ) : pen ? (
+            <PenDetails pen={pen} />
+          ) : (
+            <InkDetails ink={ink!} />
+          )
+        }
+        accent={ink ? swatch?.hex || "#e2e2e5" : undefined}
+      >
+        {item && (
           <>
-            <H2 fontSize={20}>Select {kind === "pens" ? "a pen" : "an ink"}</H2>
-            <Muted>
-              Browse the collection or search to open its reference.
-            </Muted>
-          </>
-        ) : (
-          <>
-            <H2 fontSize={24} fontWeight="700" lineHeight="32px">
-              {pen ? (
-                <>
-                  <span className="object-brand">{pen.brand}</span> {pen.model}
-                </>
-              ) : (
-                ink!.name
-              )}
-            </H2>
-            {pen ? <PenDetails pen={pen} /> : <InkDetails ink={ink!} />}
-            {ink && (
-              <>
-                <div
-                  className="reference-color"
-                  style={{ backgroundColor: swatch?.hex || "#e2e2e5" }}
-                />
-                <Muted>
-                  {swatch
-                    ? `${swatch.hex} · ${swatch.source}`
-                    : "No color reference available"}
-                </Muted>
-              </>
-            )}
             {item.favorite && (
               <Text className="status status-green">★ Favorite</Text>
             )}
             {item.archived && <Muted>Archived</Muted>}
-            {item.details && (
-              <Text className="reference-prose">{item.details}</Text>
-            )}
             {pen && (
-              <>
-                <Text fontWeight="700">Current fill</Text>
+              <SidebarSection title="Current fill">
+                {pen.needsRefill && (
+                  <span className="status status-red">Needs refill</span>
+                )}
                 {entry ? (
-                  <div className="reference-fill">
-                    <DateStamp value={entry.date} />
-                    <span
-                      className={`status ${isCleaning(entry) ? "status-neutral" : "status-green"}`}
-                    >
-                      {isCleaning(entry) ? "Cleaned & empty" : "Inked"}
-                    </span>
-                    {!isCleaning(entry) && (
-                      <Text fontSize={13}>
-                        {entry.inkIds
-                          .map((id) => inkLabel(model.inkById.get(id)))
-                          .join(" + ")}
-                      </Text>
-                    )}
+                  <>
+                    <InkColors
+                      inks={
+                        isCleaning(entry)
+                          ? []
+                          : entry.inkIds.map((id) => model.inkById.get(id)!)
+                      }
+                    />
                     {entry.notPure && (
                       <span className="status status-neutral">
                         Residual ink
                       </span>
                     )}
-                  </div>
+                    <SidebarFacts
+                      items={[
+                        {
+                          label: isCleaning(entry) ? "Cleaned" : "Filled",
+                          value: <DateStamp value={entry.date} />,
+                        },
+                        {
+                          label: "Last written",
+                          value: lastWritten ? (
+                            <DateStamp value={lastWritten.writtenOn} />
+                          ) : (
+                            "Not recorded"
+                          ),
+                        },
+                      ]}
+                    />
+                  </>
                 ) : (
                   <Muted>No refill recorded</Muted>
                 )}
-              </>
+                <SidebarActions>
+                  {entry && !isCleaning(entry) && (
+                    <Action onPress={() => onHistory(entry)}>
+                      View history
+                    </Action>
+                  )}
+                  {collection.canEdit && !pen.archived && (
+                    <Action onPress={() => onRefill(pen.id)}>
+                      Add refill log
+                    </Action>
+                  )}
+                  <RefillNeededAction pen={pen} />
+                </SidebarActions>
+              </SidebarSection>
             )}
             {ink && (
-              <>
-                <Text fontWeight="700">Currently in</Text>
+              <SidebarSection title="Currently in">
                 {model.currentPens(ink.id).length ? (
-                  model
-                    .currentPens(ink.id)
-                    .map((p) => <PenIdentity key={p.id} pen={p} />)
+                  model.currentPens(ink.id).map((p) => (
+                    <div className="sidebar-pen" key={p.id}>
+                      <PenIdentity pen={p} />
+                      <RefillNeededAction pen={p} />
+                    </div>
+                  ))
                 ) : (
                   <Muted>No currently inked pens.</Muted>
                 )}
-              </>
+              </SidebarSection>
+            )}
+            {item.details && (
+              <SidebarSection title="Details">
+                <Text className="reference-prose">{item.details}</Text>
+              </SidebarSection>
             )}
             {reference && (
-              <dl className="reference-facts">
-                {Object.entries({
-                  "Product code": reference.productCode,
-                  "Name origin":
-                    reference.nameOrigin &&
-                    `${reference.nameOrigin.japanese} · ${reference.nameOrigin.reading} · ${reference.nameOrigin.meaning}`,
-                  Inspiration: [
-                    reference.inspiration.author,
-                    reference.inspiration.work,
-                    reference.inspiration.series,
-                  ]
-                    .filter(Boolean)
-                    .join(" · "),
-                  Properties: [
-                    ...reference.properties,
-                    ...(reference.colorGuideProperties || []),
-                  ].join(", "),
-                  Glitter: reference.glitterColors.join(", "),
-                  Origin: reference.countryOfOrigin,
-                  Edition: [
-                    reference.edition,
-                    reference.limitedEdition ? "Limited edition" : "",
-                    reference.exclusiveTo,
-                  ]
-                    .filter(Boolean)
-                    .join(" · "),
-                  Notes: reference.notes?.join("\n"),
-                })
-                  .filter(([, value]) => value)
-                  .map(([key, value]) => (
-                    <div key={key}>
-                      <dt>{key}</dt>
-                      <dd>{value}</dd>
+              <SidebarSection title="Reference">
+                <dl className="reference-facts">
+                  {Object.entries({
+                    "Product code": reference.productCode,
+                    "Name origin":
+                      reference.nameOrigin &&
+                      `${reference.nameOrigin.japanese} · ${reference.nameOrigin.reading} · ${reference.nameOrigin.meaning}`,
+                    Inspiration: [
+                      reference.inspiration.author,
+                      reference.inspiration.work,
+                      reference.inspiration.series,
+                    ]
+                      .filter(Boolean)
+                      .join(" · "),
+                    Properties: [
+                      ...reference.properties,
+                      ...(reference.colorGuideProperties || []),
+                    ].join(", "),
+                    Glitter: reference.glitterColors.join(", "),
+                    Origin: reference.countryOfOrigin,
+                    Edition: [
+                      reference.edition,
+                      reference.limitedEdition ? "Limited edition" : "",
+                      reference.exclusiveTo,
+                    ]
+                      .filter(Boolean)
+                      .join(" · "),
+                    Notes: reference.notes?.join("\n"),
+                  })
+                    .filter(([, value]) => value)
+                    .map(([key, value]) => (
+                      <div key={key}>
+                        <dt>{key}</dt>
+                        <dd>{value}</dd>
+                      </div>
+                    ))}
+                  {reference.writing && (
+                    <div>
+                      <dt>Writing reference</dt>
+                      <dd>
+                        {reference.writing.flow} flow ·{" "}
+                        {reference.writing.shading} shading ·{" "}
+                        {reference.writing.sheen} sheen ·{" "}
+                        {reference.writing.dryTimeSeconds}s dry time
+                        <br />
+                        {reference.writing.waterResistance} water resistance ·{" "}
+                        {reference.writing.shimmer ? "Shimmer" : "No shimmer"}
+                        <br />
+                        Tested with {reference.writing.testPen} on{" "}
+                        {reference.writing.testPaper}.{" "}
+                        <a
+                          href={reference.writing.sourceUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Source ↗
+                        </a>
+                      </dd>
                     </div>
-                  ))}
-                {reference.writing && (
-                  <div>
-                    <dt>Writing reference</dt>
-                    <dd>
-                      {reference.writing.flow} flow ·{" "}
-                      {reference.writing.shading} shading ·{" "}
-                      {reference.writing.sheen} sheen ·{" "}
-                      {reference.writing.dryTimeSeconds}s dry time
-                      <br />
-                      {reference.writing.waterResistance} water resistance ·{" "}
-                      {reference.writing.shimmer ? "Shimmer" : "No shimmer"}
-                      <br />
-                      Tested with {reference.writing.testPen} on{" "}
-                      {reference.writing.testPaper}.{" "}
-                      <a
-                        href={reference.writing.sourceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Source ↗
-                      </a>
-                    </dd>
-                  </div>
-                )}
-              </dl>
+                  )}
+                </dl>
+              </SidebarSection>
             )}
             {!!item.sources?.length && (
-              <YStack gap={8}>
-                <Text fontWeight="700">Sources</Text>
+              <SidebarSection title="Sources">
                 {item.sources.map((s, index) => (
                   <a
                     key={`${s.url}-${index}`}
@@ -298,7 +339,7 @@ export function CollectionView({
                     {s.label} ↗
                   </a>
                 ))}
-              </YStack>
+              </SidebarSection>
             )}
             {swatch?.url && (
               <a href={swatch.url} target="_blank" rel="noreferrer">
@@ -307,7 +348,7 @@ export function CollectionView({
             )}
           </>
         )}
-      </Panel>
+      </SidebarCard>
     </div>
   );
 }

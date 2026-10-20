@@ -2,7 +2,7 @@ import { arrangementDto, type DeskArrangement, type PaletteItem } from '../lib/d
 import type { MutationName, MutationPayload } from './database.types';
 import type { RefillLog } from '../models/types';
 import { isCleaning, realInkIds, type Collection, type JournalEntry } from '../lib/collection';
-import { collectionDto, eventDto, writingLogDto, object } from './collectionAdapter';
+import { collectionDto, penDto, eventDto, writingLogDto, object } from './collectionAdapter';
 import { getSupabase } from './supabaseClient';
 
 export class CollectionError extends Error {}
@@ -55,7 +55,7 @@ export async function loadData(force = false): Promise<void> {
 async function command(name: MutationName, payload: MutationPayload, apply: (value: Record<string, unknown>) => void) {
     if (!owner || !collection.canEdit) throw new CollectionError('Only the collection owner can save changes.');
     if (saving) return Promise.reject(new CollectionError('A save is in progress.'));
-    saving = true;
+    saving = true; emit();
     try {
         const { data, error } = await getSupabase().rpc(name, payload);
         if (error) throw safeError(error);
@@ -105,5 +105,18 @@ export async function saveWritingLog(refillId: string, writtenOn: string, id: st
 export async function deleteWritingLog(id: string) {
     await command('delete_writing_log', { p_id: id }, () => {
         collection = { ...collection, writingLogs: (collection.writingLogs || []).filter(x => x.id !== id) };
+    });
+}
+
+export async function setPenNeedsRefill(id: string, needsRefill: boolean) {
+    const pen = collection.pens.find(p => p.id === id);
+    if (!pen) throw new CollectionError('This pen is no longer available.');
+    const { brand, model, color, nibSize, nibType } = pen;
+    // The existing update contract requires identity fields. Omit optional prose
+    // and sources so the server preserves them rather than rewriting references.
+    await command('update_pen', { p_id: id, p_item: { brand, model, color, nibSize, nibType,
+        archived: !!pen.archived, favorite: !!pen.favorite, needsRefill } }, result => {
+        const saved = penDto(result.item);
+        collection = { ...collection, pens: collection.pens.map(p => p.id === saved.id ? saved : p) };
     });
 }

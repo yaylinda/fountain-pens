@@ -80,11 +80,22 @@ test('calendar-date display keeps American dates and relative days stable across
     try {
         for (const zone of ['America/Los_Angeles', 'America/New_York', 'Pacific/Auckland', 'UTC']) {
             process.env.TZ = zone;
-            assert.deepEqual(displayDate('2026-10-10', '2026-10-20'), { absolute: 'Oct 10, 2026', relative: '10 days ago' });
+            assert.deepEqual(displayDate('2026-10-10', '2026-10-20'), { absolute: 'Oct 10, 2026', relative: '1 week ago' });
             assert.equal(displayDate('2026-10-20', '2026-10-20').relative, 'Today');
             assert.equal(displayDate('2026-03-08', '2026-03-09').relative, 'Yesterday');
             assert.equal(displayDate('2026-11-01', '2026-11-02').relative, 'Yesterday');
             assert.equal(displayDate('2026-01-01', '2025-12-31').relative, 'Tomorrow');
         }
     } finally { process.env.TZ = previous; }
+});
+
+test('relative dates use compact elapsed units at week, month and year boundaries', async () => {
+    const { displayDate } = await import('../src/lib/displayDate');
+    const base = Date.parse('2026-10-20T00:00:00Z');
+    for (const [days, expected] of [[2,'2 days ago'],[6,'6 days ago'],[7,'1 week ago'],[14,'2 weeks ago'],[29,'4 weeks ago'],[30,'1 month ago'],[60,'2 months ago'],[364,'12 months ago'],[365,'1 year ago'],[730,'2 years ago']] as const) {
+        const date = new Date(base-days*86400000).toISOString().slice(0,10);
+        assert.equal(displayDate(date, '2026-10-20').relative, expected);
+    }
+    assert.equal(displayDate('2026-11-03','2026-10-20').relative,'in 2 weeks');
+    assert.equal(displayDate('2024-02-29','2024-03-01').relative,'Yesterday');
 });

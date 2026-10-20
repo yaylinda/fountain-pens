@@ -11,11 +11,13 @@ const event = { id: 'e', sequence: '9007199254740993', penId: 'p', date: '2026-0
 const snapshot = () => ({ pens: [{ ...pen }], inks: [{ ...ink }], events: [{ ...event }], canEdit: true, asOf: '2026-10-03' });
 let readFailure = false;
 let writeCode = '';
+let lastPenPayload: Record<string, unknown> = {};
 globalThis.fetch = async (input, init) => {
     const name = String(input).split('/').at(-1);
     const body = JSON.parse(String(init?.body || '{}'));
     if (name === 'get_collection') return readFailure ? new Response('Unavailable', { status: 503 }) : Response.json(snapshot());
     if (writeCode) return Response.json({ code: writeCode, message: 'Sensitive internal SQL context' }, { status: 400 });
+    if (name === 'update_pen') { lastPenPayload = body.p_item; return Response.json({item:{...pen,...body.p_item,details:'Preserved notes',sources:[]}}); }
     if (name === 'update_refill_event') return Response.json({ event: { ...event, ...body.p_entry }, pen });
     throw new Error(`Unexpected RPC ${name}`);
 };
@@ -50,4 +52,23 @@ test('auth changes immediately revoke editing without discarding public data', a
     assert.equal(service.getCollection().canEdit, false);
     assert.equal(service.getCollection().pens[0].id, pen.id);
     await assert.rejects(service.updateRefillLog(event, event), /Only the collection owner/);
+});
+
+test('refill-needed action changes only the pen flag, survives interrupted refresh and enforces owner writes', async () => {
+    readFailure = false; writeCode = '';
+    service.activateCollection('synthetic-owner'); await service.loadData(true);
+    const entries = service.getCollection().entries;
+    readFailure = true;
+    await service.setPenNeedsRefill('p', false);
+    assert.equal(service.getCollection().pens[0].needsRefill, false);
+    assert.equal(service.getCollection().pens[0].details, 'Preserved notes');
+    assert.deepEqual(service.getCollection().entries, entries);
+    assert.deepEqual(lastPenPayload, {brand:pen.brand, model:pen.model, color:pen.color, nibSize:pen.nibSize, nibType:pen.nibType, archived:false, favorite:false, needsRefill:false});
+    await service.setPenNeedsRefill('p', true);
+    assert.equal(service.getCollection().pens[0].needsRefill, true);
+    writeCode = '42501';
+    await assert.rejects(service.setPenNeedsRefill('p', false), /Only the collection owner/);
+    assert.equal(service.getCollection().pens[0].needsRefill, true);
+    service.activateCollection(null);
+    await assert.rejects(service.setPenNeedsRefill('p', false), /Only the collection owner/);
 });
