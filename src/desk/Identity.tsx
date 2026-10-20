@@ -23,9 +23,15 @@ export function PenDetails({ pen }: { pen: Pen }) {
     </span>
   );
 }
-export function InkIdentity({ ink }: { ink: Ink }) {
+export function InkIdentity({
+  ink,
+  compact = false,
+}: {
+  ink: Ink;
+  compact?: boolean;
+}) {
   return (
-    <span className="object-identity">
+    <span className={`object-identity ${compact ? "ink-identity-inline" : ""}`}>
       <strong className="object-name">{ink.name}</strong>
       <span className="object-meta">
         {[ink.brand, ink.collection].filter(Boolean).join(" · ")}

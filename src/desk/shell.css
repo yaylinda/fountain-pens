@@ -1216,3 +1216,37 @@ button[aria-pressed="true"] .status-neutral {
     flex-basis: 100%;
   }
 }
+
+/* Sidebar actions adapt to their own available width. */
+.desk-active {
+  container: selected-card / inline-size;
+}
+@container selected-card (max-width: 320px) {
+  .ink-actions > div {
+    grid-template-columns: 1fr;
+  }
+}
+.ink-identity-inline {
+  flex: 0 1 auto;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.ink-identity-inline .object-name {
+  font-size: 0.8125rem;
+}
+.ink-identity-inline .object-meta {
+  font-size: 0.75rem;
+}
+.activity-inks,
+.activity-ink {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+.ink-separator {
+  color: #68686e;
+  font-size: 0.75rem;
+}

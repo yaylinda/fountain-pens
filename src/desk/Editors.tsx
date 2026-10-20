@@ -333,7 +333,7 @@ export function WritingEditor({
                   className="chip-color"
                   style={{ backgroundColor: getSwatch(ink)?.hex || "#ddd" }}
                 />
-                {inkLabel(ink)}
+                <InkIdentity ink={ink} compact />
               </span>
             ) : null;
           })}

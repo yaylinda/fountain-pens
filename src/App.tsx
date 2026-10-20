@@ -38,7 +38,7 @@ import type { Ink } from "./models/types";
 import { Action, Primary, Muted, Panel, Failure } from "./desk/ui";
 import { CollectionView } from "./desk/CollectionView";
 import { PaletteMenu } from "./desk/PaletteMenu";
-import { PenIdentity, DateStamp } from "./desk/Identity";
+import { PenIdentity, InkIdentity, DateStamp } from "./desk/Identity";
 import { Icon } from "./desk/Icon";
 import { PaletteCreate } from "./desk/PaletteCreate";
 import { Access } from "./desk/Access";
@@ -701,8 +701,7 @@ export function App() {
                                         >
                                           {used ? (
                                             <>
-                                              <Icon name="check" /> Logged
-                                              today
+                                              <Icon name="check" /> Logged today
                                             </>
                                           ) : (
                                             "Log writing today"
@@ -766,14 +765,25 @@ export function App() {
                       <PenIdentity pen={model.penById.get(entry.penId)!} />
                       <DateStamp value={entry.date} />
                     </div>
-                    <Muted>
-                      {isCleaning(entry)
-                        ? "Cleaned & empty"
-                        : entry.inkIds
-                            .map((id) => inkLabel(model.inkById.get(id)))
-                            .join(" + ")}
-                      {entry.notPure ? " · Residual ink" : ""}
-                    </Muted>
+                    <div className="activity-inks">
+                      {isCleaning(entry) ? (
+                        <Muted>Cleaned & empty</Muted>
+                      ) : (
+                        entry.inkIds.map((id, index) => (
+                          <span className="activity-ink" key={id}>
+                            {index > 0 && (
+                              <span className="ink-separator">+</span>
+                            )}
+                            <InkIdentity ink={model.inkById.get(id)!} compact />
+                          </span>
+                        ))
+                      )}
+                      {entry.notPure && (
+                        <span className="status status-neutral">
+                          Residual ink
+                        </span>
+                      )}
+                    </div>
                     {entry.notes && <Muted>{entry.notes}</Muted>}
                     <XStack gap={5} flexWrap="wrap">
                       {!isCleaning(entry) && (
