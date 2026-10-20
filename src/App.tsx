@@ -29,8 +29,6 @@ import {
 } from "./lib/deskPalette";
 import {
   getSwatch,
-  penLabel,
-  penDescription,
   inkLabel,
   today,
   isCleaning,
@@ -40,6 +38,7 @@ import type { Ink } from "./models/types";
 import { Action, Primary, Muted, Panel, Failure } from "./desk/ui";
 import { CollectionView } from "./desk/CollectionView";
 import { PaletteMenu } from "./desk/PaletteMenu";
+import { PenIdentity, DateStamp } from "./desk/Identity";
 import { Icon } from "./desk/Icon";
 import { PaletteCreate } from "./desk/PaletteCreate";
 import { Access } from "./desk/Access";
@@ -207,7 +206,7 @@ export function App() {
     });
   };
   return (
-    <div className="desk-shell">
+    <div className="desk-shell" data-view={view}>
       <a
         className="desk-skip"
         href="#desk-main"
@@ -243,6 +242,7 @@ export function App() {
       </header>
       <main id="desk-main" className="desk-main" tabIndex={-1}>
         <XStack
+          className="page-heading"
           alignItems="center"
           justifyContent="space-between"
           flexWrap="wrap"
@@ -284,19 +284,21 @@ export function App() {
                         borderColor="#f3d51b"
                         onPress={() => setDialog({ kind: "refill" })}
                       >
-                        <Icon name="refill" /> Refill / clean
+                        <Icon name="plus" /> New refill log
                       </Primary>
                     )}
                   </XStack>
                 )}
             </XStack>
-            {view === "desk" && (
-              <Muted>
-                {model.inked.length} inked pens · {currentInks.length} colors ·{" "}
-                {model.activePens.filter((p) => p.needsRefill).length} need
-                refill
-              </Muted>
-            )}
+            <Muted className="page-caption">
+              {view === "desk"
+                ? `${model.inked.length} inked pens · ${currentInks.length} colors · ${model.activePens.filter((p) => p.needsRefill).length} need refill`
+                : view === "refills"
+                  ? `${model.journal.length} refill logs · newest first`
+                  : view === "pens"
+                    ? `${model.activePens.length} pens · ${model.inked.length} currently inked`
+                    : `${collection.inks.filter((i) => !i.archived).length} inks · ${currentInks.length} currently in use`}
+            </Muted>
           </YStack>
         </XStack>
         {loading ? (
@@ -621,8 +623,7 @@ export function App() {
                                     aria-pressed={pen.id === activePenId}
                                     onPress={() => setSelectedPen(pen.id)}
                                   >
-                                    {penLabel(pen)} · {pen.color} ·{" "}
-                                    {pen.nibSize}
+                                    <PenIdentity pen={pen} />
                                   </Action>
                                 ))}
                               </YStack>
@@ -647,20 +648,23 @@ export function App() {
                                     borderTopWidth={1}
                                     borderColor="borderColor"
                                   >
-                                    <Text fontSize={16} fontWeight="700">
-                                      {penLabel(pen)}
-                                    </Text>
-                                    <Muted>{penDescription(pen)}</Muted>
+                                    {activePens.length === 1 && (
+                                      <PenIdentity pen={pen} />
+                                    )}
                                     <div className="pen-facts">
                                       <div>
                                         <span>Filled</span>
-                                        <strong>{entry.date}</strong>
+                                        <DateStamp value={entry.date} />
                                       </div>
                                       <div>
                                         <span>Last written</span>
-                                        <strong>
-                                          {logs[0]?.writtenOn || "Not recorded"}
-                                        </strong>
+                                        {logs[0] ? (
+                                          <DateStamp
+                                            value={logs[0].writtenOn}
+                                          />
+                                        ) : (
+                                          <strong>Not recorded</strong>
+                                        )}
                                       </div>
                                     </div>
                                     {(entry.inkIds.length > 1 ||
@@ -697,11 +701,11 @@ export function App() {
                                         >
                                           {used ? (
                                             <>
-                                              <Icon name="check" /> Written
+                                              <Icon name="check" /> Logged
                                               today
                                             </>
                                           ) : (
-                                            "Wrote today"
+                                            "Log writing today"
                                           )}
                                         </Primary>
                                       )}
@@ -725,7 +729,7 @@ export function App() {
                                               })
                                             }
                                           >
-                                            Refill / clean
+                                            New refill log
                                           </Action>
                                         )}
                                       </XStack>
@@ -751,7 +755,6 @@ export function App() {
         {view === "refills" && !loading && !error && (
           <div className="refills-layout">
             <section className="activity-view" aria-label="Refill activity">
-              <Muted>{model.journal.length} events · newest first</Muted>
               <YStack gap={16}>
                 {model.journal.map((entry) => (
                   <YStack
@@ -759,9 +762,10 @@ export function App() {
                     key={entry.id || entry.index}
                     gap={8}
                   >
-                    <Text fontSize={13}>
-                      {entry.date} · {penLabel(model.penById.get(entry.penId))}
-                    </Text>
+                    <div className="activity-heading">
+                      <PenIdentity pen={model.penById.get(entry.penId)!} />
+                      <DateStamp value={entry.date} />
+                    </div>
                     <Muted>
                       {isCleaning(entry)
                         ? "Cleaned & empty"
@@ -801,10 +805,7 @@ export function App() {
                   .filter((p) => p.needsRefill)
                   .map((p) => (
                     <YStack key={p.id} gap={5}>
-                      <Text fontSize={14} fontWeight="700">
-                        {penLabel(p)}
-                      </Text>
-                      <Muted>{penDescription(p)}</Muted>
+                      <PenIdentity pen={p} />
                       {canEdit && (
                         <Action
                           onPress={() =>

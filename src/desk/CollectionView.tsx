@@ -1,3 +1,4 @@
+import { PenIdentity, PenDetails, InkIdentity, DateStamp } from "./Identity";
 import { Icon } from "./Icon";
 import { useState } from "react";
 import { H2, Input, Label, Text, XStack, YStack } from "tamagui";
@@ -50,7 +51,9 @@ export function CollectionView({
   return (
     <div className="collection-view">
       <YStack gap={16} minWidth={0}>
-        <Label htmlFor="collection-search">Search {kind}</Label>
+        <Label className="visually-hidden" htmlFor="collection-search">
+          Search {kind}
+        </Label>
         <Input
           id="collection-search"
           type="search"
@@ -69,7 +72,7 @@ export function CollectionView({
           flexWrap="wrap"
         >
           <Muted role="status">
-            {kind === "pens" ? pens.length : inks.length} {kind}
+            {kind === "pens" ? pens.length : inks.length} shown
           </Muted>
           <Action
             aria-pressed={includeArchived}
@@ -87,12 +90,7 @@ export function CollectionView({
                   aria-pressed={selected === p.id}
                   onPress={() => setSelected(p.id)}
                 >
-                  <YStack gap={5} flex={1}>
-                    <Text fontSize={15} fontWeight="700">
-                      {penLabel(p)}
-                    </Text>
-                    <Muted>{penDescription(p)}</Muted>
-                  </YStack>
+                  <PenIdentity pen={p} />
                   <Text
                     className={`status ${p.needsRefill ? "status-red" : "status-green"}`}
                   >
@@ -128,16 +126,7 @@ export function CollectionView({
                     className="reference-swatch"
                     style={{ backgroundColor: getSwatch(i)?.hex || "#e2e2e5" }}
                   />
-                  <YStack gap={5} flex={1}>
-                    <Text fontSize={15} fontWeight="700">
-                      {i.name}
-                    </Text>
-                    <Muted>
-                      {i.brand}
-                      {i.collection ? ` · ${i.collection}` : ""}
-                      {i.archived ? " · Archived" : ""}
-                    </Muted>
-                  </YStack>
+                  <InkIdentity ink={i} />
                 </Action>
               ))}
           {!(kind === "pens" ? pens.length : inks.length) && (
@@ -157,17 +146,22 @@ export function CollectionView({
           </>
         ) : (
           <>
-            <Text className="status status-blue">
-              ◉ {pen ? "Pen reference" : "Ink reference"}
-            </Text>
-            <H2 fontSize={24} lineHeight="32px">
-              {pen ? penLabel(pen) : ink!.name}
+            <H2 fontSize={24} fontWeight="700" lineHeight="32px">
+              {pen ? (
+                <>
+                  <span className="object-brand">{pen.brand}</span> {pen.model}
+                </>
+              ) : (
+                ink!.name
+              )}
             </H2>
-            <Muted>
-              {pen
-                ? penDescription(pen)
-                : `${ink!.brand}${ink!.collection ? ` · ${ink!.collection}` : ""}`}
-            </Muted>
+            {pen ? (
+              <PenDetails pen={pen} />
+            ) : (
+              <Muted>
+                {[ink!.brand, ink!.collection].filter(Boolean).join(" · ")}
+              </Muted>
+            )}
             {ink && (
               <>
                 <div
@@ -191,24 +185,39 @@ export function CollectionView({
             {pen && (
               <>
                 <Text fontWeight="700">Current fill</Text>
-                <Muted>
-                  {entry
-                    ? isCleaning(entry)
-                      ? `Cleaned ${entry.date}`
-                      : `${entry.inkIds.map((id) => inkLabel(model.inkById.get(id))).join(" + ")} · ${entry.date}${entry.notPure ? " · Residual ink" : ""}`
-                    : "No refill recorded"}
-                </Muted>
+                {entry ? (
+                  <div className="reference-fill">
+                    <DateStamp value={entry.date} />
+                    <span
+                      className={`status ${isCleaning(entry) ? "status-neutral" : "status-green"}`}
+                    >
+                      {isCleaning(entry) ? "Cleaned & empty" : "Inked"}
+                    </span>
+                    {!isCleaning(entry) && (
+                      <Text fontSize={13}>
+                        {entry.inkIds
+                          .map((id) => inkLabel(model.inkById.get(id)))
+                          .join(" + ")}
+                      </Text>
+                    )}
+                    {entry.notPure && (
+                      <span className="status status-neutral">
+                        Residual ink
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <Muted>No refill recorded</Muted>
+                )}
               </>
             )}
             {ink && (
               <>
                 <Text fontWeight="700">Currently in</Text>
                 {model.currentPens(ink.id).length ? (
-                  model.currentPens(ink.id).map((p) => (
-                    <Muted key={p.id}>
-                      {penLabel(p)} · {penDescription(p)}
-                    </Muted>
-                  ))
+                  model
+                    .currentPens(ink.id)
+                    .map((p) => <PenIdentity key={p.id} pen={p} />)
                 ) : (
                   <Muted>No currently inked pens.</Muted>
                 )}

@@ -719,11 +719,11 @@ button:disabled {
   flex-direction: column;
   gap: 6px;
 }
-.pen-facts span {
+.pen-facts > div > span {
   font-size: 11px;
   color: #68686e;
 }
-.pen-facts strong {
+.pen-facts > div > strong {
   font-size: 12px;
   font-weight: 500;
 }
@@ -782,4 +782,437 @@ button:disabled {
 .status .ui-icon {
   width: 18px;
   height: 18px;
+}
+
+/* Shared rhythm: a single header, control height and object hierarchy across the desk. */
+:root {
+  --control-height: 42px;
+  --text-caption: 0.75rem;
+  --text-body: 0.875rem;
+  --text-name: 1rem;
+}
+.desk-shell[data-view="desk"] {
+  --page-accent: #f3d51b;
+}
+.desk-shell[data-view="inks"] {
+  --page-accent: #ec5b4c;
+}
+.desk-shell[data-view="pens"] {
+  --page-accent: #38a169;
+}
+.desk-shell[data-view="refills"] {
+  --page-accent: #1686ed;
+}
+.page-heading .brand-mark {
+  color: var(--page-accent);
+}
+.page-heading {
+  min-height: 68px;
+  margin-bottom: 28px;
+}
+.page-caption {
+  min-height: 18px;
+}
+.header-access .status {
+  height: var(--control-height);
+  padding: 0 12px;
+}
+.header-access button {
+  height: var(--control-height);
+}
+.status {
+  width: fit-content;
+  max-width: 100%;
+  white-space: normal;
+}
+.status-neutral {
+  color: #52525b;
+  background: #f1f0f3;
+}
+.object-identity {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+  white-space: normal;
+}
+.object-name {
+  font-size: var(--text-name);
+  line-height: 1.4;
+  color: #242426;
+  overflow-wrap: anywhere;
+}
+.object-name strong {
+  font-weight: 700;
+}
+.object-brand {
+  font-weight: 400;
+}
+.object-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  font-size: var(--text-caption);
+  line-height: 1.5;
+  color: #68686e;
+}
+.object-meta .status {
+  font-size: 0.75rem !important;
+  font-weight: 500;
+  padding: 1px 6px;
+}
+.date-stamp {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  color: #242426;
+  font-weight: 500;
+}
+.date-stamp small {
+  font-size: 0.6875rem;
+  color: #68686e;
+  font-weight: 400;
+}
+.pen-facts {
+  gap: 16px;
+  padding-top: 4px;
+}
+.pen-facts > div {
+  gap: 8px;
+}
+.selected-panel .object-name {
+  font-size: 0.875rem;
+}
+.selected-panel button[aria-pressed] {
+  padding: 12px;
+  min-height: 66px;
+}
+.selected-panel .ink-actions {
+  padding-top: 16px;
+  margin-top: 0;
+}
+.all-palette {
+  min-height: 58px;
+  height: 58px;
+}
+.palette-choice select,
+.palette-choice input,
+.palette-menu .menu-trigger {
+  height: 58px;
+}
+.palette-menu .menu-trigger {
+  width: 42px;
+}
+.palette-actions {
+  min-height: 58px;
+}
+.activity-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+.activity-heading > .date-stamp {
+  flex-shrink: 0;
+  text-align: right;
+}
+.activity-entry {
+  padding: 20px 0;
+}
+.activity-entry:first-child {
+  padding-top: 0;
+}
+.activity-entry > div:last-child {
+  margin-top: 8px;
+}
+.reference-fill {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.reference-fill > div,
+.reference-fill > span:not(.status) {
+  flex-basis: 100%;
+}
+.reference-detail > .object-identity + .object-identity {
+  padding-top: 12px;
+}
+.collection-view {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+.collection-row {
+  min-height: 88px;
+}
+.collection-row .status {
+  flex-shrink: 0;
+}
+.reference-detail h2 {
+  text-wrap: pretty;
+}
+
+/* Dialogs use the same identities, dates and controls as the page they belong to. */
+.desk-dialog {
+  padding: 24px !important;
+  gap: 20px !important;
+}
+.dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dialog-heading h2 {
+  margin: 0;
+}
+.icon-button {
+  width: var(--control-height);
+  min-width: var(--control-height);
+  padding: 8px !important;
+}
+.refill-dialog {
+  width: min(820px, calc(100vw - 40px));
+}
+.writing-dialog {
+  width: min(620px, calc(100vw - 40px));
+}
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.field-label,
+.form-section > label,
+.form-field > label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 20px;
+}
+.field-hint {
+  font-weight: 400;
+  color: #68686e;
+  margin-left: 8px;
+  font-size: 0.6875rem;
+}
+.refill-topline {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 24px;
+}
+.segmented-control {
+  display: flex;
+  gap: 0;
+}
+.segmented-control button {
+  min-width: 110px;
+  border-radius: 0;
+}
+.segmented-control button:first-child {
+  border-radius: 6px 0 0 6px;
+}
+.segmented-control button:last-child {
+  border-radius: 0 6px 6px 0;
+  margin-left: -1px;
+}
+.segmented-control button[aria-pressed="true"] {
+  background: #edf5ff;
+  color: #185b98;
+  border-color: #91bce2;
+  z-index: 1;
+}
+.refill-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.form-section {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+.refill-dialog fieldset.desk-form {
+  gap: 20px;
+}
+.refill-dialog input,
+.writing-dialog input {
+  height: var(--control-height);
+}
+.refill-dialog .desk-options {
+  height: 216px;
+  max-height: 216px;
+  padding: 3px;
+  margin: -3px;
+  scroll-padding: 6px;
+}
+.desk-options button {
+  min-height: 70px;
+  padding: 10px 12px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.desk-options .object-name {
+  font-size: 0.875rem;
+}
+.option-swatch {
+  width: 10px;
+  height: 38px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.cleaning-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 12px;
+  min-height: 280px;
+  padding: 20px;
+  background: #f2f1f3;
+  border-radius: 6px;
+}
+.refill-dialog textarea {
+  min-height: 68px;
+}
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid #d9d9de;
+}
+.writing-context {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #d9d9de;
+}
+.writing-fill {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.writing-inks {
+  grid-column: 1/-1;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ink-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.chip-color {
+  height: 12px;
+  width: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.writing-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  padding: 16px;
+  border-radius: 6px;
+  background: #f2f1f3;
+}
+.writing-form .form-field {
+  flex: 1;
+}
+.history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.history-row {
+  padding: 12px 0;
+  border-top: 1px solid #d9d9de;
+}
+.history-row .action-danger {
+  border-color: transparent !important;
+}
+@media (max-width: 1050px) {
+  .collection-view {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}
+@media (max-width: 800px) {
+  .activity-heading {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .activity-heading > .date-stamp {
+    text-align: left;
+  }
+  .refill-columns {
+    gap: 16px;
+  }
+}
+@media (max-width: 699px) {
+  .collection-view {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .refill-columns,
+  .refill-topline {
+    grid-template-columns: 1fr;
+  }
+  .writing-context {
+    grid-template-columns: 1fr;
+  }
+}
+
+button[aria-pressed="true"] .status-neutral {
+  background: #fff;
+  color: #42424b;
+}
+.refill-dialog .desk-options {
+  height: 230px;
+  max-height: 230px;
+  scrollbar-gutter: stable;
+}
+.refill-summary {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+}
+.refill-summary strong {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.refill-summary span {
+  color: #68686e;
+  overflow-wrap: anywhere;
+}
+.dialog-footer {
+  align-items: center;
+}
+.dialog-footer button {
+  flex-shrink: 0;
+}
+@media (max-width: 699px) {
+  .dialog-footer {
+    flex-wrap: wrap;
+  }
+  .refill-summary {
+    flex-basis: 100%;
+  }
 }
