@@ -23,10 +23,10 @@ import {
 } from "./services/dataService";
 import {
   reconcilePalette,
+  currentlyInkedColors,
   movePalette,
   type DeskArrangement,
 } from "./lib/deskPalette";
-import { sortInksByColor } from "./lib/colorOrder";
 import {
   getSwatch,
   penLabel,
@@ -39,6 +39,8 @@ import {
 import type { Ink } from "./models/types";
 import { Action, Primary, Muted, Panel, Failure } from "./desk/ui";
 import { CollectionView } from "./desk/CollectionView";
+import { PaletteMenu } from "./desk/PaletteMenu";
+import { Icon } from "./desk/Icon";
 import { PaletteCreate } from "./desk/PaletteCreate";
 import { Access } from "./desk/Access";
 import { RefillEditor, WritingEditor } from "./desk/Editors";
@@ -103,22 +105,22 @@ function Swatch({
         <XStack gap={4}>
           <Action
             flex={1}
-            height={28}
+            height={36}
             fontSize={10}
             {...sort.attributes}
             {...sort.listeners}
             role="button"
             aria-label={`Move ${inkLabel(ink)}`}
           >
-            ↔ Move
+            <Icon name="move" /> Move
           </Action>
           <Action
-            height={28}
+            height={36}
             fontSize={10}
             aria-label={`Omit ${inkLabel(ink)}`}
             onPress={omit}
           >
-            −
+            <Icon name="minus" />
           </Action>
         </XStack>
       )}
@@ -127,14 +129,14 @@ function Swatch({
 }
 const views = {
   desk: "My desk",
-  pens: "Pens",
   inks: "Inks",
-  queue: "Refill queue",
-  activity: "Activity",
+  pens: "Pens",
+  refills: "Refills",
 };
 type View = keyof typeof views;
 const readView = () => {
-  const key = location.hash.slice(1);
+  const hash = location.hash.slice(1);
+  const key = hash === "activity" || hash === "queue" ? "refills" : hash;
   return (key in views ? key : "desk") as View;
 };
 
@@ -165,19 +167,18 @@ export function App() {
   >(null);
   const command = useCommand();
   const canEdit = !!collection.canEdit;
-  const currentIds = new Set(
-    model.inked.flatMap((p) => model.latest.get(p.id)?.inkIds || []),
-  );
-  const currentInks = sortInksByColor(
-    collection.inks.filter((ink) => currentIds.has(ink.id)),
-  );
+  const currentInks = currentlyInkedColors(collection.inks, model);
+  const currentIds = new Set(currentInks.map((ink) => ink.id));
   const palettes = model.palettes.length
     ? model.palettes
-    : [{ id: "default", name: "My palette", items: model.palette }];
-  const palette = palettes.find((p) => p.id === paletteId) || palettes[0];
+    : model.palette.length
+      ? [{ id: "default", name: "My palette", items: model.palette }]
+      : [];
+  const palette = palettes.find((p) => p.id === paletteId);
+  const isAll = !palette;
   const editing = canEdit && !!draft;
   const items = reconcilePalette(
-    editing ? draft.items : palette.items,
+    editing ? draft.items : palette?.items || [],
     currentInks,
   );
   const visible = items.filter(
@@ -196,6 +197,7 @@ export function App() {
     }),
   );
   const begin = (mode: "edit" | "copy") => {
+    if (!palette) return;
     setConfirmDelete(false);
     setDraft({
       id: mode === "edit" ? palette.id : null,
@@ -261,7 +263,7 @@ export function App() {
               {canEdit &&
                 !loading &&
                 !error &&
-                (view === "desk" || view === "queue") && (
+                (view === "desk" || view === "refills") && (
                   <XStack
                     gap={8}
                     flexWrap="wrap"
@@ -274,15 +276,17 @@ export function App() {
                         disabled={command.busy}
                         onPress={() => setCreating(true)}
                       >
-                        + New palette
+                        <Icon name="plus" /> New palette
                       </Primary>
                     )}
-                    <Action
-                      borderColor="#85858c"
-                      onPress={() => setDialog({ kind: "refill" })}
-                    >
-                      + Refill or clean a pen
-                    </Action>
+                    {view === "refills" && (
+                      <Primary
+                        borderColor="#f3d51b"
+                        onPress={() => setDialog({ kind: "refill" })}
+                      >
+                        <Icon name="refill" /> Refill / clean
+                      </Primary>
+                    )}
                   </XStack>
                 )}
             </XStack>
@@ -329,6 +333,21 @@ export function App() {
                         : "Saved palette"}
                     </label>
                     <div className="palette-toolbar">
+                      {!editing && (
+                        <button
+                          className="all-palette"
+                          aria-pressed={isAll}
+                          disabled={command.busy}
+                          onClick={() => {
+                            setPaletteId("");
+                            setSelected("");
+                            setConfirmDelete(false);
+                          }}
+                        >
+                          <strong>All</strong>
+                          <span>Currently inked · {currentInks.length}</span>
+                        </button>
+                      )}
                       <div className="palette-choice">
                         {editing ? (
                           <Input
@@ -344,14 +363,19 @@ export function App() {
                           <select
                             id="saved-palette"
                             name="saved-palette"
-                            value={palette.id}
-                            disabled={editing || command.busy}
+                            value={palette?.id || ""}
+                            disabled={
+                              editing || command.busy || !palettes.length
+                            }
                             onChange={(event) => {
                               setPaletteId(event.target.value);
                               setSelected("");
                               setConfirmDelete(false);
                             }}
                           >
+                            <option value="" disabled>
+                              Saved palettes
+                            </option>
                             {palettes.map((p) => (
                               <option key={p.id} value={p.id}>
                                 {p.name}
@@ -406,35 +430,21 @@ export function App() {
                                 Cancel
                               </Action>
                             </>
-                          ) : (
-                            <>
-                              <Action
-                                borderColor="#85858c"
-                                aria-label="Edit"
-                                onPress={() => begin("edit")}
-                              >
-                                <span aria-hidden="true">✎</span> Edit
-                              </Action>
-                              <Action
-                                backgroundColor="transparent"
-                                borderColor="transparent"
-                                onPress={() => begin("copy")}
-                              >
-                                Duplicate
-                              </Action>
-                              <Action
-                                className="action-quiet action-danger"
-                                onPress={() => setConfirmDelete(true)}
-                              >
-                                Delete
-                              </Action>
-                            </>
-                          )}
+                          ) : palette ? (
+                            <PaletteMenu
+                              key={palette.id}
+                              name={palette.name}
+                              disabled={command.busy}
+                              edit={() => begin("edit")}
+                              duplicate={() => begin("copy")}
+                              remove={() => setConfirmDelete(true)}
+                            />
+                          ) : null}
                         </XStack>
                       )}
                     </div>
                   </div>
-                  {confirmDelete && canEdit && (
+                  {confirmDelete && canEdit && palette && (
                     <Panel>
                       <Text>Delete “{palette.name}”?</Text>
                       <XStack gap={8}>
@@ -571,7 +581,9 @@ export function App() {
                                   {activeInk.name}
                                 </H2>
                                 <Muted>
-                                  {activeInk.brand} · {activeInk.collection}
+                                  {[activeInk.brand, activeInk.collection]
+                                    .filter(Boolean)
+                                    .join(" · ")}
                                 </Muted>
                               </div>
                               <Action
@@ -586,7 +598,7 @@ export function App() {
                                   setSelected("");
                                 }}
                               >
-                                ×
+                                <Icon name="close" />
                               </Action>
                             </XStack>
                             <YStack
@@ -639,17 +651,30 @@ export function App() {
                                       {penLabel(pen)}
                                     </Text>
                                     <Muted>{penDescription(pen)}</Muted>
-                                    <Muted>
-                                      Filled {entry.date}
-                                      {entry.inkIds.length > 1
-                                        ? ` · Mix: ${entry.inkIds.map((id) => inkLabel(model.inkById.get(id))).join(" + ")}`
-                                        : ""}
-                                      {entry.notPure ? " · Residual ink" : ""}
-                                    </Muted>
-                                    <Muted>
-                                      Last written:{" "}
-                                      {logs[0]?.writtenOn || "Not recorded"}
-                                    </Muted>
+                                    <div className="pen-facts">
+                                      <div>
+                                        <span>Filled</span>
+                                        <strong>{entry.date}</strong>
+                                      </div>
+                                      <div>
+                                        <span>Last written</span>
+                                        <strong>
+                                          {logs[0]?.writtenOn || "Not recorded"}
+                                        </strong>
+                                      </div>
+                                    </div>
+                                    {(entry.inkIds.length > 1 ||
+                                      entry.notPure) && (
+                                      <Muted>
+                                        {entry.inkIds.length > 1
+                                          ? `Mix: ${entry.inkIds.map((id) => inkLabel(model.inkById.get(id))).join(" + ")}`
+                                          : ""}
+                                        {entry.notPure
+                                          ? `${entry.inkIds.length > 1 ? " · " : ""}Residual ink`
+                                          : ""}
+                                      </Muted>
+                                    )}
+
                                     <div className="ink-actions">
                                       {canEdit && (
                                         <Primary
@@ -670,9 +695,14 @@ export function App() {
                                             )
                                           }
                                         >
-                                          {used
-                                            ? "✓ Written today"
-                                            : "Wrote today"}
+                                          {used ? (
+                                            <>
+                                              <Icon name="check" /> Written
+                                              today
+                                            </>
+                                          ) : (
+                                            "Wrote today"
+                                          )}
                                         </Primary>
                                       )}
                                       <XStack gap={6} flexWrap="wrap">
@@ -716,80 +746,82 @@ export function App() {
                 </YStack>
               </div>
             )}
-            {view === "queue" && (
-              <YStack gap={16} className="queue-view">
-                {" "}
-                <Panel>
-                  <Text fontSize={16} fontWeight="700">
-                    ↻ Pens waiting for ink
-                  </Text>
-                  {model.activePens
-                    .filter((p) => p.needsRefill)
-                    .map((p) => (
-                      <YStack key={p.id} gap={5}>
-                        <Text fontSize={12}>{penLabel(p)}</Text>
-                        <Muted>{penDescription(p)}</Muted>
-                        {canEdit && (
-                          <Action
-                            onPress={() =>
-                              setDialog({ kind: "refill", penId: p.id })
-                            }
-                          >
-                            Fill this pen
-                          </Action>
-                        )}
-                      </YStack>
-                    ))}
-                  {!model.activePens.some((p) => p.needsRefill) && (
-                    <Muted>No pens waiting.</Muted>
-                  )}
-                </Panel>
-              </YStack>
-            )}
           </>
         )}
-        {view === "activity" && !loading && !error && (
-          <section className="activity-view" aria-label="Refill activity">
-            <Muted>{model.journal.length} events · newest first</Muted>
-            <YStack gap={16}>
-              {model.journal.map((entry) => (
-                <YStack
-                  className="activity-entry"
-                  key={entry.id || entry.index}
-                  gap={8}
-                >
-                  <Text fontSize={13}>
-                    {entry.date} · {penLabel(model.penById.get(entry.penId))}
-                  </Text>
-                  <Muted>
-                    {isCleaning(entry)
-                      ? "Cleaned & empty"
-                      : entry.inkIds
-                          .map((id) => inkLabel(model.inkById.get(id)))
-                          .join(" + ")}
-                    {entry.notPure ? " · Residual ink" : ""}
-                  </Muted>
-                  {entry.notes && <Muted>{entry.notes}</Muted>}
-                  <XStack gap={5} flexWrap="wrap">
-                    {!isCleaning(entry) && (
-                      <Action
-                        onPress={() => setDialog({ kind: "writing", entry })}
-                      >
-                        Writing history
-                      </Action>
-                    )}
-                    {canEdit && (
-                      <Action
-                        onPress={() => setDialog({ kind: "refill", entry })}
-                      >
-                        Correct refill
-                      </Action>
-                    )}
-                  </XStack>
-                </YStack>
-              ))}
-            </YStack>
-          </section>
+        {view === "refills" && !loading && !error && (
+          <div className="refills-layout">
+            <section className="activity-view" aria-label="Refill activity">
+              <Muted>{model.journal.length} events · newest first</Muted>
+              <YStack gap={16}>
+                {model.journal.map((entry) => (
+                  <YStack
+                    className="activity-entry"
+                    key={entry.id || entry.index}
+                    gap={8}
+                  >
+                    <Text fontSize={13}>
+                      {entry.date} · {penLabel(model.penById.get(entry.penId))}
+                    </Text>
+                    <Muted>
+                      {isCleaning(entry)
+                        ? "Cleaned & empty"
+                        : entry.inkIds
+                            .map((id) => inkLabel(model.inkById.get(id)))
+                            .join(" + ")}
+                      {entry.notPure ? " · Residual ink" : ""}
+                    </Muted>
+                    {entry.notes && <Muted>{entry.notes}</Muted>}
+                    <XStack gap={5} flexWrap="wrap">
+                      {!isCleaning(entry) && (
+                        <Action
+                          onPress={() => setDialog({ kind: "writing", entry })}
+                        >
+                          Writing history
+                        </Action>
+                      )}
+                      {canEdit && (
+                        <Action
+                          onPress={() => setDialog({ kind: "refill", entry })}
+                        >
+                          Correct refill
+                        </Action>
+                      )}
+                    </XStack>
+                  </YStack>
+                ))}
+              </YStack>
+            </section>
+            <aside className="queue-view" aria-label="Refill queue">
+              {" "}
+              <Panel>
+                <Text fontSize={16} fontWeight="700">
+                  Refill queue
+                </Text>
+                {model.activePens
+                  .filter((p) => p.needsRefill)
+                  .map((p) => (
+                    <YStack key={p.id} gap={5}>
+                      <Text fontSize={14} fontWeight="700">
+                        {penLabel(p)}
+                      </Text>
+                      <Muted>{penDescription(p)}</Muted>
+                      {canEdit && (
+                        <Action
+                          onPress={() =>
+                            setDialog({ kind: "refill", penId: p.id })
+                          }
+                        >
+                          Fill this pen
+                        </Action>
+                      )}
+                    </YStack>
+                  ))}
+                {!model.activePens.some((p) => p.needsRefill) && (
+                  <Muted>No pens waiting.</Muted>
+                )}
+              </Panel>
+            </aside>
+          </div>
         )}
       </main>
       {creating && canEdit && (
@@ -798,9 +830,11 @@ export function App() {
           hasUnsavedChanges={
             !!draft &&
             (draft.id === null ||
-              draft.name !== palette.name ||
+              draft.name !== palette?.name ||
               JSON.stringify(items) !==
-                JSON.stringify(reconcilePalette(palette.items, currentInks)))
+                JSON.stringify(
+                  reconcilePalette(palette?.items || [], currentInks),
+                ))
           }
           close={() => setCreating(false)}
           created={(saved) => {

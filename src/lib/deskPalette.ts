@@ -1,4 +1,13 @@
 import type { Ink } from '../models/types';
+import type { deriveCollection } from './collection';
+import { sortInksByColor } from './colorOrder';
+
+// All is a live reference, never a saved arrangement. Mixed fills contribute each ink once.
+export function currentlyInkedColors(inks: Ink[], model: ReturnType<typeof deriveCollection>): Ink[] {
+    const ids = new Set(model.inked.flatMap(pen => model.latest.get(pen.id)?.inkIds || []));
+    return sortInksByColor(inks.filter(ink => ids.has(ink.id)));
+}
+
 export interface PaletteItem { inkId: string; omitted: boolean }
 export interface DeskArrangement { id: string; name: string; items: PaletteItem[] }
 export function arrangementDto(value: unknown): DeskArrangement {

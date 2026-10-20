@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import { useCommand } from "./useCommand";
 import { useState } from "react";
 import { Input, Label, Text, TextArea, XStack, YStack } from "tamagui";
@@ -196,7 +197,7 @@ export function RefillEditor({
                 aria-pressed={!!draft.notPure}
                 onPress={() => patch({ notPure: !draft.notPure })}
               >
-                {draft.notPure ? "✓ " : ""}Residual ink / not pure
+                {draft.notPure && <Icon name="check" />}Residual ink / not pure
               </Action>
             </>
           ) : (
@@ -205,7 +206,7 @@ export function RefillEditor({
                 aria-pressed={!!draft.needsRefill}
                 onPress={() => patch({ needsRefill: !draft.needsRefill })}
               >
-                {draft.needsRefill ? "✓ " : ""}Add to refill queue
+                {draft.needsRefill && <Icon name="check" />}Add to refill queue
               </Action>
             )
           )}

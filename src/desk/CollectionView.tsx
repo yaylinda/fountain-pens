@@ -1,3 +1,4 @@
+import { Icon } from "./Icon";
 import { useState } from "react";
 import { H2, Input, Label, Text, XStack, YStack } from "tamagui";
 import {
@@ -95,13 +96,24 @@ export function CollectionView({
                   <Text
                     className={`status ${p.needsRefill ? "status-red" : "status-green"}`}
                   >
+                    {!p.archived && (
+                      <Icon
+                        name={
+                          p.needsRefill
+                            ? "refill"
+                            : model.inked.some((x) => x.id === p.id)
+                              ? "ink"
+                              : "circle"
+                        }
+                      />
+                    )}
                     {p.archived
                       ? "Archived"
                       : p.needsRefill
-                        ? "↻ Needs refill"
+                        ? "Needs refill"
                         : model.inked.some((x) => x.id === p.id)
-                          ? "● Inked"
-                          : "○ Empty"}
+                          ? "Inked"
+                          : "Empty"}
                   </Text>
                 </Action>
               ))

@@ -601,3 +601,185 @@ button:disabled {
     justify-content: flex-start;
   }
 }
+
+/* Reference and saved arrangements are choices; actions stay in their menu. */
+.desk-rail-nav a[href="#desk"] {
+  --nav-accent: #f3d51b;
+}
+.desk-rail-nav a[href="#inks"] {
+  --nav-accent: #ec5b4c;
+}
+.desk-rail-nav a[href="#pens"] {
+  --nav-accent: #38a169;
+}
+.desk-rail-nav a[href="#refills"] {
+  --nav-accent: #1686ed;
+}
+.desk-rail-nav a.nav-active {
+  box-shadow: inset 0 -3px var(--nav-accent);
+}
+.ui-icon {
+  flex: none;
+  vertical-align: middle;
+}
+.palette-toolbar {
+  align-items: center;
+  gap: 12px;
+}
+.palette-choice {
+  flex: 1 1 180px;
+}
+.all-palette {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  padding: 9px 14px;
+  min-height: 58px;
+  border: 1px solid #d9d9de;
+  border-radius: 6px;
+  background: white;
+  color: #242426;
+}
+.all-palette strong {
+  font-size: 15px;
+}
+.all-palette span {
+  color: #68686e;
+  font-size: 11px;
+}
+.all-palette[aria-pressed="true"] {
+  border-color: #242426;
+  box-shadow: inset 3px 0 #f3d51b;
+}
+.palette-menu {
+  position: relative;
+}
+.menu-trigger {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #b8b8bf;
+  background: white;
+  border-radius: 6px;
+  color: #242426;
+}
+.palette-menu-popup {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: 230px;
+  z-index: 10;
+  padding: 6px;
+  border: 1px solid #b8b8bf;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 8px 24px #24242618;
+}
+.menu-context {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px;
+  overflow-wrap: anywhere;
+}
+.palette-menu-popup button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px;
+  background: white;
+  border: 0;
+  border-radius: 4px;
+  font-size: 12px;
+  text-align: left;
+  color: #242426;
+}
+.palette-menu-popup button:hover,
+.palette-menu-popup button:focus {
+  background: #f2f1f3;
+}
+.menu-separator {
+  border-top: 1px solid #d9d9de;
+  margin: 6px 4px;
+}
+.palette-menu-popup .menu-delete {
+  color: #ad2635;
+}
+.pen-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 14px 0 4px;
+}
+.pen-facts div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pen-facts span {
+  font-size: 11px;
+  color: #68686e;
+}
+.pen-facts strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.ink-actions > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ink-actions button {
+  padding: 10px;
+  min-height: 42px;
+}
+.selected-panel button[aria-label="Deselect ink"] {
+  width: 38px;
+  height: 38px;
+  padding: 8px;
+}
+.refills-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 28px;
+  align-items: start;
+}
+.queue-view {
+  position: sticky;
+  top: 24px;
+}
+.queue-view button {
+  align-self: flex-start;
+  margin-top: 6px;
+}
+@media (max-width: 1050px) {
+  .refills-layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 18px;
+  }
+  .palette-choice {
+    flex-basis: 150px;
+  }
+}
+@media (max-width: 699px) {
+  .refills-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .queue-view {
+    position: static;
+    grid-row: 1;
+  }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.status .ui-icon {
+  width: 18px;
+  height: 18px;
+}
