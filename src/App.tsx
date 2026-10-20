@@ -805,6 +805,7 @@ export function App() {
                                         ))}
                                       <XStack gap={6} flexWrap="wrap">
                                         <Action
+                                          aria-label="View writing history"
                                           onPress={() =>
                                             setDialog({
                                               kind: "writing",
@@ -812,7 +813,7 @@ export function App() {
                                             })
                                           }
                                         >
-                                          View writing history
+                                          View history
                                         </Action>
                                         {canEdit && (
                                           <Action
