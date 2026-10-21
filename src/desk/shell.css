@@ -667,8 +667,8 @@ button:disabled {
   padding: 6px;
   border: 1px solid #b8b8bf;
   border-radius: 8px;
-  background: white;
-  box-shadow: 0 8px 24px #24242618;
+  background: #fff !important;
+  box-shadow: 0 8px 24px #24242618 !important;
 }
 .menu-context {
   font-size: 12px;
@@ -1725,10 +1725,10 @@ button[aria-pressed="true"] .status-neutral {
   flex: 1 1 240px;
   min-width: 0;
 }
-.palette-selector select {
+.palette-selector .palette-select-trigger {
   width: 100%;
   min-height: 58px;
-  padding: 0 46px 0 46px;
+  padding: 0 46px 0 46px !important;
   appearance: none;
   border: 1px solid #b8b8bf;
   border-radius: 6px;
@@ -1739,7 +1739,7 @@ button[aria-pressed="true"] .status-neutral {
     monospace;
   text-overflow: ellipsis;
 }
-.palette-selector-live select {
+.palette-selector-live .palette-select-trigger {
   box-shadow: inset 3px 0 #f3d51b;
 }
 .selector-mark {
@@ -1754,11 +1754,77 @@ button[aria-pressed="true"] .status-neutral {
 .palette-selector-live .selector-mark {
   color: #226943;
 }
-.palette-selector select:focus-visible {
+.palette-selector .palette-select-trigger:focus-visible {
   outline: 2px solid #242426;
   outline-offset: 2px;
 }
 
 @media (max-width: 1050px) {
-  .sidebar-card { padding: 18px; }
+  .sidebar-card {
+    padding: 18px;
+  }
+}
+
+.palette-select-trigger {
+  position: relative;
+  justify-content: flex-start;
+}
+.palette-select-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: inherit;
+}
+.palette-select-popup {
+  position: fixed !important;
+  left: var(--palette-left) !important;
+  top: var(--palette-top) !important;
+  width: var(--palette-width) !important;
+  min-width: var(--palette-width) !important;
+  max-width: var(--palette-width) !important;
+  height: auto !important;
+  max-height: var(--palette-height) !important;
+  transform: none !important;
+  padding: 6px;
+  border: 1px solid #b8b8bf;
+  border-radius: 8px;
+  background: #fff !important;
+  box-shadow: 0 8px 24px #24242618 !important;
+  scrollbar-width: thin !important;
+  scroll-padding: 6px;
+}
+.palette-select-popup .palette-select-label {
+  padding: 8px 10px;
+  color: #68686e;
+  font:
+    500 11px/18px "Fira Mono",
+    monospace;
+}
+.palette-select-saved {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #e2e2e7;
+}
+.palette-select-option {
+  min-height: 42px;
+  padding: 10px;
+  gap: 12px;
+  border-radius: 4px;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.palette-select-option span {
+  font:
+    400 13px/20px "Fira Mono",
+    monospace;
+  overflow-wrap: anywhere;
+}
+.palette-select-option[aria-selected="true"] {
+  background: #faf6d9;
+}
+.palette-select-option:focus,
+.palette-select-option:hover {
+  background: #eeeef1;
+  outline: 2px solid #68686e;
+  outline-offset: -2px;
 }
