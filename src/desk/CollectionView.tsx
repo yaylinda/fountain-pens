@@ -10,6 +10,7 @@ import { InkColors } from "./InkColors";
 import type { JournalEntry } from "../lib/collection";
 import {
   PenIdentity,
+  PenSummary,
   PenDetails,
   InkIdentity,
   InkDetails,
@@ -38,7 +39,9 @@ export function CollectionView({
   model,
   onRefill,
   onHistory,
+  detailId,
 }: {
+  detailId?: string;
   onRefill: (penId: string) => void;
   onHistory: (entry: JournalEntry) => void;
   kind: "pens" | "inks";
@@ -46,7 +49,7 @@ export function CollectionView({
   model: ReturnType<typeof deriveCollection>;
 }) {
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState(detailId || "");
   const [includeArchived, setIncludeArchived] = useState(false);
   const pens = [...collection.pens]
     .sort(byPenName)
@@ -74,82 +77,86 @@ export function CollectionView({
       .filter((log) => log.refillId === entry.id)
       .sort((a, b) => b.writtenOn.localeCompare(a.writtenOn))[0];
   return (
-    <div className="collection-view">
-      <YStack gap={16} minWidth={0}>
-        <Label className="visually-hidden" htmlFor="collection-search">
-          Search {kind}
-        </Label>
-        <Input
-          id="collection-search"
-          type="search"
-          value={query}
-          onChangeText={setQuery}
-          placeholder={
-            kind === "pens"
-              ? "Brand, model, color or nib…"
-              : "Brand, ink or collection…"
-          }
-        />
-        <XStack
-          justifyContent="space-between"
-          alignItems="center"
-          gap={12}
-          flexWrap="wrap"
-        >
-          <Muted role="status">
-            {kind === "pens" ? pens.length : inks.length} shown
-          </Muted>
-          <Action
-            aria-pressed={includeArchived}
-            onPress={() => setIncludeArchived(!includeArchived)}
+    <div className={detailId ? "ink-detail-view" : "collection-view"}>
+      {!detailId && (
+        <YStack gap={16} minWidth={0}>
+          <Label className="visually-hidden" htmlFor="collection-search">
+            Search {kind}
+          </Label>
+          <Input
+            id="collection-search"
+            type="search"
+            value={query}
+            onChangeText={setQuery}
+            placeholder={
+              kind === "pens"
+                ? "Brand, model, color or nib…"
+                : "Brand, ink or collection…"
+            }
+          />
+          <XStack
+            justifyContent="space-between"
+            alignItems="center"
+            gap={12}
+            flexWrap="wrap"
           >
-            Include archived
-          </Action>
-        </XStack>
-        <div className="collection-list">
-          {kind === "pens"
-            ? pens.map((p) => (
-                <Action
-                  className="collection-row"
-                  key={p.id}
-                  aria-pressed={selected === p.id}
-                  onPress={() => setSelected(p.id)}
-                >
-                  <PenIdentity pen={p} />
-                  <span className="pen-statuses">
-                    {p.archived && (
-                      <span className="status status-neutral">Archived</span>
-                    )}
-                    <FillStatus entry={model.latest.get(p.id)} />
-                    {p.needsRefill && (
-                      <span className="status status-red">
-                        <Icon name="refill" /> Queued for refill
-                      </span>
-                    )}
-                  </span>
-                </Action>
-              ))
-            : inks.map((i) => (
-                <Action
-                  className="collection-row"
-                  key={i.id}
-                  aria-pressed={selected === i.id}
-                  onPress={() => setSelected(i.id)}
-                >
-                  <span
-                    className="reference-swatch"
-                    style={{ backgroundColor: getSwatch(i)?.hex || "#e2e2e5" }}
-                  />
-                  <InkIdentity ink={i} />
-                </Action>
-              ))}
-          {!(kind === "pens" ? pens.length : inks.length) && (
-            <Muted>
-              No matches. Try another name or include archived items.
+            <Muted role="status">
+              {kind === "pens" ? pens.length : inks.length} shown
             </Muted>
-          )}
-        </div>
-      </YStack>
+            <Action
+              aria-pressed={includeArchived}
+              onPress={() => setIncludeArchived(!includeArchived)}
+            >
+              Include archived
+            </Action>
+          </XStack>
+          <div className="collection-list">
+            {kind === "pens"
+              ? pens.map((p) => (
+                  <Action
+                    className="collection-row"
+                    key={p.id}
+                    aria-pressed={selected === p.id}
+                    onPress={() => setSelected(p.id)}
+                  >
+                    <PenIdentity pen={p} />
+                    <span className="pen-statuses">
+                      {p.archived && (
+                        <span className="status status-neutral">Archived</span>
+                      )}
+                      <FillStatus entry={model.latest.get(p.id)} />
+                      {p.needsRefill && (
+                        <span className="status status-red">
+                          <Icon name="refill" /> Queued for refill
+                        </span>
+                      )}
+                    </span>
+                  </Action>
+                ))
+              : inks.map((i) => (
+                  <Action
+                    className="collection-row"
+                    key={i.id}
+                    aria-pressed={selected === i.id}
+                    onPress={() => setSelected(i.id)}
+                  >
+                    <span
+                      className="reference-swatch"
+                      style={{
+                        backgroundColor: getSwatch(i)?.hex || "#e2e2e5",
+                      }}
+                    />
+                    <InkIdentity ink={i} />
+                  </Action>
+                ))}
+            {!(kind === "pens" ? pens.length : inks.length) && (
+              <Muted>
+                No matches. Try another name or include archived items.
+              </Muted>
+            )}
+          </div>
+        </YStack>
+      )}
       <SidebarCard
         className="reference-detail"
         title={
@@ -219,12 +226,12 @@ export function CollectionView({
                 <SidebarActions>
                   {entry && !isCleaning(entry) && (
                     <Action onPress={() => onHistory(entry)}>
-                      View history
+                      <Icon name="history" /> View history
                     </Action>
                   )}
                   {collection.canEdit && !pen.archived && (
                     <Action onPress={() => onRefill(pen.id)}>
-                      Add refill log
+                      <Icon name="plus" /> Log refill
                     </Action>
                   )}
                 </SidebarActions>
@@ -233,10 +240,13 @@ export function CollectionView({
             {pen && (
               <SidebarSection title="Refill queue">
                 <Muted>
-                  {pen.needsRefill ? "Queued for refill" : "Not queued for refill"}
+                  {pen.needsRefill
+                    ? "Queued for refill"
+                    : "Not queued for refill"}
                 </Muted>
                 <Muted>
-                  Queueing plans a future refill. It does not change the current fill.
+                  Queueing plans a future refill. It does not change the current
+                  fill.
                 </Muted>
                 <RefillNeededAction pen={pen} />
               </SidebarSection>
@@ -246,7 +256,7 @@ export function CollectionView({
                 {model.currentPens(ink.id).length ? (
                   model.currentPens(ink.id).map((p) => (
                     <div className="sidebar-pen" key={p.id}>
-                      <PenIdentity pen={p} />
+                      <PenSummary pen={p} />
                       <RefillNeededAction pen={p} />
                     </div>
                   ))

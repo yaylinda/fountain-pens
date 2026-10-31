@@ -349,12 +349,11 @@ button[aria-pressed="true"]:not(.desk-swatch) {
 }
 .selection-slot {
   position: relative;
-  height: 650px;
+  min-height: 650px;
 }
 .selected-panel {
-  height: 100%;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
+  height: auto;
+  overflow: visible;
   overscroll-behavior: contain;
   opacity: 0;
   transform: translateX(14px);
@@ -534,7 +533,7 @@ select:focus-visible {
     max-height: 650px;
   }
   .selection-slot {
-    height: 620px;
+    min-height: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1849,12 +1848,14 @@ button[aria-pressed="true"] .status-neutral {
 
 /* Ink names sit on the color they identify; controls remain outside the swatch. */
 .desk-swatch {
-  height: auto !important;
-  min-height: 144px;
+  height: 160px !important;
+  min-height: 160px;
   width: 100%;
   white-space: normal;
 }
 .swatch-face {
+  --swatch-light: rgb(255 255 255 / .85);
+  color: var(--swatch-light);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1862,14 +1863,18 @@ button[aria-pressed="true"] .status-neutral {
   padding: 16px 14px;
   width: 100%;
   min-width: 0;
-  min-height: 144px;
+  height: 160px;
   text-align: left;
 }
 .swatch-ink-name {
-  font-size: 21px;
-  line-height: 1.2;
-  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 600;
   overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
 }
 .swatch-sample-lines {
   display: flex;
@@ -1878,11 +1883,10 @@ button[aria-pressed="true"] .status-neutral {
 .swatch-sample-lines > span {
   flex: 1;
   height: 3px;
-  background: currentColor;
-  opacity: .85;
+  background: var(--swatch-light);
 }
-.swatch-sample-lines > span:nth-child(2) { opacity: .5; }
-.swatch-sample-lines > span:nth-child(3) { opacity: .25; }
+.swatch-sample-lines > span:nth-child(2) { opacity: .588235; }
+.swatch-sample-lines > span:nth-child(3) { opacity: .294118; }
 .pen-identity-color {
   display: flex;
   flex-direction: column;
@@ -1903,5 +1907,23 @@ button[aria-pressed="true"] .status-neutral {
 }
 @media (max-width: 600px) {
   .desk-swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .swatch-ink-name { font-size: 19px; }
+  .swatch-ink-name { font-size: 17px; }
 }
+
+.pen-summary { font-size: 13px; line-height: 1.5; }
+.pen-summary-detail { color: #68686e; }
+.selected-pen-details { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+.pen-choice-info { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; }
+
+.pen-fill-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.swatch-card { position: relative; width: 100%; min-width: 0; --swatch-light: rgb(255 255 255 / .85); }
+.swatch-name-spacer { visibility: hidden; }
+.swatch-detail-link { position: absolute; top: 16px; left: 14px; right: 14px; color: var(--swatch-light); text-decoration: none; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.swatch-detail-link:hover, .swatch-detail-link:focus-visible { text-decoration: underline; }
+.swatch-detail-link:focus-visible { outline: 2px solid white; outline-offset: 4px; border-radius: 2px; }
+.sidebar-actions button { white-space: nowrap; }
+.ink-detail-dialog { width: min(620px, calc(100vw - 32px)); }
+.ink-detail-view { min-width: 0; }
+.ink-detail-view .reference-detail { width: 100%; position: static; max-height: none; }
