@@ -27,13 +27,13 @@ export function RefillNeededAction({ pen }: { pen: Pen }) {
               toast.success(
                 pen.needsRefill
                   ? "Removed from refill queue"
-                  : "Marked as needing refill",
+                  : "Added to refill queue",
               ),
           )
         }
       >
         <Icon name={pen.needsRefill ? "minus" : "refill"} />
-        {pen.needsRefill ? "Remove from queue" : "Mark needs refill"}
+        {pen.needsRefill ? "Remove from queue" : "Add to refill queue"}
       </Action>
       <Failure error={command.error} />
     </div>

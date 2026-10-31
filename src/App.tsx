@@ -1,3 +1,4 @@
+import { swatchTextColor } from "./lib/swatchTextColor";
 import {
   SidebarCard,
   SidebarSection,
@@ -49,7 +50,6 @@ import { CollectionView } from "./desk/CollectionView";
 import { PaletteMenu } from "./desk/PaletteMenu";
 import {
   PenIdentity,
-  InkIdentity,
   InkDetails,
   DateStamp,
 } from "./desk/Identity";
@@ -71,6 +71,7 @@ function Swatch({
   omit: () => void;
 }) {
   const sort = useSortable({ id: ink.id, disabled: !editing });
+  const color = getSwatch(ink)?.hex || "#e2e2e5";
   return (
     <YStack
       ref={(node) => sort.setNodeRef(node as HTMLElement | null)}
@@ -87,30 +88,20 @@ function Swatch({
         aria-label={inkLabel(ink)}
         aria-pressed={selected}
         onPress={select}
-        height={112}
+        height="auto"
         padding={0}
         borderWidth={selected ? 3 : 0}
         borderColor="white"
-        backgroundColor={getSwatch(ink)?.hex || "#e2e2e5"}
+        backgroundColor={color}
       >
-        <YStack position="absolute" bottom={12} left={13} right={13}>
-          <Text color="white" fontSize={23}>
-            Aa
-          </Text>
-          <XStack gap={4} marginTop={8}>
-            {[0.85, 0.5, 0.25].map((opacity) => (
-              <YStack
-                key={opacity}
-                flex={1}
-                height={3}
-                backgroundColor="white"
-                opacity={opacity}
-              />
-            ))}
-          </XStack>
-        </YStack>
+        <span className="swatch-face" style={{ color: swatchTextColor(color) }}>
+          <strong className="swatch-ink-name">{ink.name}</strong>
+          <span className="swatch-sample-lines" aria-hidden="true">
+            <span /><span /><span />
+          </span>
+        </span>
       </Action>
-      <InkIdentity ink={ink} />
+      <InkDetails ink={ink} />
       {editing && (
         <div className="swatch-edit-controls">
           <button
@@ -680,7 +671,7 @@ export function App() {
                                     aria-pressed={pen.id === activePenId}
                                     onPress={() => setSelectedPen(pen.id)}
                                   >
-                                    <PenIdentity pen={pen} />
+                                    <PenIdentity pen={pen} emphasizeColor />
                                   </Action>
                                 ))}
                               </YStack>
@@ -700,11 +691,11 @@ export function App() {
                                 return (
                                   <SidebarSection key={pen.id}>
                                     {activePens.length === 1 && (
-                                      <PenIdentity pen={pen} />
+                                      <PenIdentity pen={pen} emphasizeColor />
                                     )}
                                     {pen.needsRefill && (
                                       <span className="status status-red">
-                                        Needs refill
+                                        Queued for refill
                                       </span>
                                     )}
                                     <SidebarFacts
@@ -818,7 +809,9 @@ export function App() {
         )}
         {view === "refills" && !loading && !error && (
           <div className="refills-layout">
-            <section className="activity-view" aria-label="Refill activity">
+            <section className="activity-view" aria-label="Refill and cleaning history">
+              <h2>Refill & cleaning history</h2>
+              <Muted>Past fills and cleanings. “Cleaned & empty” describes the pen after that log.</Muted>
               <YStack gap={0}>
                 {model.journal.map((entry) => (
                   <div className="activity-entry" key={entry.id || entry.index}>
@@ -867,7 +860,7 @@ export function App() {
               </YStack>
             </section>
             <aside className="queue-view" aria-label="Refill queue">
-              <SidebarCard title="Refill queue">
+              <SidebarCard title="Refill queue" subtitle="Pens chosen for a future refill, whether still inked or cleaned and empty.">
                 {model.activePens
                   .filter((p) => p.needsRefill)
                   .map((p) => {
@@ -875,6 +868,7 @@ export function App() {
                     return (
                       <SidebarSection key={p.id}>
                         <PenIdentity pen={p} />
+                        <Muted>Current fill</Muted>
                         {last ? (
                           <>
                             <InkColors
@@ -916,7 +910,7 @@ export function App() {
                     );
                   })}
                 {!model.activePens.some((p) => p.needsRefill) && (
-                  <Muted>No pens waiting.</Muted>
+                  <Muted>No pens queued for refill. Add a pen from its details in Pens.</Muted>
                 )}
               </SidebarCard>
             </aside>
