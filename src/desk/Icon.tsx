@@ -1,4 +1,5 @@
 const paths = {
+  view: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12ZM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
   warning: "M12 3 2 21h20L12 3ZM12 9v5m0 3h.01",
   history: "M4 5v5h5M4 10a8 8 0 1 1 2 8M12 7v5l3 2",
   grip: "M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01",
@@ -11,7 +12,8 @@ const paths = {
   close: "m6 6 12 12M6 18 18 6",
   check: "m5 12 4 4L19 6",
   move: "M4 12h16M8 8l-4 4 4 4m8-8 4 4-4 4",
-  refill: "M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1",
+  refill:
+    "M9 3h6v4H9zM9 7v3l-3 3v7a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-7l-3-3V7M12 12s-2 3-2 4a2 2 0 0 0 4 0c0-1-2-4-2-4Z",
   edit: "m4 16-1 5 5-1L20 8l-4-4L4 16Zm9-9 4 4",
   copy: "M9 9h12v12H9zM15 5V3H3v12h2",
   trash: "M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7",
