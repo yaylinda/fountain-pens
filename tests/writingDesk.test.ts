@@ -99,3 +99,12 @@ test('relative dates use compact elapsed units at week, month and year boundarie
     assert.equal(displayDate('2026-11-03','2026-10-20').relative,'in 2 weeks');
     assert.equal(displayDate('2024-02-29','2024-03-01').relative,'Yesterday');
 });
+
+test('swatch labels remain readable across light, dark and midtone ink colors', async () => {
+    const { swatchTextColor } = await import('../src/lib/swatchTextColor');
+    for (const [hex, expected] of [
+        ['#ffffff', '#000000'], ['#000000', '#ffffff'],
+        ['#f3d51b', '#000000'], ['#173a69', '#ffffff'],
+        ['#777777', '#000000'], ['#e2e2e5', '#000000'],
+    ]) assert.equal(swatchTextColor(hex), expected);
+});

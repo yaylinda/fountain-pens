@@ -1,21 +1,22 @@
 import type { Ink, Pen } from "../models/types";
 import { today } from "../lib/collection";
 import { displayDate } from "../lib/displayDate";
-export function PenIdentity({ pen }: { pen: Pen }) {
+export function PenIdentity({ pen, emphasizeColor = false }: { pen: Pen; emphasizeColor?: boolean }) {
   return (
-    <span className="object-identity">
+    <span className={`object-identity ${emphasizeColor ? "pen-identity-color" : ""}`}>
+      {emphasizeColor && <strong className="pen-color">{pen.color.trim() || "Color not recorded"}</strong>}
       <span className="object-name">
         <span className="object-brand">{pen.brand}</span>{" "}
         <strong>{pen.model}</strong>
       </span>
-      <PenDetails pen={pen} />
+      <PenDetails pen={pen} hideColor={emphasizeColor} />
     </span>
   );
 }
-export function PenDetails({ pen }: { pen: Pen }) {
+export function PenDetails({ pen, hideColor = false }: { pen: Pen; hideColor?: boolean }) {
   return (
     <span className="object-meta">
-      <span>{pen.color}</span>
+      {!hideColor && <span>{pen.color}</span>}
       {pen.nibSize && (
         <span className="status status-neutral">{pen.nibSize}</span>
       )}

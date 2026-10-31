@@ -1828,3 +1828,80 @@ button[aria-pressed="true"] .status-neutral {
   outline: 2px solid #68686e;
   outline-offset: -2px;
 }
+
+.pen-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+@media (max-width: 600px) {
+  .collection-row:has(.pen-statuses) {
+    flex-wrap: wrap;
+  }
+  .pen-statuses {
+    justify-content: flex-start;
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+/* Ink names sit on the color they identify; controls remain outside the swatch. */
+.desk-swatch {
+  height: auto !important;
+  min-height: 144px;
+  width: 100%;
+  white-space: normal;
+}
+.swatch-face {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 14px;
+  width: 100%;
+  min-width: 0;
+  min-height: 144px;
+  text-align: left;
+}
+.swatch-ink-name {
+  font-size: 21px;
+  line-height: 1.2;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.swatch-sample-lines {
+  display: flex;
+  gap: 4px;
+}
+.swatch-sample-lines > span {
+  flex: 1;
+  height: 3px;
+  background: currentColor;
+  opacity: .85;
+}
+.swatch-sample-lines > span:nth-child(2) { opacity: .5; }
+.swatch-sample-lines > span:nth-child(3) { opacity: .25; }
+.pen-identity-color {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 5px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.pen-color {
+  font-size: 18px;
+  line-height: 1.3;
+  color: #242426;
+}
+.pen-identity-color .object-name {
+  font-size: 13px;
+  line-height: 1.4;
+}
+@media (max-width: 600px) {
+  .desk-swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .swatch-ink-name { font-size: 19px; }
+}

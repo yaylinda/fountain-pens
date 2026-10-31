@@ -5,6 +5,7 @@ import {
   SidebarActions,
 } from "./Sidebar";
 import { RefillNeededAction } from "./RefillNeededAction";
+import { FillStatus } from "./FillStatus";
 import { InkColors } from "./InkColors";
 import type { JournalEntry } from "../lib/collection";
 import {
@@ -115,28 +116,17 @@ export function CollectionView({
                   onPress={() => setSelected(p.id)}
                 >
                   <PenIdentity pen={p} />
-                  <Text
-                    className={`status ${p.needsRefill ? "status-red" : "status-green"}`}
-                  >
-                    {!p.archived && (
-                      <Icon
-                        name={
-                          p.needsRefill
-                            ? "refill"
-                            : model.inked.some((x) => x.id === p.id)
-                              ? "ink"
-                              : "circle"
-                        }
-                      />
+                  <span className="pen-statuses">
+                    {p.archived && (
+                      <span className="status status-neutral">Archived</span>
                     )}
-                    {p.archived
-                      ? "Archived"
-                      : p.needsRefill
-                        ? "Needs refill"
-                        : model.inked.some((x) => x.id === p.id)
-                          ? "Inked"
-                          : "Empty"}
-                  </Text>
+                    <FillStatus entry={model.latest.get(p.id)} />
+                    {p.needsRefill && (
+                      <span className="status status-red">
+                        <Icon name="refill" /> Queued for refill
+                      </span>
+                    )}
+                  </span>
                 </Action>
               ))
             : inks.map((i) => (
@@ -192,9 +182,6 @@ export function CollectionView({
             {item.archived && <Muted>Archived</Muted>}
             {pen && (
               <SidebarSection title="Current fill">
-                {pen.needsRefill && (
-                  <span className="status status-red">Needs refill</span>
-                )}
                 {entry ? (
                   <>
                     <InkColors
@@ -240,8 +227,18 @@ export function CollectionView({
                       Add refill log
                     </Action>
                   )}
-                  <RefillNeededAction pen={pen} />
                 </SidebarActions>
+              </SidebarSection>
+            )}
+            {pen && (
+              <SidebarSection title="Refill queue">
+                <Muted>
+                  {pen.needsRefill ? "Queued for refill" : "Not queued for refill"}
+                </Muted>
+                <Muted>
+                  Queueing plans a future refill. It does not change the current fill.
+                </Muted>
+                <RefillNeededAction pen={pen} />
               </SidebarSection>
             )}
             {ink && (

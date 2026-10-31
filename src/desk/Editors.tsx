@@ -186,7 +186,7 @@ export function RefillEditor({
                   >
                     <PenIdentity pen={p} />
                     {p.needsRefill && (
-                      <span className="status status-red">Needs refill</span>
+                      <span className="status status-red">Queued for refill</span>
                     )}
                   </Action>
                 ))}
@@ -248,7 +248,7 @@ export function RefillEditor({
                   <Text fontSize={15} fontWeight="700">
                     Cleaned & empty
                   </Text>
-                  <Muted>This log leaves the pen without ink.</Muted>
+                  <Muted>This log leaves the pen without ink. Queueing it for a future refill is optional.</Muted>
                   {queueAllowed && (
                     <Action
                       aria-pressed={!!draft.needsRefill}
