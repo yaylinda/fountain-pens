@@ -244,6 +244,7 @@ button[aria-pressed="true"]:not(.desk-swatch) {
   gap: 26px !important;
 }
 .desk-rail-nav a {
+  line-height: var(--line-body);
   padding: 10px 2px 14px;
   text-decoration: none;
   color: #68686e;
@@ -325,7 +326,7 @@ button[aria-pressed="true"]:not(.desk-swatch) {
 .status {
   display: inline-block;
   font-size: var(--text-caption) !important;
-  line-height: 18px;
+  line-height: var(--line-caption);
   padding: 3px 7px;
   border-radius: 4px;
 }
@@ -780,6 +781,10 @@ button:disabled {
   --text-name: 1.125rem;
   --text-heading: 1.5rem;
   --text-page: 2.125rem;
+  --line-caption: 18px;
+  --line-body: 20px;
+  --line-name: 24px;
+  --line-heading: 30px;
 }
 .desk-shell[data-view="desk"] {
   --page-accent: #f3d51b;
@@ -831,7 +836,7 @@ button:disabled {
 }
 .object-name {
   font-size: var(--text-name);
-  line-height: 1.4;
+  line-height: var(--line-name);
   color: #242426;
   overflow-wrap: anywhere;
 }
@@ -860,13 +865,13 @@ button:disabled {
   flex-direction: column;
   gap: 4px;
   font-size: var(--text-body);
-  line-height: 20px;
+  line-height: var(--line-body);
   font-variant-numeric: tabular-nums;
   color: #242426;
   font-weight: 500;
 }
 .date-stamp small {
-  line-height: 18px;
+  line-height: var(--line-caption);
   font-size: var(--text-caption);
   color: #68686e;
   font-weight: 400;
@@ -880,6 +885,7 @@ button:disabled {
 }
 .selected-panel .object-name {
   font-size: var(--text-body);
+  line-height: var(--line-body);
 }
 .selected-panel button[aria-pressed] {
   padding: 12px;
@@ -982,7 +988,7 @@ button:disabled {
 .form-field > label {
   font-size: var(--text-caption);
   font-weight: 700;
-  line-height: 20px;
+  line-height: var(--line-caption);
 }
 .field-hint {
   font-weight: 400;
@@ -1049,6 +1055,7 @@ button:disabled {
 }
 .desk-options .object-name {
   font-size: var(--text-body);
+  line-height: var(--line-body);
 }
 .option-swatch {
   width: 10px;
@@ -1113,6 +1120,7 @@ button:disabled {
 }
 .writing-pair .ink-identity-inline .object-name {
   font-size: var(--text-name);
+  line-height: var(--line-name);
 }
 .writing-fill {
   display: flex;
@@ -1252,6 +1260,7 @@ button[aria-pressed="true"] .status-neutral {
 }
 .ink-identity-inline .object-name {
   font-size: var(--text-body);
+  line-height: var(--line-body);
 }
 .ink-identity-inline .object-meta {
   font-size: var(--text-caption);
@@ -1326,7 +1335,7 @@ button[aria-pressed="true"] .status-neutral {
 }
 .drag-handle:hover {
   background: #efeff1;
-  color: #25252b;
+  color: #242426;
 }
 .drag-handle:active {
   cursor: grabbing;
@@ -1351,8 +1360,8 @@ button[aria-pressed="true"] .status-neutral {
 .ink-details {
   display: block;
   font-size: var(--text-caption);
-  line-height: 18px;
-  color: #494950;
+  line-height: var(--line-caption);
+  color: #68686e;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1374,7 +1383,7 @@ button[aria-pressed="true"] .status-neutral {
 }
 .desk-swatches .object-name {
   font-size: var(--text-body);
-  line-height: 18px;
+  line-height: var(--line-caption);
   font-weight: 500;
 }
 .desk-swatches .ink-details {
@@ -1415,7 +1424,7 @@ button[aria-pressed="true"] .status-neutral {
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: #53535c;
+  color: #68686e;
   font-family: inherit;
   font-size: var(--text-caption);
   font-weight: 500;
@@ -1464,10 +1473,10 @@ button[aria-pressed="true"] .status-neutral {
   min-height: 18px;
   color: #68686e;
   font-size: var(--text-caption);
-  line-height: 18px;
+  line-height: var(--line-caption);
 }
 .page-caption strong {
-  color: #303037;
+  color: #242426;
   font-weight: 700;
 }
 .page-caption .summary-secondary {
@@ -1476,7 +1485,7 @@ button[aria-pressed="true"] .status-neutral {
 }
 .page-caption .summary-status {
   padding: 0 7px;
-  line-height: 18px;
+  line-height: var(--line-caption);
 }
 .page-caption .summary-status strong {
   color: inherit;
@@ -1498,7 +1507,7 @@ button[aria-pressed="true"] .status-neutral {
   height: 36px;
   border: 0;
   background: transparent;
-  color: #53535c;
+  color: #68686e;
 }
 .swatch-edit-controls .drag-handle {
   flex: none;
@@ -1547,7 +1556,7 @@ button[aria-pressed="true"] .status-neutral {
 .feedback-content > span {
   flex: 1;
   font-size: var(--text-caption);
-  line-height: 18px;
+  line-height: var(--line-caption);
   font-weight: 500;
 }
 .feedback-content button {
@@ -1572,6 +1581,7 @@ button[aria-pressed="true"] .status-neutral {
 }
 .ink-actions > .writing-complete,
 .sidebar-actions > .writing-complete {
+  line-height: var(--line-caption);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1610,14 +1620,14 @@ button[aria-pressed="true"] .status-neutral {
 .sidebar-header h2 {
   margin: 0;
   font-size: var(--text-heading);
-  line-height: 30px;
+  line-height: var(--line-heading);
   font-weight: 700;
   overflow-wrap: anywhere;
 }
 .sidebar-subtitle {
   margin-top: 6px;
   font-size: var(--text-caption);
-  line-height: 18px;
+  line-height: var(--line-caption);
   color: #68686e;
 }
 .sidebar-accent {
@@ -1637,7 +1647,7 @@ button[aria-pressed="true"] .status-neutral {
 .sidebar-section h3 {
   margin: 0;
   font-size: var(--text-body);
-  line-height: 20px;
+  line-height: var(--line-body);
   font-weight: 700;
 }
 .sidebar-section > .status {
@@ -1658,12 +1668,12 @@ button[aria-pressed="true"] .status-neutral {
 .sidebar-facts dt {
   color: #68686e;
   font-size: var(--text-caption);
-  line-height: 18px;
+  line-height: var(--line-caption);
 }
 .sidebar-facts dd {
   margin: 0;
   font-size: var(--text-body);
-  line-height: 20px;
+  line-height: var(--line-body);
   font-weight: 500;
 }
 .sidebar-actions {
@@ -1708,11 +1718,10 @@ button[aria-pressed="true"] .status-neutral {
   width: 100%;
   background: transparent;
   border-color: #d9d9de;
-  font-size: var(--text-caption);
 }
 .reference-detail.sidebar-card h2 {
   font-size: var(--text-heading);
-  line-height: 30px;
+  line-height: var(--line-heading);
 }
 .sidebar-card .reference-facts {
   margin: 0;
@@ -1752,7 +1761,7 @@ button[aria-pressed="true"] .status-neutral {
   gap: 8px;
   color: #68686e;
   font-size: var(--text-caption);
-  line-height: 20px;
+  line-height: var(--line-body);
 }
 .palette-selector {
   position: relative;
@@ -1903,7 +1912,7 @@ button[aria-pressed="true"] .status-neutral {
 }
 .swatch-ink-name {
   font-size: var(--text-name);
-  line-height: 1.25;
+  line-height: var(--line-name);
   font-weight: 700;
   overflow-wrap: anywhere;
   display: -webkit-box;
@@ -1937,13 +1946,13 @@ button[aria-pressed="true"] .status-neutral {
 }
 .pen-color {
   font-size: var(--text-name);
-  line-height: 1.3;
+  line-height: var(--line-name);
   color: #242426;
 }
 /* Color identifies the pen; name is the subtitle; nib details are metadata. */
 .pen-identity-color .object-name {
   font-size: var(--text-body);
-  line-height: 20px;
+  line-height: var(--line-body);
   font-weight: 500;
   color: #242426;
 }
@@ -1959,11 +1968,11 @@ button[aria-pressed="true"] .status-neutral {
 .pen-summary {
   display: block;
   font-size: var(--text-body);
-  line-height: 20px;
+  line-height: var(--line-body);
 }
 .pen-specifications {
   font-size: var(--text-caption);
-  line-height: 18px;
+  line-height: var(--line-caption);
   font-weight: 400;
   color: #68686e;
 }
@@ -2041,6 +2050,7 @@ button[aria-pressed="true"] .status-neutral {
   gap: 8px;
 }
 .brand-filter-heading {
+  line-height: var(--line-body);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2056,6 +2066,7 @@ button[aria-pressed="true"] .status-neutral {
   margin: -4px;
 }
 .brand-chip {
+  line-height: var(--line-body);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2065,7 +2076,7 @@ button[aria-pressed="true"] .status-neutral {
   border: 1px solid #d9d9de;
   border-radius: 22px;
   background: #fff;
-  color: #494950;
+  color: #68686e;
   font-size: var(--text-body);
 }
 .brand-chip[aria-pressed="true"] {
@@ -2080,10 +2091,11 @@ button[aria-pressed="true"] .status-neutral {
 }
 .filter-reset,
 .brand-expand {
+  line-height: var(--line-caption);
   min-height: 44px;
   border: 0;
   background: transparent;
-  color: #494950;
+  color: #68686e;
   font-size: var(--text-caption);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -2136,5 +2148,5 @@ button[aria-pressed="true"] .status-neutral {
 .writing-fill .field-label {
   color: #68686e;
   font-weight: 400;
-  line-height: 18px;
+  line-height: var(--line-caption);
 }

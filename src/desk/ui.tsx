@@ -6,10 +6,11 @@ export const Action = styled(Button, {
   borderRadius: 6,
   fontSize: 14,
   fontWeight: "500",
+  lineHeight: "20px",
   borderWidth: 1,
   borderColor: "borderColor",
   backgroundColor: "surface",
-  color: "color",
+  color: "inkText",
 });
 export const Primary = styled(Action, {
   fontWeight: "700",
@@ -104,7 +105,7 @@ export function Modal({
 }
 export function Failure({ error }: { error: string }) {
   return error ? (
-    <Text role="alert" color="#ad2635" fontSize={12}>
+    <Text role="alert" color="#ad2635" fontSize={12} lineHeight="18px">
       {error}
     </Text>
   ) : null;

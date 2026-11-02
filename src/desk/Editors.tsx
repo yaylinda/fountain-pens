@@ -247,7 +247,7 @@ export function RefillEditor({
               ) : (
                 <div className="cleaning-summary">
                   <Icon name="refill" />
-                  <Text fontSize={14} fontWeight="700">
+                  <Text fontSize={14} fontWeight="700" lineHeight="20px">
                     Cleaned & empty
                   </Text>
                   <Muted>
@@ -415,7 +415,7 @@ export function WritingEditor({
         </Muted>
       )}
       <div className="history-heading">
-        <Text fontSize={14} fontWeight="700">
+        <Text fontSize={14} fontWeight="700" lineHeight="20px">
           Writing days
         </Text>
         <span className="status status-neutral">{logs.length}</span>
