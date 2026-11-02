@@ -2170,9 +2170,6 @@ button[aria-pressed="true"] .status-neutral {
   border: 0;
   padding: 0;
 }
-.palette-selection-dialog button[aria-label="Deselect ink"] {
-  display: none;
-}
 
 .collection-filter-summary {
   display: grid !important;

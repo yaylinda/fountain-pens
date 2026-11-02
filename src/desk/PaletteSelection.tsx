@@ -6,16 +6,20 @@ export function PaletteSelection({
   open,
   close,
   children,
+  inkName,
 }: {
   mobile: boolean;
   open: boolean;
   close: () => void;
   children: ReactNode;
+  inkName: string;
 }) {
   if (mobile)
     return open ? (
       <Modal
-        title="Selected ink"
+        title={inkName}
+        hideHeading
+        showCloseButton={false}
         close={close}
         className="palette-selection-dialog"
       >

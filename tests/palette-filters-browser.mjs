@@ -167,7 +167,7 @@ try {
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page
-    .getByRole("dialog", { name: "Selected ink", exact: true })
+    .getByRole("dialog", { name: "Blue Peppermint", exact: true })
     .waitFor();
   await page
     .getByRole("dialog")
@@ -175,8 +175,16 @@ try {
     .click();
   await page.getByRole("dialog").waitFor({ state: "hidden" });
   await clickSwatch();
-  const modal = page.getByRole("dialog", { name: "Selected ink", exact: true });
+  const modal = page.locator(".palette-selection-dialog");
   await modal.waitFor();
+  assert.equal(
+    await modal.getByText("Selected ink", { exact: true }).count(),
+    0,
+  );
+  assert.equal(
+    await modal.locator(".sidebar-header h2").innerText(),
+    "Blue Peppermint",
+  );
   await page.screenshot({
     path: ".artifacts/palette-filters/mobile-palette.png",
   });

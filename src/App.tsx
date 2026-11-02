@@ -717,6 +717,7 @@ export function App() {
                     )}
                 </YStack>
                 <PaletteSelection
+                  inkName={activeInk?.name || "Ink details"}
                   mobile={mobilePalette}
                   open={selectionOpen}
                   close={closeSelection}
@@ -733,7 +734,7 @@ export function App() {
                       activeInk && (
                         <Action
                           flexShrink={0}
-                          aria-label="Deselect ink"
+                          aria-label={mobilePalette ? "Close" : "Deselect ink"}
                           onPress={() => {
                             closeSelection();
                           }}
