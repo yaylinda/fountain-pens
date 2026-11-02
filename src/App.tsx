@@ -839,19 +839,23 @@ export function App() {
                                               today
                                             </Primary>
                                           ))}
-                                        <XStack gap={6} flexWrap="wrap">
-                                          <Action
-                                            aria-label="View writing history"
-                                            onPress={() =>
-                                              setDialog({
-                                                kind: "writing",
-                                                entry,
-                                              })
-                                            }
+                                        <Action
+                                          aria-label="View writing history"
+                                          onPress={() =>
+                                            setDialog({
+                                              kind: "writing",
+                                              entry,
+                                            })
+                                          }
+                                        >
+                                          <Icon name="history" /> View history
+                                        </Action>
+                                        {canEdit && (
+                                          <div
+                                            className="sidebar-refill-actions"
+                                            role="group"
+                                            aria-label="Refill actions"
                                           >
-                                            <Icon name="history" /> View history
-                                          </Action>
-                                          {canEdit && (
                                             <Action
                                               onPress={() =>
                                                 setDialog({
@@ -862,9 +866,9 @@ export function App() {
                                             >
                                               <Icon name="plus" /> Log refill
                                             </Action>
-                                          )}
-                                        </XStack>
-                                        <RefillNeededAction pen={pen} />
+                                            <RefillNeededAction pen={pen} />
+                                          </div>
+                                        )}
                                       </SidebarActions>
                                     </SidebarSection>
                                   </div>
@@ -957,8 +961,8 @@ export function App() {
                               inks={
                                 isCleaning(last)
                                   ? []
-                                  : last.inkIds.map(
-                                      (id) => model.inkById.get(id)!,
+                                  : last.inkIds.map((id) =>
+                                      model.inkById.get(id)!,
                                     )
                               }
                             />

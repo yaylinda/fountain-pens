@@ -4,7 +4,7 @@ import { Button, Dialog, Text, YStack, styled } from "tamagui";
 export const Action = styled(Button, {
   height: 42,
   borderRadius: 6,
-  fontSize: 12,
+  fontSize: 14,
   fontWeight: "500",
   borderWidth: 1,
   borderColor: "borderColor",
@@ -82,7 +82,7 @@ export function Modal({
           }}
         >
           <div className="dialog-heading">
-            <Dialog.Title fontSize={23} fontWeight="700" lineHeight="30px">
+            <Dialog.Title fontSize={24} fontWeight="700" lineHeight="30px">
               {title}
             </Dialog.Title>
             {showCloseButton && (

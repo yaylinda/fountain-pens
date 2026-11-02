@@ -49,13 +49,32 @@ export function CollectionView({
   model: ReturnType<typeof deriveCollection>;
 }) {
   const [query, setQuery] = useState("");
+  const [brand, setBrand] = useState("");
+  const [showAllBrands, setShowAllBrands] = useState(false);
   const [selected, setSelected] = useState(detailId || "");
   const [includeArchived, setIncludeArchived] = useState(false);
+  const brands = [
+    ...new Set(
+      (kind === "pens" ? collection.pens : collection.inks)
+        .filter((item) => includeArchived || !item.archived)
+        .map((item) => item.brand),
+    ),
+  ].sort((a, b) => a.localeCompare(b));
+  const visibleBrands = showAllBrands
+    ? brands
+    : brands.filter((name, index) => index < 5 || name === brand);
+  const resetFilters = () => {
+    setQuery("");
+    setBrand("");
+    setIncludeArchived(false);
+    setSelected("");
+  };
   const pens = [...collection.pens]
     .sort(byPenName)
     .filter(
       (p) =>
         (includeArchived || !p.archived) &&
+        (!brand || p.brand === brand) &&
         matches(query, penLabel(p), penDescription(p), p.details),
     );
   const inks = [...collection.inks]
@@ -63,11 +82,13 @@ export function CollectionView({
     .filter(
       (i) =>
         (includeArchived || !i.archived) &&
+        (!brand || i.brand === brand) &&
         matches(query, inkLabel(i), i.collection, i.details),
     );
   const pen = kind === "pens" ? model.penById.get(selected) : undefined;
   const ink = kind === "inks" ? model.inkById.get(selected) : undefined;
   const item = pen || ink;
+  const resultCount = kind === "pens" ? pens.length : inks.length;
   const reference = getInkReference(ink);
   const swatch = getSwatch(ink);
   const entry = pen && model.latest.get(pen.id);
@@ -87,13 +108,64 @@ export function CollectionView({
             id="collection-search"
             type="search"
             value={query}
-            onChangeText={setQuery}
+            onChangeText={(value) => {
+              setQuery(value);
+              setSelected("");
+            }}
             placeholder={
               kind === "pens"
                 ? "Brand, model, color or nib…"
                 : "Brand, ink or collection…"
             }
           />
+          <div
+            className="brand-filter"
+            role="group"
+            aria-label="Filter by brand"
+          >
+            <div className="brand-filter-heading">
+              <span>Brand</span>
+              {(brand || query || includeArchived) && (
+                <button
+                  type="button"
+                  className="filter-reset"
+                  onClick={resetFilters}
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+            <div className="brand-chips" id={`brands-${kind}`}>
+              {["", ...visibleBrands].map((name) => (
+                <button
+                  type="button"
+                  className="brand-chip"
+                  key={name}
+                  aria-pressed={brand === name}
+                  onClick={() => {
+                    setBrand(name === brand ? "" : name);
+                    setSelected("");
+                  }}
+                >
+                  {brand === name && <Icon name="check" />}
+                  {name || "All brands"}
+                </button>
+              ))}
+            </div>
+            {brands.length > 5 && (
+              <button
+                type="button"
+                className="brand-expand"
+                aria-expanded={showAllBrands}
+                aria-controls={`brands-${kind}`}
+                onClick={() => setShowAllBrands(!showAllBrands)}
+              >
+                {showAllBrands
+                  ? "Fewer brands"
+                  : `More brands (${brands.length - visibleBrands.length})`}
+              </button>
+            )}
+          </div>
           <XStack
             justifyContent="space-between"
             alignItems="center"
@@ -101,11 +173,15 @@ export function CollectionView({
             flexWrap="wrap"
           >
             <Muted role="status">
-              {kind === "pens" ? pens.length : inks.length} shown
+              {resultCount} {resultCount === 1 ? kind.slice(0, -1) : kind} shown
+              {brand ? ` · ${brand}` : ""}
             </Muted>
             <Action
               aria-pressed={includeArchived}
-              onPress={() => setIncludeArchived(!includeArchived)}
+              onPress={() => {
+                setIncludeArchived(!includeArchived);
+                setSelected("");
+              }}
             >
               Include archived
             </Action>
@@ -150,9 +226,16 @@ export function CollectionView({
                   </Action>
                 ))}
             {!(kind === "pens" ? pens.length : inks.length) && (
-              <Muted>
-                No matches. Try another name or include archived items.
-              </Muted>
+              <div className="collection-empty">
+                <strong>
+                  No {kind} match{brand ? ` ${brand}` : ""}
+                  {query ? ` and “${query}”` : ""}.
+                </strong>
+                <Muted>
+                  Try another search or brand, or include archived items.
+                </Muted>
+                <Action onPress={resetFilters}>Clear filters</Action>
+              </div>
             )}
           </div>
         </YStack>

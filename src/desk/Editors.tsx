@@ -1,5 +1,5 @@
 import { toast } from "tamagui";
-import { PenIdentity, InkIdentity, DateStamp } from "./Identity";
+import { PenIdentity, PenSummary, InkIdentity, DateStamp } from "./Identity";
 import { Icon } from "./Icon";
 import { useCommand } from "./useCommand";
 import { useState } from "react";
@@ -186,7 +186,9 @@ export function RefillEditor({
                   >
                     <PenIdentity pen={p} />
                     {p.needsRefill && (
-                      <span className="status status-red">Queued for refill</span>
+                      <span className="status status-red">
+                        Queued for refill
+                      </span>
                     )}
                   </Action>
                 ))}
@@ -245,10 +247,13 @@ export function RefillEditor({
               ) : (
                 <div className="cleaning-summary">
                   <Icon name="refill" />
-                  <Text fontSize={15} fontWeight="700">
+                  <Text fontSize={14} fontWeight="700">
                     Cleaned & empty
                   </Text>
-                  <Muted>This log leaves the pen without ink. Queueing it for a future refill is optional.</Muted>
+                  <Muted>
+                    This log leaves the pen without ink. Queueing it for a
+                    future refill is optional.
+                  </Muted>
                   {queueAllowed && (
                     <Action
                       aria-pressed={!!draft.needsRefill}
@@ -332,24 +337,28 @@ export function WritingEditor({
       busy={command.busy}
     >
       <div className="writing-context">
-        <PenIdentity pen={collection.pens.find((p) => p.id === entry.penId)!} />
+        <div className="writing-pair">
+          <PenSummary
+            pen={collection.pens.find((p) => p.id === entry.penId)!}
+          />
+          <div className="writing-inks">
+            {entry.inkIds.map((id) => {
+              const ink = collection.inks.find((i) => i.id === id);
+              return ink ? (
+                <span className="ink-chip" key={id}>
+                  <span
+                    className="chip-color"
+                    style={{ backgroundColor: getSwatch(ink)?.hex || "#ddd" }}
+                  />
+                  <InkIdentity ink={ink} compact />
+                </span>
+              ) : null;
+            })}
+          </div>
+        </div>
         <div className="writing-fill">
           <span className="field-label">Filled</span>
           <DateStamp value={entry.date} />
-        </div>
-        <div className="writing-inks">
-          {entry.inkIds.map((id) => {
-            const ink = collection.inks.find((i) => i.id === id);
-            return ink ? (
-              <span className="ink-chip" key={id}>
-                <span
-                  className="chip-color"
-                  style={{ backgroundColor: getSwatch(ink)?.hex || "#ddd" }}
-                />
-                <InkIdentity ink={ink} compact />
-              </span>
-            ) : null;
-          })}
         </div>
       </div>
       {collection.canEdit && entry.id && (
@@ -406,7 +415,7 @@ export function WritingEditor({
         </Muted>
       )}
       <div className="history-heading">
-        <Text fontSize={15} fontWeight="700">
+        <Text fontSize={14} fontWeight="700">
           Writing days
         </Text>
         <span className="status status-neutral">{logs.length}</span>
