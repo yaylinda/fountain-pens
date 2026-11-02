@@ -17,6 +17,9 @@ export function PenIdentity({ pen }: { pen: Pen }) {
 // Shared color-first pen identity for palette and ink-reference sidebars.
 // Status markers and actions belong to the surrounding view.
 export function PenSummary({ pen }: { pen: Pen }) {
+  const specifications = [pen.nibSize, pen.nibType]
+    .map((detail) => detail.trim())
+    .filter(Boolean);
   return (
     <span className="object-identity pen-identity-color">
       <strong className="pen-color">
@@ -26,15 +29,16 @@ export function PenSummary({ pen }: { pen: Pen }) {
         <span className="object-name">
           {pen.brand} {pen.model}
         </span>
-        {[pen.nibSize, pen.nibType]
-          .map((detail) => detail.trim())
-          .filter(Boolean)
-          .map((detail, index) => (
-            <span className="pen-summary-detail" key={index}>
-              <span aria-hidden="true"> · </span>
-              {detail}
-            </span>
-          ))}
+        {specifications.length > 0 && (
+          <span className="pen-specifications">
+            {specifications.map((detail, index) => (
+              <span className="pen-summary-detail" key={index}>
+                {index > 0 && <span aria-hidden="true"> · </span>}
+                {detail}
+              </span>
+            ))}
+          </span>
+        )}
       </span>
     </span>
   );

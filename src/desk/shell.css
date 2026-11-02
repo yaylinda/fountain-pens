@@ -859,13 +859,14 @@ button:disabled {
   display: inline-flex;
   flex-direction: column;
   gap: 4px;
-  font-size: var(--text-caption);
-  line-height: 1.5;
+  font-size: var(--text-body);
+  line-height: 20px;
   font-variant-numeric: tabular-nums;
   color: #242426;
   font-weight: 500;
 }
 .date-stamp small {
+  line-height: 18px;
   font-size: var(--text-caption);
   color: #68686e;
   font-weight: 400;
@@ -1358,7 +1359,7 @@ button[aria-pressed="true"] .status-neutral {
   max-width: 100%;
 }
 .ink-collection {
-  color: #777780;
+  color: #68686e;
   font-weight: 400;
 }
 .object-identity {
@@ -1657,12 +1658,12 @@ button[aria-pressed="true"] .status-neutral {
 .sidebar-facts dt {
   color: #68686e;
   font-size: var(--text-caption);
-  line-height: 16px;
+  line-height: 18px;
 }
 .sidebar-facts dd {
   margin: 0;
-  font-size: var(--text-caption);
-  line-height: 18px;
+  font-size: var(--text-body);
+  line-height: 20px;
   font-weight: 500;
 }
 .sidebar-actions {
@@ -1939,9 +1940,12 @@ button[aria-pressed="true"] .status-neutral {
   line-height: 1.3;
   color: #242426;
 }
+/* Color identifies the pen; name is the subtitle; nib details are metadata. */
 .pen-identity-color .object-name {
   font-size: var(--text-body);
-  line-height: 1.4;
+  line-height: 20px;
+  font-weight: 500;
+  color: #242426;
 }
 @media (max-width: 600px) {
   .desk-swatches {
@@ -1953,8 +1957,17 @@ button[aria-pressed="true"] .status-neutral {
 }
 
 .pen-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   font-size: var(--text-body);
-  line-height: 1.5;
+  line-height: 20px;
+}
+.pen-specifications {
+  font-size: var(--text-caption);
+  line-height: 18px;
+  font-weight: 400;
+  color: #68686e;
 }
 .pen-summary-detail {
   color: #68686e;
@@ -2117,29 +2130,13 @@ button[aria-pressed="true"] .status-neutral {
   }
 }
 
-/* Supporting details use one quiet style; color names carry the emphasis. */
-.ink-details,
-.pen-summary,
-.date-stamp,
-.sidebar-facts dt,
-.sidebar-facts dd {
-  font-size: var(--text-body);
-  line-height: 20px;
-  font-weight: 400;
-  color: #68686e;
-}
-.ink-collection,
-.pen-identity-color .object-name,
-.pen-summary-detail,
-.date-stamp small {
-  font: inherit;
-  color: inherit;
-}
-.desk-swatches .ink-details {
-  font-size: var(--text-body);
+/* Captions support ink names without competing with them. */
+.ink-details {
   white-space: normal;
   overflow-wrap: anywhere;
 }
-.ink-details {
-  white-space: normal;
+.writing-fill .field-label {
+  color: #68686e;
+  font-weight: 400;
+  line-height: 18px;
 }
