@@ -33,7 +33,7 @@ export function PenSummary({ pen }: { pen: Pen }) {
           <span className="pen-specifications">
             {specifications.map((detail, index) => (
               <span className="pen-summary-detail" key={index}>
-                {index > 0 && <span aria-hidden="true"> · </span>}
+                <span aria-hidden="true"> · </span>
                 {detail}
               </span>
             ))}

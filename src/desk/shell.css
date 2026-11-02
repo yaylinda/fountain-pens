@@ -1957,9 +1957,7 @@ button[aria-pressed="true"] .status-neutral {
 }
 
 .pen-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: block;
   font-size: var(--text-body);
   line-height: 20px;
 }
