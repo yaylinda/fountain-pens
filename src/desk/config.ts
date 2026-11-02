@@ -36,6 +36,8 @@ export const config = createTamagui({
       backgroundHover: "#f2f1f3",
       backgroundPress: "#e6e6e9",
       color: "#242426",
+      // Stable text color: Button themes may remap the generic color token.
+      inkText: "#242426",
       borderColor: "#d9d9de",
       surface: "#ffffff",
       muted: "#68686e",

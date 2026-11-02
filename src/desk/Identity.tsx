@@ -17,6 +17,9 @@ export function PenIdentity({ pen }: { pen: Pen }) {
 // Shared color-first pen identity for palette and ink-reference sidebars.
 // Status markers and actions belong to the surrounding view.
 export function PenSummary({ pen }: { pen: Pen }) {
+  const specifications = [pen.nibSize, pen.nibType]
+    .map((detail) => detail.trim())
+    .filter(Boolean);
   return (
     <span className="object-identity pen-identity-color">
       <strong className="pen-color">
@@ -24,18 +27,18 @@ export function PenSummary({ pen }: { pen: Pen }) {
       </strong>
       <span className="pen-summary">
         <span className="object-name">
-          <span className="object-brand">{pen.brand}</span>{" "}
-          <strong>{pen.model}</strong>
+          {pen.brand} {pen.model}
         </span>
-        {[pen.nibSize, pen.nibType]
-          .map((detail) => detail.trim())
-          .filter(Boolean)
-          .map((detail, index) => (
-            <span className="pen-summary-detail" key={index}>
-              <span aria-hidden="true"> · </span>
-              {detail}
-            </span>
-          ))}
+        {specifications.length > 0 && (
+          <span className="pen-specifications">
+            {specifications.map((detail, index) => (
+              <span className="pen-summary-detail" key={index}>
+                <span aria-hidden="true"> · </span>
+                {detail}
+              </span>
+            ))}
+          </span>
+        )}
       </span>
     </span>
   );
@@ -102,7 +105,7 @@ export function InkDetails({ ink }: { ink: Ink }) {
       className="ink-details"
       title={[ink.brand, ink.collection].filter(Boolean).join(" · ")}
     >
-      <span>{ink.brand}</span>
+      <strong className="ink-brand">{ink.brand}</strong>
       {ink.collection?.trim() && (
         <span className="ink-collection"> ({ink.collection})</span>
       )}

@@ -4,12 +4,13 @@ import { Button, Dialog, Text, YStack, styled } from "tamagui";
 export const Action = styled(Button, {
   height: 42,
   borderRadius: 6,
-  fontSize: 12,
+  fontSize: 14,
   fontWeight: "500",
+  lineHeight: "20px",
   borderWidth: 1,
   borderColor: "borderColor",
   backgroundColor: "surface",
-  color: "color",
+  color: "inkText",
 });
 export const Primary = styled(Action, {
   fontWeight: "700",
@@ -82,7 +83,7 @@ export function Modal({
           }}
         >
           <div className="dialog-heading">
-            <Dialog.Title fontSize={23} fontWeight="700" lineHeight="30px">
+            <Dialog.Title fontSize={24} fontWeight="700" lineHeight="30px">
               {title}
             </Dialog.Title>
             {showCloseButton && (
@@ -104,7 +105,7 @@ export function Modal({
 }
 export function Failure({ error }: { error: string }) {
   return error ? (
-    <Text role="alert" color="#ad2635" fontSize={12}>
+    <Text role="alert" color="#ad2635" fontSize={12} lineHeight="18px">
       {error}
     </Text>
   ) : null;
