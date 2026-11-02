@@ -125,22 +125,6 @@ export function CollectionView({
                 : "Brand, ink or collection…"
             }
           />
-          <div className="current-use-filter">
-            <button
-              type="button"
-              className="in-use-toggle"
-              aria-pressed={inUse}
-              onClick={() => {
-                setInUse(!inUse);
-                setSelected("");
-              }}
-            >
-              <Icon name="ink" /> In use
-              <span className="toggle-track" aria-hidden="true">
-                <span />
-              </span>
-            </button>
-          </div>
           <div
             className="brand-filter"
             role="group"
@@ -189,6 +173,22 @@ export function CollectionView({
                 Clear filters
               </button>
             </div>
+          </div>
+          <div className="current-use-filter">
+            <button
+              type="button"
+              className="in-use-toggle"
+              aria-pressed={inUse}
+              onClick={() => {
+                setInUse(!inUse);
+                setSelected("");
+              }}
+            >
+              <Icon name="ink" /> In use
+              <span className="toggle-track" aria-hidden="true">
+                <span />
+              </span>
+            </button>
           </div>
           <XStack
             className="collection-filter-summary"
