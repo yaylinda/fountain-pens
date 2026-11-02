@@ -24,8 +24,7 @@ export function PenSummary({ pen }: { pen: Pen }) {
       </strong>
       <span className="pen-summary">
         <span className="object-name">
-          <span className="object-brand">{pen.brand}</span>{" "}
-          <strong>{pen.model}</strong>
+          {pen.brand} {pen.model}
         </span>
         {[pen.nibSize, pen.nibType]
           .map((detail) => detail.trim())

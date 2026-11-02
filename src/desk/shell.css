@@ -2116,3 +2116,30 @@ button[aria-pressed="true"] .status-neutral {
     flex-wrap: wrap;
   }
 }
+
+/* Supporting details use one quiet style; color names carry the emphasis. */
+.ink-details,
+.pen-summary,
+.date-stamp,
+.sidebar-facts dt,
+.sidebar-facts dd {
+  font-size: var(--text-body);
+  line-height: 20px;
+  font-weight: 400;
+  color: #68686e;
+}
+.ink-collection,
+.pen-identity-color .object-name,
+.pen-summary-detail,
+.date-stamp small {
+  font: inherit;
+  color: inherit;
+}
+.desk-swatches .ink-details {
+  font-size: var(--text-body);
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.ink-details {
+  white-space: normal;
+}
