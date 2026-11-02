@@ -1367,6 +1367,10 @@ button[aria-pressed="true"] .status-neutral {
   white-space: nowrap;
   max-width: 100%;
 }
+.ink-brand {
+  color: #242426;
+  font-weight: 700;
+}
 .ink-collection {
   color: #68686e;
   font-weight: 400;

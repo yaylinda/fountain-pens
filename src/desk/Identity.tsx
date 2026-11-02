@@ -105,7 +105,7 @@ export function InkDetails({ ink }: { ink: Ink }) {
       className="ink-details"
       title={[ink.brand, ink.collection].filter(Boolean).join(" · ")}
     >
-      <span>{ink.brand}</span>
+      <strong className="ink-brand">{ink.brand}</strong>
       {ink.collection?.trim() && (
         <span className="ink-collection"> ({ink.collection})</span>
       )}
