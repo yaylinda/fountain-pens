@@ -4,6 +4,8 @@ import {
   SidebarFacts,
   SidebarActions,
 } from "./desk/Sidebar";
+import { PaletteSelection } from "./desk/PaletteSelection";
+import { useMobilePalette } from "./hooks/useMobilePalette";
 import { RefillNeededAction } from "./desk/RefillNeededAction";
 import { InkColors } from "./desk/InkColors";
 import { PaletteSelector } from "./desk/PaletteSelector";
@@ -97,7 +99,7 @@ function Swatch({
           onPress={select}
           height="auto"
           padding={0}
-          borderWidth={selected ? 3 : 0}
+          borderWidth={0}
           borderColor="white"
           backgroundColor={color}
         >
@@ -186,6 +188,9 @@ export function App() {
     const navigate = () => {
       setView(readView());
       setInkDetail(readInkDetail());
+      setSelected(
+        history.state?.paletteSelection || history.state?.selectedInk || "",
+      );
     };
     window.addEventListener("hashchange", navigate);
     window.addEventListener("popstate", navigate);
@@ -197,6 +202,7 @@ export function App() {
   useEffect(() => {
     document.title = `Fountain Pens · ${views[view]}`;
   }, [view]);
+  const mobilePalette = useMobilePalette();
   const [lastSelected, setLastSelected] = useState("");
   const [selectedPen, setSelectedPen] = useState("");
   const [selected, setSelected] = useState(""),
@@ -241,7 +247,18 @@ export function App() {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
+  const closeSelection = () => {
+    if (history.state?.paletteSelection) history.back();
+    else {
+      document
+        .querySelector<HTMLButtonElement>('.desk-swatch[aria-pressed="true"]')
+        ?.focus({ preventScroll: true });
+      history.replaceState({ ...history.state, selectedInk: "" }, "");
+      setSelected("");
+    }
+  };
   const openInk = (id: string) => {
+    history.replaceState({ ...history.state, selectedInk: selected }, "");
     history.pushState(
       { ...history.state, inkDetail: true },
       "",
@@ -608,6 +625,29 @@ export function App() {
                               selectionOpen && activeInk?.id === item.inkId
                             }
                             select={() => {
+                              if (
+                                mobilePalette &&
+                                !history.state?.paletteSelection
+                              ) {
+                                history.replaceState(
+                                  { ...history.state, selectedInk: "" },
+                                  "",
+                                );
+                                history.pushState(
+                                  {
+                                    ...history.state,
+                                    paletteSelection: item.inkId,
+                                  },
+                                  "",
+                                );
+                              } else if (history.state?.paletteSelection)
+                                history.replaceState(
+                                  {
+                                    ...history.state,
+                                    paletteSelection: item.inkId,
+                                  },
+                                  "",
+                                );
                               setLastSelected(item.inkId);
                               setSelected(item.inkId);
                             }}
@@ -676,215 +716,193 @@ export function App() {
                       </YStack>
                     )}
                 </YStack>
-                <YStack className="desk-active" gap={16}>
-                  <div className="selection-slot">
-                    <div className="selection-empty" hidden={selectionOpen}>
-                      <Text fontSize={18}>No ink selected</Text>
-                      <Muted>
-                        Select a swatch to see its pens and writing history.
-                      </Muted>
-                    </div>
-                    <div
-                      className={`selected-panel ${selectionOpen ? "is-open" : ""}`}
-                      inert={!selectionOpen}
-                      aria-hidden={!selectionOpen}
-                    >
-                      <SidebarCard
-                        title={activeInk?.name || "No ink selected"}
-                        subtitle={activeInk && <InkDetails ink={activeInk} />}
-                        accent={
-                          activeInk
-                            ? getSwatch(activeInk)?.hex || "#ddd"
-                            : undefined
-                        }
-                        action={
-                          activeInk && (
-                            <Action
-                              flexShrink={0}
-                              aria-label="Deselect ink"
-                              onPress={() => {
-                                document
-                                  .querySelector<HTMLButtonElement>(
-                                    '.desk-swatch[aria-pressed="true"]',
-                                  )
-                                  ?.focus();
-                                setSelected("");
-                              }}
-                            >
-                              <Icon name="close" />
-                            </Action>
-                          )
-                        }
-                      >
-                        {activeInk ? (
-                          <>
-                            <Action onPress={() => openInk(activeInk.id)}>
-                              <Icon name="view" /> View ink
-                            </Action>
-                            {activePens.length > 1 && (
-                              <YStack gap={6}>
-                                {activePens.map((pen) => (
-                                  <Action
-                                    key={pen.id}
-                                    height="auto"
-                                    minHeight={38}
-                                    padding={8}
-                                    justifyContent="flex-start"
-                                    aria-pressed={pen.id === activePenId}
-                                    onPress={() => setSelectedPen(pen.id)}
-                                  >
-                                    <span className="pen-choice-info">
-                                      <PenSummary pen={pen} />
-                                      <PenFillBadges
-                                        queued={pen.needsRefill}
-                                        residual={
-                                          model.latest.get(pen.id)?.notPure
-                                        }
-                                      />
-                                    </span>
-                                  </Action>
-                                ))}
-                              </YStack>
-                            )}
-                            {activePens
-                              .filter((pen) => pen.id === activePenId)
-                              .map((pen) => {
-                                const entry = model.latest.get(pen.id)!;
-                                const logs = model.writingLogs
-                                  .filter((log) => log.refillId === entry.id)
-                                  .sort((a, b) =>
-                                    b.writtenOn.localeCompare(a.writtenOn),
-                                  );
-                                const used = logs.some(
-                                  (log) => log.writtenOn === today(),
-                                );
-                                return (
-                                  <div
-                                    key={pen.id}
-                                    className="selected-pen-details"
-                                  >
-                                    {activePens.length === 1 && (
-                                      <div className="pen-choice-info">
-                                        <PenSummary pen={pen} />
-                                        <PenFillBadges
-                                          queued={pen.needsRefill}
-                                          residual={entry.notPure}
-                                        />
-                                      </div>
-                                    )}
-                                    <SidebarSection>
-                                      <SidebarFacts
-                                        items={[
-                                          {
-                                            label: "Filled",
-                                            value: (
-                                              <DateStamp value={entry.date} />
-                                            ),
-                                          },
-                                          {
-                                            label: "Last written",
-                                            value: logs[0] ? (
-                                              <DateStamp
-                                                value={logs[0].writtenOn}
-                                              />
-                                            ) : (
-                                              "Not recorded"
-                                            ),
-                                          },
-                                        ]}
-                                      />
-                                      {entry.inkIds.length > 1 && (
-                                        <Muted>
-                                          Mix:{" "}
-                                          {entry.inkIds
-                                            .map((id) =>
-                                              inkLabel(model.inkById.get(id)),
-                                            )
-                                            .join(" + ")}
-                                        </Muted>
-                                      )}
+                <PaletteSelection
+                  mobile={mobilePalette}
+                  open={selectionOpen}
+                  close={closeSelection}
+                >
+                  <SidebarCard
+                    title={activeInk?.name || "No ink selected"}
+                    subtitle={activeInk && <InkDetails ink={activeInk} />}
+                    accent={
+                      activeInk
+                        ? getSwatch(activeInk)?.hex || "#ddd"
+                        : undefined
+                    }
+                    action={
+                      activeInk && (
+                        <Action
+                          flexShrink={0}
+                          aria-label="Deselect ink"
+                          onPress={() => {
+                            closeSelection();
+                          }}
+                        >
+                          <Icon name="close" />
+                        </Action>
+                      )
+                    }
+                  >
+                    {activeInk ? (
+                      <>
+                        <Action onPress={() => openInk(activeInk.id)}>
+                          <Icon name="view" /> View ink
+                        </Action>
+                        {activePens.length > 1 && (
+                          <YStack gap={6}>
+                            {activePens.map((pen) => (
+                              <Action
+                                key={pen.id}
+                                height="auto"
+                                minHeight={38}
+                                padding={8}
+                                justifyContent="flex-start"
+                                aria-pressed={pen.id === activePenId}
+                                onPress={() => setSelectedPen(pen.id)}
+                              >
+                                <span className="pen-choice-info">
+                                  <PenSummary pen={pen} />
+                                  <PenFillBadges
+                                    queued={pen.needsRefill}
+                                    residual={model.latest.get(pen.id)?.notPure}
+                                  />
+                                </span>
+                              </Action>
+                            ))}
+                          </YStack>
+                        )}
+                        {activePens
+                          .filter((pen) => pen.id === activePenId)
+                          .map((pen) => {
+                            const entry = model.latest.get(pen.id)!;
+                            const logs = model.writingLogs
+                              .filter((log) => log.refillId === entry.id)
+                              .sort((a, b) =>
+                                b.writtenOn.localeCompare(a.writtenOn),
+                              );
+                            const used = logs.some(
+                              (log) => log.writtenOn === today(),
+                            );
+                            return (
+                              <div
+                                key={pen.id}
+                                className="selected-pen-details"
+                              >
+                                {activePens.length === 1 && (
+                                  <div className="pen-choice-info">
+                                    <PenSummary pen={pen} />
+                                    <PenFillBadges
+                                      queued={pen.needsRefill}
+                                      residual={entry.notPure}
+                                    />
+                                  </div>
+                                )}
+                                <SidebarSection>
+                                  <SidebarFacts
+                                    items={[
+                                      {
+                                        label: "Filled",
+                                        value: <DateStamp value={entry.date} />,
+                                      },
+                                      {
+                                        label: "Last written",
+                                        value: logs[0] ? (
+                                          <DateStamp
+                                            value={logs[0].writtenOn}
+                                          />
+                                        ) : (
+                                          "Not recorded"
+                                        ),
+                                      },
+                                    ]}
+                                  />
+                                  {entry.inkIds.length > 1 && (
+                                    <Muted>
+                                      Mix:{" "}
+                                      {entry.inkIds
+                                        .map((id) =>
+                                          inkLabel(model.inkById.get(id)),
+                                        )
+                                        .join(" + ")}
+                                    </Muted>
+                                  )}
 
-                                      <SidebarActions>
-                                        {canEdit &&
-                                          (used ? (
-                                            <div
-                                              className="writing-complete"
-                                              role="status"
-                                            >
-                                              <Icon name="check" /> Writing
-                                              logged today
-                                            </div>
-                                          ) : (
-                                            <Primary
-                                              disabled={
-                                                command.busy ||
-                                                used ||
-                                                !entry.id
-                                              }
-                                              onPress={() =>
-                                                void command.run(
-                                                  () =>
-                                                    saveWritingLog(
-                                                      entry.id!,
-                                                      today(),
-                                                    ),
-                                                  () =>
-                                                    toast.success(
-                                                      "Writing day saved",
-                                                    ),
-                                                )
-                                              }
-                                            >
-                                              <Icon name="edit" /> Log writing
-                                              today
-                                            </Primary>
-                                          ))}
+                                  <SidebarActions>
+                                    {canEdit &&
+                                      (used ? (
+                                        <div
+                                          className="writing-complete"
+                                          role="status"
+                                        >
+                                          <Icon name="check" /> Writing logged
+                                          today
+                                        </div>
+                                      ) : (
+                                        <Primary
+                                          disabled={
+                                            command.busy || used || !entry.id
+                                          }
+                                          onPress={() =>
+                                            void command.run(
+                                              () =>
+                                                saveWritingLog(
+                                                  entry.id!,
+                                                  today(),
+                                                ),
+                                              () =>
+                                                toast.success(
+                                                  "Writing day saved",
+                                                ),
+                                            )
+                                          }
+                                        >
+                                          <Icon name="edit" /> Log writing today
+                                        </Primary>
+                                      ))}
+                                    <Action
+                                      aria-label="View writing history"
+                                      onPress={() =>
+                                        setDialog({
+                                          kind: "writing",
+                                          entry,
+                                        })
+                                      }
+                                    >
+                                      <Icon name="history" /> View history
+                                    </Action>
+                                    {canEdit && (
+                                      <div
+                                        className="sidebar-refill-actions"
+                                        role="group"
+                                        aria-label="Refill actions"
+                                      >
                                         <Action
-                                          aria-label="View writing history"
                                           onPress={() =>
                                             setDialog({
-                                              kind: "writing",
-                                              entry,
+                                              kind: "refill",
+                                              penId: pen.id,
                                             })
                                           }
                                         >
-                                          <Icon name="history" /> View history
+                                          <Icon name="plus" /> Log refill
                                         </Action>
-                                        {canEdit && (
-                                          <div
-                                            className="sidebar-refill-actions"
-                                            role="group"
-                                            aria-label="Refill actions"
-                                          >
-                                            <Action
-                                              onPress={() =>
-                                                setDialog({
-                                                  kind: "refill",
-                                                  penId: pen.id,
-                                                })
-                                              }
-                                            >
-                                              <Icon name="plus" /> Log refill
-                                            </Action>
-                                            <RefillNeededAction pen={pen} />
-                                          </div>
-                                        )}
-                                      </SidebarActions>
-                                    </SidebarSection>
-                                  </div>
-                                );
-                              })}
-                            {!activePens.length && (
-                              <Muted>No current pens use this ink.</Muted>
-                            )}
-                          </>
-                        ) : (
-                          <Muted>Select a color to see its pens.</Muted>
+                                        <RefillNeededAction pen={pen} />
+                                      </div>
+                                    )}
+                                  </SidebarActions>
+                                </SidebarSection>
+                              </div>
+                            );
+                          })}
+                        {!activePens.length && (
+                          <Muted>No current pens use this ink.</Muted>
                         )}
-                      </SidebarCard>
-                    </div>
-                  </div>
-                </YStack>
+                      </>
+                    ) : (
+                      <Muted>Select a color to see its pens.</Muted>
+                    )}
+                  </SidebarCard>
+                </PaletteSelection>
               </div>
             )}
           </>
@@ -961,8 +979,8 @@ export function App() {
                               inks={
                                 isCleaning(last)
                                   ? []
-                                  : last.inkIds.map((id) =>
-                                      model.inkById.get(id)!,
+                                  : last.inkIds.map(
+                                      (id) => model.inkById.get(id)!,
                                     )
                               }
                             />

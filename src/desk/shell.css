@@ -84,16 +84,12 @@ h2 {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
-.desk-swatch {
-  transition:
-    transform 160ms ease,
-    box-shadow 160ms ease;
-}
-.desk-swatch:hover {
-  transform: translateY(-2px);
-}
 .desk-swatch[aria-pressed="true"] {
-  box-shadow: 0 0 0 2px #1686ed;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
+}
+.desk-swatch:focus-visible {
+  outline: 3px solid #25252b;
+  outline-offset: 4px;
 }
 .desk-rail {
   display: flex;
@@ -2053,15 +2049,6 @@ button[aria-pressed="true"] .status-neutral {
   flex-direction: column;
   gap: 8px;
 }
-.brand-filter-heading {
-  line-height: var(--line-body);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 36px;
-  font-size: var(--text-body);
-  font-weight: 700;
-}
 .brand-chips {
   display: flex;
   flex-wrap: wrap;
@@ -2081,13 +2068,12 @@ button[aria-pressed="true"] .status-neutral {
   border-radius: 22px;
   background: #fff;
   color: #68686e;
-  font-size: var(--text-body);
+  font-size: 13px;
 }
 .brand-chip[aria-pressed="true"] {
-  background: #faf6d9 !important;
-  border-color: #8a7614 !important;
-  color: #242426;
-  font-weight: 700;
+  background: #a6edda !important;
+  border-color: #26816c !important;
+  color: #164d41;
 }
 .brand-chip .ui-icon {
   width: 16px;
@@ -2153,4 +2139,73 @@ button[aria-pressed="true"] .status-neutral {
   color: #68686e;
   font-weight: 400;
   line-height: var(--line-caption);
+}
+
+.brand-check {
+  display: inline-flex;
+  visibility: hidden;
+}
+.brand-chip[aria-pressed="true"] .brand-check {
+  visibility: visible;
+}
+.brand-chip:hover {
+  background: #e6faf4;
+}
+.collection-quick-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.collection-quick-filters button[aria-pressed="true"] {
+  background: #a6edda;
+  border-color: #26816c;
+  color: #164d41;
+}
+.palette-selection-dialog {
+  width: min(520px, calc(100vw - 24px));
+  padding: 18px !important;
+}
+.palette-selection-dialog .sidebar-card {
+  border: 0;
+  padding: 0;
+}
+.palette-selection-dialog button[aria-label="Deselect ink"] {
+  display: none;
+}
+
+.collection-filter-summary {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px !important;
+}
+.collection-quick-filters {
+  grid-column: 1 / -1;
+}
+.collection-filter-summary > .filter-reset:disabled {
+  opacity: 0.4;
+  cursor: default;
+  text-decoration: none;
+}
+.header-access {
+  min-width: 0;
+  max-width: 100%;
+}
+.header-access > div {
+  min-width: 0;
+  max-width: 100%;
+}
+@media (max-width: 900px) {
+  .desk-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 699px) {
+  .header-access .status {
+    padding-inline: 6px;
+  }
+  .header-access button {
+    padding-inline: 10px;
+  }
 }
