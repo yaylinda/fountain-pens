@@ -2043,6 +2043,13 @@ button[aria-pressed="true"] .status-neutral {
   max-height: none;
 }
 
+/* Filter accents echo the blue N in the header logo. */
+.collection-view {
+  --filter-blue: #1686ed;
+  --filter-blue-border: #126fc4;
+  --filter-blue-tint: #e0efff;
+  --filter-blue-text: #084b85;
+}
 /* Brand chips share the collection search; overflow is an explicit expansion. */
 .brand-filter {
   display: flex;
@@ -2071,9 +2078,9 @@ button[aria-pressed="true"] .status-neutral {
   font-size: 13px;
 }
 .brand-chip[aria-checked="true"] {
-  background: #a6edda !important;
-  border-color: #26816c !important;
-  color: #164d41;
+  background: var(--filter-blue-tint) !important;
+  border-color: var(--filter-blue-border) !important;
+  color: var(--filter-blue-text);
 }
 .brand-chip .ui-icon {
   width: 16px;
@@ -2158,15 +2165,15 @@ button[aria-pressed="true"] .status-neutral {
   visibility: hidden;
 }
 .brand-chip[aria-checked="true"] .brand-check {
-  background: #164d41;
-  border-color: #164d41;
+  background: var(--filter-blue);
+  border-color: var(--filter-blue-border);
   color: #fff;
 }
 .brand-chip[aria-checked="true"] .brand-check .ui-icon {
   visibility: visible;
 }
 .brand-chip:hover {
-  background: #e6faf4;
+  background: #edf5ff;
 }
 .brand-filter-tools {
   display: flex;
@@ -2192,16 +2199,16 @@ button[aria-pressed="true"] .status-neutral {
   align-items: center;
   min-height: 44px;
   padding: 8px 12px;
-  border: 1px solid #b3ccc3;
+  border: 1px solid #b9cde3;
   border-radius: 8px;
-  background: #eef8f3;
-  color: #164d41;
+  background: #f5f9ff;
+  color: var(--filter-blue-text);
   font-size: 13px;
   font-weight: 700;
 }
 .in-use-toggle[aria-pressed="true"] {
-  background: #a6edda;
-  border-color: #26816c;
+  background: var(--filter-blue-tint);
+  border-color: var(--filter-blue-border);
 }
 .toggle-track {
   width: 28px;
@@ -2218,7 +2225,7 @@ button[aria-pressed="true"] .status-neutral {
   background: white;
 }
 .in-use-toggle[aria-pressed="true"] .toggle-track {
-  background: #164d41;
+  background: var(--filter-blue);
   justify-content: flex-end;
 }
 .archive-filter {
@@ -2234,7 +2241,7 @@ button[aria-pressed="true"] .status-neutral {
   width: 14px;
   height: 14px;
   margin: 0;
-  accent-color: #526b61;
+  accent-color: #52677e;
 }
 .palette-selection-dialog {
   width: min(520px, calc(100vw - 24px));
