@@ -37,6 +37,7 @@ export function Modal({
   close,
   busy = false,
   showCloseButton = true,
+  hideHeading = false,
   className = "",
 }: {
   title: string;
@@ -44,6 +45,7 @@ export function Modal({
   close: () => void;
   busy?: boolean;
   showCloseButton?: boolean;
+  hideHeading?: boolean;
   className?: string;
 }) {
   const returnFocus = useRef(document.activeElement as HTMLElement | null);
@@ -82,7 +84,7 @@ export function Modal({
               details.cancel();
           }}
         >
-          <div className="dialog-heading">
+          <div className={hideHeading ? "visually-hidden" : "dialog-heading"}>
             <Dialog.Title fontSize={24} fontWeight="700" lineHeight="30px">
               {title}
             </Dialog.Title>

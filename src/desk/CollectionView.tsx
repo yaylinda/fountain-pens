@@ -53,13 +53,17 @@ export function CollectionView({
   const [showAllBrands, setShowAllBrands] = useState(false);
   const [selected, setSelected] = useState(detailId || "");
   const [includeArchived, setIncludeArchived] = useState(false);
-  const brands = [
-    ...new Set(
-      (kind === "pens" ? collection.pens : collection.inks)
-        .filter((item) => includeArchived || !item.archived)
-        .map((item) => item.brand),
-    ),
-  ].sort((a, b) => a.localeCompare(b));
+  const [inUse, setInUse] = useState(false);
+  const inUsePenIds = new Set(model.inked.map((pen) => pen.id));
+  // Counts ignore search/brand/in-use so choosing a filter never moves its target.
+  const brandCounts = new Map<string, number>();
+  for (const item of kind === "pens" ? collection.pens : collection.inks) {
+    if (includeArchived || !item.archived)
+      brandCounts.set(item.brand, (brandCounts.get(item.brand) || 0) + 1);
+  }
+  const brands = [...brandCounts.keys()].sort(
+    (a, b) => brandCounts.get(b)! - brandCounts.get(a)! || a.localeCompare(b),
+  );
   const visibleBrands = showAllBrands
     ? brands
     : brands.filter((name, index) => index < 5 || name === brand);
@@ -67,6 +71,7 @@ export function CollectionView({
     setQuery("");
     setBrand("");
     setIncludeArchived(false);
+    setInUse(false);
     setSelected("");
   };
   const pens = [...collection.pens]
@@ -75,6 +80,7 @@ export function CollectionView({
       (p) =>
         (includeArchived || !p.archived) &&
         (!brand || p.brand === brand) &&
+        (!inUse || inUsePenIds.has(p.id)) &&
         matches(query, penLabel(p), penDescription(p), p.details),
     );
   const inks = [...collection.inks]
@@ -83,6 +89,7 @@ export function CollectionView({
       (i) =>
         (includeArchived || !i.archived) &&
         (!brand || i.brand === brand) &&
+        (!inUse || model.currentPens(i.id).length > 0) &&
         matches(query, inkLabel(i), i.collection, i.details),
     );
   const pen = kind === "pens" ? model.penById.get(selected) : undefined;
@@ -123,50 +130,68 @@ export function CollectionView({
             role="group"
             aria-label="Filter by brand"
           >
-            <div className="brand-filter-heading">
-              <span>Brand</span>
-              {(brand || query || includeArchived) && (
-                <button
-                  type="button"
-                  className="filter-reset"
-                  onClick={resetFilters}
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
             <div className="brand-chips" id={`brands-${kind}`}>
-              {["", ...visibleBrands].map((name) => (
+              {visibleBrands.map((name) => (
                 <button
                   type="button"
                   className="brand-chip"
                   key={name}
-                  aria-pressed={brand === name}
+                  role="checkbox"
+                  aria-checked={brand === name}
                   onClick={() => {
                     setBrand(name === brand ? "" : name);
                     setSelected("");
                   }}
                 >
-                  {brand === name && <Icon name="check" />}
-                  {name || "All brands"}
+                  <span className="brand-check" aria-hidden="true">
+                    <Icon name="check" />
+                  </span>
+                  {name}
                 </button>
               ))}
             </div>
-            {brands.length > 5 && (
+            <div className="brand-filter-tools">
+              {brands.length > 5 && (
+                <button
+                  type="button"
+                  className="brand-expand"
+                  aria-expanded={showAllBrands}
+                  aria-controls={`brands-${kind}`}
+                  onClick={() => setShowAllBrands(!showAllBrands)}
+                >
+                  {showAllBrands
+                    ? "Fewer brands"
+                    : `More brands (${brands.length - visibleBrands.length})`}
+                </button>
+              )}
               <button
                 type="button"
-                className="brand-expand"
-                aria-expanded={showAllBrands}
-                aria-controls={`brands-${kind}`}
-                onClick={() => setShowAllBrands(!showAllBrands)}
+                className="filter-reset"
+                disabled={!(brand || query || includeArchived || inUse)}
+                onClick={resetFilters}
               >
-                {showAllBrands
-                  ? "Fewer brands"
-                  : `More brands (${brands.length - visibleBrands.length})`}
+                Clear filters
               </button>
-            )}
+            </div>
+          </div>
+          <div className="current-use-filter">
+            <button
+              type="button"
+              className="in-use-toggle"
+              aria-pressed={inUse}
+              onClick={() => {
+                setInUse(!inUse);
+                setSelected("");
+              }}
+            >
+              <Icon name="ink" /> In use
+              <span className="toggle-track" aria-hidden="true">
+                <span />
+              </span>
+            </button>
           </div>
           <XStack
+            className="collection-filter-summary"
             justifyContent="space-between"
             alignItems="center"
             gap={12}
@@ -174,17 +199,18 @@ export function CollectionView({
           >
             <Muted role="status">
               {resultCount} {resultCount === 1 ? kind.slice(0, -1) : kind} shown
-              {brand ? ` · ${brand}` : ""}
             </Muted>
-            <Action
-              aria-pressed={includeArchived}
-              onPress={() => {
-                setIncludeArchived(!includeArchived);
-                setSelected("");
-              }}
-            >
+            <label className="archive-filter">
+              <input
+                type="checkbox"
+                checked={includeArchived}
+                onChange={(event) => {
+                  setIncludeArchived(event.target.checked);
+                  setSelected("");
+                }}
+              />
               Include archived
-            </Action>
+            </label>
           </XStack>
           <div className="collection-list">
             {kind === "pens"
@@ -232,7 +258,8 @@ export function CollectionView({
                   {query ? ` and “${query}”` : ""}.
                 </strong>
                 <Muted>
-                  Try another search or brand, or include archived items.
+                  Try another search or brand, turn off In use, or include
+                  archived items.
                 </Muted>
                 <Action onPress={resetFilters}>Clear filters</Action>
               </div>
