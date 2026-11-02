@@ -125,6 +125,22 @@ export function CollectionView({
                 : "Brand, ink or collection…"
             }
           />
+          <div className="current-use-filter">
+            <button
+              type="button"
+              className="in-use-toggle"
+              aria-pressed={inUse}
+              onClick={() => {
+                setInUse(!inUse);
+                setSelected("");
+              }}
+            >
+              <Icon name="ink" /> In use
+              <span className="toggle-track" aria-hidden="true">
+                <span />
+              </span>
+            </button>
+          </div>
           <div
             className="brand-filter"
             role="group"
@@ -136,7 +152,8 @@ export function CollectionView({
                   type="button"
                   className="brand-chip"
                   key={name}
-                  aria-pressed={brand === name}
+                  role="checkbox"
+                  aria-checked={brand === name}
                   onClick={() => {
                     setBrand(name === brand ? "" : name);
                     setSelected("");
@@ -149,19 +166,29 @@ export function CollectionView({
                 </button>
               ))}
             </div>
-            {brands.length > 5 && (
+            <div className="brand-filter-tools">
+              {brands.length > 5 && (
+                <button
+                  type="button"
+                  className="brand-expand"
+                  aria-expanded={showAllBrands}
+                  aria-controls={`brands-${kind}`}
+                  onClick={() => setShowAllBrands(!showAllBrands)}
+                >
+                  {showAllBrands
+                    ? "Fewer brands"
+                    : `More brands (${brands.length - visibleBrands.length})`}
+                </button>
+              )}
               <button
                 type="button"
-                className="brand-expand"
-                aria-expanded={showAllBrands}
-                aria-controls={`brands-${kind}`}
-                onClick={() => setShowAllBrands(!showAllBrands)}
+                className="filter-reset"
+                disabled={!(brand || query || includeArchived || inUse)}
+                onClick={resetFilters}
               >
-                {showAllBrands
-                  ? "Fewer brands"
-                  : `More brands (${brands.length - visibleBrands.length})`}
+                Clear filters
               </button>
-            )}
+            </div>
           </div>
           <XStack
             className="collection-filter-summary"
@@ -173,38 +200,17 @@ export function CollectionView({
             <Muted role="status">
               {resultCount} {resultCount === 1 ? kind.slice(0, -1) : kind} shown
             </Muted>
-            <button
-              type="button"
-              className="filter-reset"
-              disabled={!(brand || query || includeArchived || inUse)}
-              onClick={resetFilters}
-            >
-              Clear filters
-            </button>
-            <div
-              className="collection-quick-filters"
-              role="group"
-              aria-label="Collection filters"
-            >
-              <Action
-                aria-pressed={inUse}
-                onPress={() => {
-                  setInUse(!inUse);
+            <label className="archive-filter">
+              <input
+                type="checkbox"
+                checked={includeArchived}
+                onChange={(event) => {
+                  setIncludeArchived(event.target.checked);
                   setSelected("");
                 }}
-              >
-                In use
-              </Action>
-              <Action
-                aria-pressed={includeArchived}
-                onPress={() => {
-                  setIncludeArchived(!includeArchived);
-                  setSelected("");
-                }}
-              >
-                Include archived
-              </Action>
-            </div>
+              />
+              Include archived
+            </label>
           </XStack>
           <div className="collection-list">
             {kind === "pens"

@@ -245,7 +245,49 @@ try {
         await page.locator(".collection-list").evaluate((el) => el.offsetTop),
         listTop,
       );
-      await page.getByRole("button", { name: "In use", exact: true }).click();
+      assert.equal(await chips.first().getAttribute("aria-checked"), "true");
+      await chips.first().click();
+      assert.equal(await chips.first().getAttribute("aria-checked"), "false");
+      assert.equal(
+        await page.locator(".collection-list").evaluate((el) => el.offsetTop),
+        listTop,
+      );
+      await chips.first().click();
+      const countWithBrand = await page.locator(".collection-row").count();
+      const inUseButton = page.getByRole("button", {
+        name: "In use",
+        exact: true,
+      });
+      await inUseButton.click();
+      assert.equal(await chips.first().getAttribute("aria-checked"), "true");
+      await inUseButton.click();
+      assert.equal(
+        await page.locator(".collection-row").count(),
+        countWithBrand,
+      );
+      assert.equal(await chips.first().getAttribute("aria-checked"), "true");
+      await inUseButton.click();
+      const more = page.getByRole("button", { name: /More brands/ });
+      const reset = page
+        .getByRole("button", { name: "Clear filters", exact: true })
+        .first();
+      const moreBox = await more.boundingBox(),
+        resetBox = await reset.boundingBox();
+      assert.equal(moreBox.y, resetBox.y);
+      assert.ok(moreBox.x < resetBox.x);
+      await more.click();
+      assert.ok((await chips.count()) > 5);
+      await page.evaluate(() => scrollTo(0, 0));
+      await page.screenshot({
+        path: `.artifacts/palette-filters/${kind.toLowerCase()}-expanded-${width}.png`,
+      });
+      await page
+        .getByRole("button", { name: "Fewer brands", exact: true })
+        .click();
+      assert.equal(
+        await page.locator(".collection-list").evaluate((el) => el.offsetTop),
+        listTop,
+      );
       await page.evaluate(() => scrollTo(0, 0));
       await page.screenshot({
         path: `.artifacts/palette-filters/${kind.toLowerCase()}-${width}.png`,
@@ -278,7 +320,7 @@ try {
         expectedInUse,
       );
       await page
-        .getByRole("button", { name: "Include archived", exact: true })
+        .getByRole("checkbox", { name: "Include archived", exact: true })
         .click();
       assert.equal(
         await page.locator(".collection-row").count(),
