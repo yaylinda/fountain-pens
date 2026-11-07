@@ -26,6 +26,7 @@ import {
   inkLabel,
   isCleaning,
   matches,
+  needsRefillOrEmpty,
   penDescription,
   penLabel,
   type Collection,
@@ -54,8 +55,9 @@ export function CollectionView({
   const [selected, setSelected] = useState(detailId || "");
   const [includeArchived, setIncludeArchived] = useState(false);
   const [inUse, setInUse] = useState(false);
+  const [needsInk, setNeedsInk] = useState(false);
   const inUsePenIds = new Set(model.inked.map((pen) => pen.id));
-  // Counts ignore search/brand/in-use so choosing a filter never moves its target.
+  // Counts ignore search and status filters so choosing a filter never moves its target.
   const brandCounts = new Map<string, number>();
   for (const item of kind === "pens" ? collection.pens : collection.inks) {
     if (includeArchived || !item.archived)
@@ -72,6 +74,7 @@ export function CollectionView({
     setBrand("");
     setIncludeArchived(false);
     setInUse(false);
+    setNeedsInk(false);
     setSelected("");
   };
   const pens = [...collection.pens]
@@ -81,6 +84,7 @@ export function CollectionView({
         (includeArchived || !p.archived) &&
         (!brand || p.brand === brand) &&
         (!inUse || inUsePenIds.has(p.id)) &&
+        (!needsInk || needsRefillOrEmpty(p, model.latest.get(p.id))) &&
         matches(query, penLabel(p), penDescription(p), p.details),
     );
   const inks = [...collection.inks]
@@ -167,7 +171,7 @@ export function CollectionView({
               <button
                 type="button"
                 className="filter-reset"
-                disabled={!(brand || query || includeArchived || inUse)}
+                disabled={!(brand || query || includeArchived || inUse || needsInk)}
                 onClick={resetFilters}
               >
                 Clear filters
@@ -189,6 +193,22 @@ export function CollectionView({
                 <span />
               </span>
             </button>
+            {kind === "pens" && (
+              <button
+                type="button"
+                className="in-use-toggle"
+                aria-pressed={needsInk}
+                onClick={() => {
+                  setNeedsInk(!needsInk);
+                  setSelected("");
+                }}
+              >
+                Needs refill or cleaned & empty
+                <span className="toggle-track" aria-hidden="true">
+                  <span />
+                </span>
+              </button>
+            )}
           </div>
           <XStack
             className="collection-filter-summary"

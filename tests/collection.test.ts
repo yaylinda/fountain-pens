@@ -9,6 +9,7 @@ import {
     getSwatch,
     isCleaning,
     matches,
+    needsRefillOrEmpty,
     refillPayload,
     validateRefill,
     type Collection,
@@ -263,4 +264,26 @@ test('Pilot references cover every owned ink with sourced observations and no in
         assert.ok(reference.writing);
     }
     assert.equal(getInkReference({ id: 'unresearched-pilot', name: 'Hotaru-Bi', brand: 'Pilot', collection: '' }), undefined);
+});
+
+
+test('combined pen filter includes refill flags or current cleanings, without treating missing history as empty', () => {
+    const collection: Collection = {
+        pens: [
+            { ...pen('queued'), needsRefill: true },
+            pen('clean'),
+            { ...pen('both'), needsRefill: true },
+            pen('refilled'),
+            pen('unrecorded'),
+        ],
+        inks: [ink('blue')],
+        entries: ['queued', 'clean', 'both', 'refilled', 'refilled'].map((penId, index) => ({
+            penId, index, date: '2026-10-01', notes: '',
+            inkIds: index === 0 || index === 4 ? ['blue'] : [],
+        })),
+        asOf: '2026-11-07',
+    };
+    const model = deriveCollection(collection);
+    assert.deepEqual(collection.pens.filter(p => needsRefillOrEmpty(p, model.latest.get(p.id)))
+        .map(p => p.id), ['queued', 'clean', 'both']);
 });

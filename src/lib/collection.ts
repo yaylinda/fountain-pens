@@ -24,6 +24,8 @@ export const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America
 export const isCleaning = (entry: RefillLog) =>
     entry.inkIds.length === 0 ||
     entry.inkIds.every((id) => id === EMPTY_INK_ID);
+export const needsRefillOrEmpty = (pen: Pen, latest?: RefillLog) =>
+    !!pen.needsRefill || (!!latest && isCleaning(latest));
 export const realInkIds = (entry: RefillLog) =>
     entry.inkIds.filter((id) => id !== EMPTY_INK_ID);
 export const inkLabel = (ink?: Ink) =>
