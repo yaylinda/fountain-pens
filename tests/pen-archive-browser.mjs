@@ -51,6 +51,7 @@ try {
   await page.getByRole("dialog").waitFor({ state: "hidden" });
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: width === 1440 ? 1000 : 844 });
+    await page.locator(".collection-row").click();
     const archive = page.getByRole("button", { name: "Archive pen", exact: true });
     await archive.scrollIntoViewIfNeeded();
     await page.screenshot({ path: `.artifacts/pen-archive/archive-${width}.png` });
@@ -60,6 +61,9 @@ try {
     assert.equal(await page.locator(".collection-row").count(), 0);
     await page.getByRole("checkbox", { name: "Include archived" }).check();
     assert.equal(await page.locator(".collection-row").count(), 1);
+    // Changing the archive filter clears the selected pen.
+    assert.equal(await restore.count(), 0);
+    await page.locator(".collection-row").click();
     await restore.scrollIntoViewIfNeeded();
     await page.screenshot({ path: `.artifacts/pen-archive/restore-${width}.png` });
     await restore.click();
