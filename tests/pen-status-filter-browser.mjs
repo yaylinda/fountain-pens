@@ -15,15 +15,15 @@ const pens = [
   ["Archived", false, true],
 ].map(([model, needsRefill, archived], i) => ({
   id: model, brand: i === 1 ? "Sailor" : "Pilot", model,
-  color: "Blue", nibSize: "Fine", nibType: "Steel", needsRefill, archived,
+  color: "Blue", nibSize: "Fine", nibType: "Steel", needsRefill, archived, favorite: false,
 }));
 const event = (penId, kind, sequence) => ({
   id: `event-${sequence}`, penId, kind, sequence: String(sequence),
-  date: "2026-10-01", inkIds: kind === "cleaning" ? [] : ["ink"], notes: "",
+  date: "2026-10-01", inkIds: kind === "cleaning" ? [] : ["ink"], notes: "", notPure: false,
 });
 const state = {
   pens,
-  inks: [{ id: "ink", brand: "Pilot", name: "Blue", collection: "", colorHex: "#32589c" }],
+  inks: [{ id: "ink", brand: "Pilot", name: "Blue", collection: "", colorHex: "#32589c", archived: false, favorite: false }],
   events: [event("Queued", "refill", 1), event("Clean", "cleaning", 2),
     event("Both", "cleaning", 3), event("Refilled", "cleaning", 4),
     event("Refilled", "refill", 5), event("Archived", "cleaning", 6)],
