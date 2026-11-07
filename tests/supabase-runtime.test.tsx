@@ -72,3 +72,26 @@ test('refill-needed action changes only the pen flag, survives interrupted refre
     service.activateCollection(null);
     await assert.rejects(service.setPenNeedsRefill('p', false), /Only the collection owner/);
 });
+
+test('archive and restore preserve pen fields and history, retain confirmed saves, and reject unauthorized changes', async () => {
+    readFailure = false; writeCode = '';
+    service.activateCollection('synthetic-owner'); await service.loadData(true);
+    const entries = service.getCollection().entries;
+    readFailure = true;
+    await service.setPenArchived('p', true);
+    assert.equal(service.getCollection().pens[0].archived, true);
+    assert.equal(service.getCollection().pens[0].details, 'Preserved notes');
+    assert.deepEqual(service.getCollection().entries, entries);
+    assert.deepEqual(lastPenPayload, {brand:pen.brand, model:pen.model, color:pen.color, nibSize:pen.nibSize, nibType:pen.nibType, archived:true, favorite:false, needsRefill:true});
+    assert.match(service.getCollectionWarning(), /^Saved\./);
+    await service.setPenNeedsRefill('p', false);
+    assert.equal(service.getCollection().pens[0].archived, true);
+    await service.setPenArchived('p', false);
+    assert.equal(service.getCollection().pens[0].archived, false);
+    assert.equal(service.getCollection().pens[0].needsRefill, false);
+    writeCode = '42501';
+    await assert.rejects(service.setPenArchived('p', true), /Only the collection owner/);
+    assert.equal(service.getCollection().pens[0].archived, false);
+    service.activateCollection(null);
+    await assert.rejects(service.setPenArchived('p', true), /Only the collection owner/);
+});

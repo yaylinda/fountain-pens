@@ -4,6 +4,7 @@ import {
   SidebarFacts,
   SidebarActions,
 } from "./Sidebar";
+import { PenArchiveAction } from "./PenArchiveAction";
 import { RefillNeededAction } from "./RefillNeededAction";
 import { FillStatus } from "./FillStatus";
 import { InkColors } from "./InkColors";
@@ -381,6 +382,7 @@ export function CollectionView({
                 <RefillNeededAction pen={pen} />
               </SidebarSection>
             )}
+            {pen && <PenArchiveAction pen={pen} />}
             {ink && (
               <SidebarSection title="Currently in">
                 {model.currentPens(ink.id).length ? (

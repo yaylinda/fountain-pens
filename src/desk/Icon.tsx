@@ -1,4 +1,5 @@
 const paths = {
+  archive: "M3 3h18v4H3zM5 7v14h14V7M9 11h6",
   view: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12ZM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
   warning: "M12 3 2 21h20L12 3ZM12 9v5m0 3h.01",
   history: "M4 5v5h5M4 10a8 8 0 1 1 2 8M12 7v5l3 2",
