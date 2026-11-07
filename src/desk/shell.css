@@ -2192,6 +2192,8 @@ button[aria-pressed="true"] .status-neutral {
 }
 .current-use-filter {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .in-use-toggle {
   display: inline-flex;
@@ -2211,6 +2213,7 @@ button[aria-pressed="true"] .status-neutral {
   border-color: var(--filter-blue-border);
 }
 .toggle-track {
+  flex-shrink: 0;
   width: 28px;
   height: 16px;
   border-radius: 10px;
