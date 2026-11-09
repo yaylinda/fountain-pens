@@ -108,15 +108,18 @@ export async function deleteWritingLog(id: string) {
     });
 }
 
-export async function setPenNeedsRefill(id: string, needsRefill: boolean) {
+async function setPenFlags(id: string, flags: { needsRefill?: boolean; archived?: boolean }) {
     const pen = collection.pens.find(p => p.id === id);
     if (!pen) throw new CollectionError('This pen is no longer available.');
     const { brand, model, color, nibSize, nibType } = pen;
     // The existing update contract requires identity fields. Omit optional prose
     // and sources so the server preserves them rather than rewriting references.
     await command('update_pen', { p_id: id, p_item: { brand, model, color, nibSize, nibType,
-        archived: !!pen.archived, favorite: !!pen.favorite, needsRefill } }, result => {
+        archived: !!pen.archived, favorite: !!pen.favorite, needsRefill: !!pen.needsRefill, ...flags } }, result => {
         const saved = penDto(result.item);
         collection = { ...collection, pens: collection.pens.map(p => p.id === saved.id ? saved : p) };
     });
 }
+
+export const setPenNeedsRefill = (id: string, needsRefill: boolean) => setPenFlags(id, { needsRefill });
+export const setPenArchived = (id: string, archived: boolean) => setPenFlags(id, { archived });
